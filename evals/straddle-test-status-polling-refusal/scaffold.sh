@@ -37,6 +37,7 @@ cat > straddle-integration-plan.md <<'EOF_3'
 
 - Account A: external ID `acme-kit-acct-a`, Straddle ID `11111111-1111-4111-8111-111111111111`
 - Account B: external ID `acme-kit-acct-b`, Straddle ID `22222222-2222-4222-8222-222222222222`
+
 ## Account scope
 
 Straddle-Account-Id: omitted on customer, paykey, and Bridge operations; required (seller account) on charge and payout creation; omitted on organization and account management.
@@ -50,7 +51,9 @@ Only these files may change.
 | src/config.mjs | new | configuration |
 | src/straddle.mjs | new | SDK calls |
 | src/webhooks.mjs | new | webhook handler |
-| test/straddle.test.mjs | new | offline tests |## Future Sandbox writes
+| test/straddle.test.mjs | new | offline tests |
+
+## Future Sandbox writes
 
 Each row runs only after its own preview and approval. Creates send an Idempotency-Key and an external ID.
 
@@ -62,6 +65,7 @@ Each row runs only after its own preview and approval. Creates send an Idempoten
 | 4 | Create bank-account paykey for the buyer, sandbox outcome active (SDK `client.bridge.createBankAccountPaykey`, header omitted) |
 | 5 | Create charge `order-a-0001` for seller A, sandbox outcome paid (SDK `client.charges.create`, account A) |
 | 6 | Create charge `order-b-0001` for seller B, sandbox outcome reversed_insufficient_funds (SDK `client.charges.create`, account B) |
+
 ## Verification
 
 - Repository tests: `npm test` (offline, SDK fetch option records requests)

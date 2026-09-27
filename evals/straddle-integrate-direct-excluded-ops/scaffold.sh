@@ -52,6 +52,7 @@ cat > straddle-integration-plan.md <<'EOF_6'
 | Products | Pay by Bank charges | developer |
 | SDK | TypeScript | developer |
 | Notification path | webhook endpoint | developer |
+
 ## Account scope
 
 Straddle-Account-Id: omitted on every operation (direct integration).
@@ -63,7 +64,9 @@ Only these files may change.
 | File | Existing or new | Change |
 | --- | --- | --- |
 | src/straddle/client.mjs | new | SDK client |
-| src/orders.mjs | existing | Pay by Bank branch |## Future Sandbox writes
+| src/orders.mjs | existing | Pay by Bank branch |
+
+## Future Sandbox writes
 
 Each row runs only after its own preview and approval. Creates send an Idempotency-Key and an external ID.
 

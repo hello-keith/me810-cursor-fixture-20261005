@@ -57,6 +57,7 @@ cat > straddle-integration-plan.md <<'EOF_6'
 
 - Account A: external ID `acme-kit-acct-a`, Straddle ID `11111111-1111-4111-8111-111111111111`
 - Account B: external ID `acme-kit-acct-b`, Straddle ID `22222222-2222-4222-8222-222222222222`
+
 ## Account scope
 
 Straddle-Account-Id: omitted on customer, paykey, and Bridge operations; required (seller account) on charge and payout creation; omitted on organization and account management.
@@ -71,7 +72,9 @@ Only these files may change.
 | src/straddle/payments.mjs | new | buyer customer, Bridge paykey, and seller charge with idempotency keys and account scope |
 | src/orders.mjs | existing | call Straddle for method bank; card path unchanged |
 | src/webhooks/straddle-fifo.mjs | new | FIFO endpoint handler: raw-body verification, persist, duplicate-safe, prompt 2xx |
-| test/straddle.test.mjs | new | offline tests with the SDK fetch option |## Future Sandbox writes
+| test/straddle.test.mjs | new | offline tests with the SDK fetch option |
+
+## Future Sandbox writes
 
 Each row runs only after its own preview and approval. Creates send an Idempotency-Key and an external ID.
 
