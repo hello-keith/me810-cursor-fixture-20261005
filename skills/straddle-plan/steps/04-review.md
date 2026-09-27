@@ -1,0 +1,26 @@
+# Step 4: Review
+
+- **Needs:** step 3 summary.
+- **Tools:** Read, Grep, Edit on `straddle-integration-plan.md` only.
+- **Next:** [05-handoff.md](05-handoff.md).
+
+Print:
+
+```text
+STRADDLE_PROGRESS {"skill":"straddle-plan","step":"04-review"}
+```
+
+Read only the plan file. Fix every item that fails:
+
+- [ ] No planned write uses `execute-request` for customer, paykey, charge, or payout creation, a `DELETE`, an unmask, or paykey reveal.
+- [ ] No status is discovered by repeating `GET` on a charge, payout, or list endpoint, and `straddle tail` is not a notification path.
+- [ ] Dashboard email appears, if at all, only as a human confirmation.
+- [ ] Header rules match the integration type. Direct sends no account header. Marketplace customer, paykey, and Bridge calls omit it. SaaS and marketplace charges and payouts require it.
+- [ ] Every create has an idempotency key and an external ID.
+- [ ] Every future write has a preview and approval line and runs in Sandbox.
+- [ ] No key, token, or `.env` content appears. The plan says keys come from `STRADDLE_API_KEY` in the environment.
+- [ ] Missing key or environment is planned as a configuration error before any request.
+- [ ] SDK method names cite the installed source or are marked `verify after install`.
+- [ ] The SDK is one of the four published ones. Python is absent unless marked unavailable.
+
+**Summary for step 5:** the checklist result and any items left unresolved.
