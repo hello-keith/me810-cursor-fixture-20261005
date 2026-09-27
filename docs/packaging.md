@@ -12,7 +12,7 @@ Native installation in each client has not been accepted yet. The commands below
 | `mcp.json` | Every client, through its manifest's `mcpServers` | The `straddle-api` and `straddle-docs` servers. |
 | `.claude-plugin/plugin.json` | Claude Code | Metadata and `"mcpServers": "./mcp.json"`. Skills load from `skills/`. |
 | `.claude-plugin/marketplace.json` | Claude Code and Codex marketplaces | One plugin entry, `straddle`, with source `./`. |
-| `.codex-plugin/plugin.json` | Codex, as an overlay on the root manifest | The `interface` block and PNG assets. |
+| `.codex-plugin/plugin.json` | Codex, as an overlay on the root manifest | The `interface` block and PNG assets. The privacy and terms URLs are Straddle's published [Privacy Policy](https://legal.straddle.com/legal/legal/privacy-policy) and [Straddle Services Agreement](https://legal.straddle.com/legal/legal/straddle-services-agreement), both listed in `legal.straddle.com/sitemap.xml`. |
 | `.cursor-plugin/plugin.json` | Cursor | Metadata, `logo`, and the `STRADDLE_API_KEY` variable prompt. |
 | `assets/` | Codex and Cursor | `logo.svg` is the published Straddle docs mark (`straddle-openapi/assets/favicon.svg` at `d571b47`). `logo.png` (512 px) and `icon.png` (256 px) are rendered from it with `@resvg/resvg-js` 2.6.2. |
 | `evals/` | `claude plugin eval` | Eval cases per skill, plus MCP mocks. |
@@ -56,7 +56,7 @@ scripts/validate-package --offline path/to/file.md   # policy lint for specific 
 python3 -m unittest discover -s tests -v
 ```
 
-The package checks validate `plugin.json` and `mcp.json` against the vendored Agent Plugins 1.0.0 schemas in `scripts/schemas/`. They also check the fixed MCP servers, name and version agreement across the manifests, the Codex `interface` fields, that PNG assets are square, the Cursor variables schema, all nine required skills, and eval case layout. They report missing skills and missing Codex legal URLs as failures, because both are real release requirements.
+The package checks validate `plugin.json` and `mcp.json` against the vendored Agent Plugins 1.0.0 schemas in `scripts/schemas/`. They also check the fixed MCP servers, name and version agreement across the manifests, the Codex `interface` fields, that PNG assets are square, the Cursor variables schema, all nine required skills, and eval case layout. They fetch the Codex `websiteURL`, `privacyPolicyURL` and `termsOfServiceURL` and require HTTP 200, like Markdown links. They report missing skills and missing Codex URLs as failures, because both are real release requirements.
 
 CI runs Markdown lint, the validator tests, `scripts/validate-package`, and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job whenever that directory exists.
 
@@ -68,9 +68,9 @@ Negative examples are recognized only when an explicit prohibition frames them, 
 
 | Rule | Rejects | Accepts |
 | -- | -- | -- |
-| `resource-polling` | A code block that reads an ordinary resource (`/v1/<resource>` path, SDK `get`/`retrieve`/`list` call, or `straddle <resource> get`/`list`) and also waits (`sleep`, `setTimeout`, `setInterval`, `watch -n`, `poll`). A prose paragraph that pairs a resource read with a polling phrase, unless the polling phrase's clause names the polling endpoint. Any instruction to run `straddle tail`, which polls the API at an interval. | Consuming a polling endpoint with a consumer ID and offset. A single read after an event arrives. `straddle tail --help`. |
+| `resource-polling` | A code block that reads an ordinary resource (`/v1/<resource>` path, SDK `get`/`retrieve`/`list` call, or `straddle <resource> get`/`list`) and also waits (`sleep`, `setTimeout`, `setInterval`, `watch -n`, `poll`). A prose paragraph that pairs a resource read with a polling phrase. A polling phrase is ignored only when its clause names the polling endpoint and reads no ordinary resource, so "a poller that polls `GET /v1/charges/{id}`" is still reported. Any instruction to run `straddle tail`, which polls the API at an interval. | Consuming a polling endpoint with a consumer ID and offset. A single read after an event arrives. `straddle tail --help`. |
 | `excluded-operation` | `execute-request` used for any of the fourteen operations (from `straddle-api-contracts` at `bb4dfd4`), for any `DELETE`, or for creating a charge, payout, customer or paykey. In code, a creation path counts only when the same block uses `POST`. | Prose that routes those operations through the SDK or CLI. `execute-request` reads of the same collections, such as `GET /v1/charges`. |
-| `credentials` | Instructions to read or print `.env*` files, `dotenv` loaders, commands that dump the environment, and code or prose that prints an API key, secret or token. | Reading keys from the process environment, and error messages that name a missing variable. |
+| `credentials` | Instructions to read or print `.env*` files, `dotenv` loaders, commands that dump the environment (bare `printenv`, `env`, `set`, `env \| grep`), `printenv` of a variable whose name contains `KEY`, `SECRET`, `TOKEN` or `PASSWORD`, and code or prose that prints an API key, secret or token. | Reading keys from the process environment, `printenv` of a named non-secret variable such as `STRADDLE_ENVIRONMENT`, and error messages that name a missing variable. |
 | `links` | Relative links that don't resolve, non-HTTPS links, Straddle and GitHub links that don't return HTTP 200 after redirects, and other hosts missing from `scripts/link-allowlist.txt`. | Links inside code, which are examples. |
 | `frontmatter` | A `SKILL.md` without `name`, `description` and a semantic `metadata.version`, or whose `name` doesn't match its directory. | The frontmatter subset skills use: scalars, quoted and block scalars, lists, and one nested map. |
 
@@ -88,11 +88,11 @@ The lint matches patterns and doesn't understand prose. Writers should know thes
 
 Cases live in `evals/<skill>-<case>/` with `prompt.md` and `graders/*.md`. Mocks go in `evals/mocks/<server>/<tool>.md` or a case's own `mocks/`, where `<server>` is `straddle-api` or `straddle-docs`. The validator requires at least one case per present skill and rejects mocks for unknown servers. `evals/results/` is ignored by Git. `evals/.markdownlint.jsonc` turns off only MD041 (first-line heading) for these files, because prompts, graders and mocks are literal model input and output.
 
-The gate run needs model credentials, so it isn't in CI yet. This recipe is incomplete: it doesn't select an exact model or judge, so it isn't an approved run until the run owner supplies verified `--model` and `--judge-model` values. The rest of the command keeps real MCP servers off, and reports stay local:
+The gate run needs model credentials, so it isn't in CI yet. The approved model and judge are both `claude-opus-5-5`, confirmed by a native Claude Code preflight. The command keeps real MCP servers off, and reports stay local:
 
 ```sh
 claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-without --threshold 1.0 \
-  --model <approved model> --judge-model <approved judge>
+  --model claude-opus-5-5 --judge-model claude-opus-5-5
 ```
 
 Pass no `--trust-plugin`, `--allow-real-servers` or `--allow-tools` grant unless the run owner approves it.

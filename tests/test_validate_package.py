@@ -15,10 +15,8 @@ FIXTURES = REPO / "tests" / "fixtures" / "policy"
 validator = SourceFileLoader("validate_package", str(SCRIPT)).load_module()
 
 PACKAGE_FILES = ("plugin.json", "mcp.json", ".claude-plugin", ".codex-plugin", ".cursor-plugin", "assets")
-KNOWN_GATES = [
-    (".codex-plugin/plugin.json", "codex", "interface.privacyPolicyURL is required"),
-    (".codex-plugin/plugin.json", "codex", "interface.termsOfServiceURL is required"),
-] + [(f"skills/{skill}", "skill", "required skill is missing") for skill in sorted(validator.REQUIRED_SKILLS)]
+KNOWN_GATES = [(f"skills/{skill}", "skill", "required skill is missing")
+               for skill in sorted(validator.REQUIRED_SKILLS)]
 
 
 def offline(url):
@@ -45,13 +43,14 @@ class PolicyLintTest(unittest.TestCase):
         expected = {
             "resource-polling.md": [(3, "resource-polling"), (7, "resource-polling"), (16, "resource-polling"),
                                     (20, "resource-polling"), (23, "resource-polling"), (26, "resource-polling"),
-                                    (29, "resource-polling")],
+                                    (29, "resource-polling"), (31, "resource-polling"), (33, "resource-polling")],
             "excluded-operations.md": [(3, "excluded-operation"), (5, "excluded-operation"),
                                        (10, "excluded-operation"), (16, "excluded-operation")],
             "cross-rule-framing.md": [(5, "credentials"), (10, "credentials"), (16, "credentials"), (19, "credentials"),
                                       (23, "credentials")],
             "credentials.md": [(3, "credentials"), (5, "credentials"), (7, "credentials"), (10, "credentials"),
-                               (14, "credentials"), (15, "credentials")],
+                               (14, "credentials"), (15, "credentials"),
+                               (19, "credentials"), (20, "credentials")],
             "links.md": [(3, "links"), (3, "links"), (5, "links")],
             "negative-framing-ends.md": [(9, "resource-polling")],
             "SKILL.md": [(1, "frontmatter"), (1, "frontmatter")],
@@ -111,6 +110,7 @@ class PolicyLintTest(unittest.TestCase):
 
 class PackageTest(unittest.TestCase):
     def setUp(self):
+        self.remote = lambda url: 200
         self.root = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.root)
         for name in PACKAGE_FILES:
@@ -118,7 +118,7 @@ class PackageTest(unittest.TestCase):
             (shutil.copytree if source.is_dir() else shutil.copy)(source, self.root / name)
 
     def check(self):
-        package = validator.Package(self.root)
+        package = validator.Package(self.root, self.remote)
         package.check()
         return sorted((d.path, d.rule, d.message) for d in package.diagnostics)
 
@@ -152,6 +152,14 @@ class PackageTest(unittest.TestCase):
             ("plugin.json", "agent-plugins",
              "$.name does not match ^(?!.*(?:--|\\.\\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$"),
         ])
+
+    def test_codex_legal_urls_are_required_and_must_resolve(self):
+        privacy = "https://legal.straddle.com/legal/legal/privacy-policy"
+        self.remote = lambda url: 404 if url == privacy else 200
+        self.assertEqual(self.new_gates(), [(".codex-plugin/plugin.json", "links",
+                                             f"interface.privacyPolicyURL {privacy} returned 404, expected 200")])
+        self.edit_json(".codex-plugin/plugin.json", lambda v: v["interface"].pop("termsOfServiceURL"))
+        self.assertIn((".codex-plugin/plugin.json", "codex", "interface.termsOfServiceURL is required"), self.check())
 
     def test_codex_icon_must_be_square_png(self):
         shutil.copy(REPO / "assets" / "logo.png", self.root / "assets" / "wide.png")

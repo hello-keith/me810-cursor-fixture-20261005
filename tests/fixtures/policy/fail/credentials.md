@@ -14,3 +14,8 @@ cat .env
 require("dotenv").config();
 console.log(process.env.STRADDLE_API_KEY);
 ```
+
+```sh
+printenv STRADDLE_API_KEY
+printenv
+```

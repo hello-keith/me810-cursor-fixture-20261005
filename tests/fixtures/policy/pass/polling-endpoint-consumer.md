@@ -26,3 +26,5 @@ while (true) {
   }
 }
 ```
+
+Run the poller against the polling endpoint every 5 seconds and store each offset.

@@ -156,8 +156,9 @@ def schema_errors(value, schema, root, where="$"):
 
 
 class Package:
-    def __init__(self, root):
+    def __init__(self, root, remote):
         self.root = root
+        self.remote = remote
         self.diagnostics = []
 
     def report(self, rel, rule, message, line=1):
@@ -258,6 +259,16 @@ class Package:
         for field in ("logo", "composerIcon"):
             if interface.get(field):
                 self.check_png(rel, f"interface.{field}", interface[field])
+        for field in ("websiteURL", "privacyPolicyURL", "termsOfServiceURL"):
+            url = interface.get(field)
+            if not url:
+                continue
+            if not url.startswith("https://"):
+                self.report(rel, "codex", f"interface.{field} must use https")
+                continue
+            status = self.remote(url)
+            if status != 200:
+                self.report(rel, "links", f"interface.{field} {url} returned {status}, expected 200")
 
     def check_png(self, rel, field, value):
         if not value.startswith("./assets/") or not value.endswith(".png"):
@@ -577,6 +588,7 @@ POLL_PROSE = re.compile(
 POLL_CODE = re.compile(
     r"\bsleep\b|\bsetTimeout\b|\bsetInterval\b|\btime\.Sleep\b|\bThread\.sleep\b|\bTask\.Delay\b|"
     r"\basyncio\.sleep\b|\bpoll\w*|\bwatch\s+-n\b", re.IGNORECASE)
+# A clause that names the polling endpoint and reads no ordinary resource describes the supported notification path.
 POLLING_ENDPOINT = re.compile(r"\bpolling endpoint|\bpoller\b", re.IGNORECASE)
 # `straddle tail` polls ordinary API reads at an interval (CLI v1.0.3 help), so any instruction to run it is polling.
 # Reading its help does not poll.
@@ -615,7 +627,10 @@ SECRET_IDENTIFIER = re.compile(r"\b(?:apiKey|api_key|webhookSecret|webhook_secre
 PRINT_CODE = re.compile(
     r"\b(?:echo|printf|print|println|puts|pp|console\.(?:log|info|warn|error|debug)|fmt\.Print\w*|"
     r"Console\.Write\w*|logger\.\w+|log\.\w+)\b")
-DUMP_ENV = re.compile(r"\bprintenv\b|^\s*(?:env|set)\s*(?:$|\|)|\benv\s*\|\s*grep\b")
+# `printenv NAME` prints one variable; with no name, or with `env`/`set`, the whole environment is printed.
+PRINTENV = re.compile(r"\bprintenv\b((?:[ \t]+[A-Za-z_][A-Za-z0-9_]*)*)")
+DUMP_ENV = re.compile(r"^\s*(?:env|set)\s*(?:$|\|)|\benv\s*\|\s*grep\b")
+SECRET_NAME = re.compile(r"KEY|SECRET|TOKEN|PASSWORD", re.IGNORECASE)
 PRINT_PROSE = re.compile(
     r"\b(?:print|echo|log|display|show|output|paste|reveal)\w*\s+(?:the\s+|your\s+|its\s+|their\s+)?"
     r"(?:(?:full|raw|actual|straddle|sandbox|production|webhook)\s+)*(?:api\s+)?(?:key|secret|token|credential)s?\b"
@@ -638,7 +653,9 @@ def lint_polling(rel, units):
             continue
         tails = [(c, m) for c in unit for m in [unnegated(c, STRADDLE_TAIL)] if m]
         reads = [(c, m) for c in unit for m in [unnegated(c, RESOURCE_READ)] if m]
-        polls = [(c, m) for c in unit if not POLLING_ENDPOINT.search(c.text) for m in [unnegated(c, POLL_PROSE)] if m]
+        read_clauses = {id(c) for c, _ in reads}
+        polls = [(c, m) for c in unit if id(c) in read_clauses or not POLLING_ENDPOINT.search(c.text)
+                 for m in [unnegated(c, POLL_PROSE)] if m]
         if tails:
             clause, match = tails[0]
             found.append(Diagnostic(rel, clause.line_of(clause.start + match.start()), "resource-polling", TAIL_MESSAGE))
@@ -675,7 +692,10 @@ def credential_code_line(line):
     code_only = STRING_LITERAL.sub('""', line)
     if (ENV_FILE.search(line) and READ_CODE.search(line)) or DOTENV.search(line):
         return "reads a .env file"
-    if DUMP_ENV.search(line) and (SECRET_REFERENCE.search(line) or "KEY" in line or not re.search(r"\w+=", line)):
+    printenv = PRINTENV.search(line)
+    if printenv and (not printenv.group(1).split() or any(SECRET_NAME.search(n) for n in printenv.group(1).split())):
+        return "prints environment variables"
+    if DUMP_ENV.search(line):
         return "prints environment variables"
     if PRINT_CODE.search(code_only) and (SECRET_REFERENCE.search(line) or SECRET_IDENTIFIER.search(code_only)):
         return "prints a credential"
@@ -812,7 +832,7 @@ def main(argv):
     if args.files:
         targets = [path.resolve() for path in args.files]
     else:
-        package = Package(root)
+        package = Package(root, remote)
         package.check()
         diagnostics += package.diagnostics
         targets = lint_scope(root)

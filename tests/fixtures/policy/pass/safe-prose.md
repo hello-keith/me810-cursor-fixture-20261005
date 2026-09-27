@@ -40,3 +40,9 @@ List charges with a permitted read:
 ```json
 {"tool": "execute-request", "method": "GET", "path": "/v1/charges"}
 ```
+
+Confirm the environment with `printenv STRADDLE_BASE_URL`, which prints nothing when the variable is unset.
+
+```sh
+printenv STRADDLE_ENVIRONMENT
+```

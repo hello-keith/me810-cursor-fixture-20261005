@@ -27,3 +27,7 @@ straddle tail charges --interval 5s
 ```
 
 Poll `GET /v1/charges/{id}` every 5 seconds in the consumer.
+
+Poll `GET /v1/charges/{id}` every 5 seconds in the poller.
+
+Build a polling endpoint that polls `GET /v1/charges/{id}` every 5 seconds.
