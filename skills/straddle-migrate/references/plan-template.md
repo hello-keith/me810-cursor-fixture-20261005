@@ -1,7 +1,7 @@
 # Straddle migration plan
 
 Status: draft | approved
-Provider: `<provider>`
+Provider: `<provider>` (reference: `references/providers/<file>.md`)
 Integration model: `<direct / SaaS / marketplace / Unresolved>`
 SDK: `<package and version / Unresolved>`
 Notification path: `<webhook endpoint / FIFO endpoint / polling endpoint / Unresolved>`
@@ -9,7 +9,7 @@ Switch: `<flag or setting name, default>`
 
 ## Current provider footprint
 
-| Call site | Flow | Provider API |
+| Call site | Flow | Provider API or event |
 | --- | --- | --- |
 | `path:line` | | |
 
@@ -17,6 +17,43 @@ Switch: `<flag or setting name, default>`
 
 | Flow | Straddle operation | Account scope | Doc citation |
 | --- | --- | --- | --- |
+
+## Status mapping
+
+Every provider status the application stores or reacts to, mapped to a Straddle payment status (`created`, `scheduled`, `validating`, `pending`, `on_hold`, `paid`, `failed`, `cancelled`, `reversed`) and to the application's own state.
+
+| Provider status or event | Straddle status | Application state | Where handled |
+| --- | --- | --- | --- |
+
+## Returns, corrections, and retries
+
+- Returns before `paid` (`failed`) and after `paid` (`reversed`): how the application reacts to each, keyed on the Straddle return code.
+- Notifications of change: who handles corrections that the provider used to apply automatically.
+- Retries: which return codes may be re-presented, and that each retry is a new charge with its own idempotency key.
+- Accounts to stop debiting after fatal returns: how the application blocks them now that the provider's automatic blocking no longer applies.
+
+## Consent
+
+- Existing authorization wording and whose name it carries: `<quote or summary>`
+- Decision: re-authorize on the Straddle path | reuse existing authorizations | `Unresolved`
+- Decided by: `<person or role>`
+- `consent_type` per flow (`internet` or `signed`), and flows with no equivalent (for example TEL).
+
+## Bank accounts on the Straddle path
+
+- New customers: link through `<Bridge widget / Plaid processor token with straddle / direct bank details>`.
+- Existing customers: re-link through Bridge when they move to the Straddle path. Using stored provider data (for example minting Straddle tokens from existing Plaid Items) is customer-data migration; this plan does not implement it.
+
+## Notifications
+
+| Provider event or polling code | Straddle event | Handler |
+| --- | --- | --- |
+
+The old provider handler stays for payments still on the provider.
+
+## In-flight payments
+
+Payments already submitted, scheduled, or future-dated on `<provider>` finish there. Refunds and late returns for them keep flowing through `<provider>` (unauthorized returns can arrive up to 60 days later).
 
 ## Authorized modifications
 
@@ -32,13 +69,14 @@ Files that need a change but had uncommitted work, or changes this skill does no
 
 ## Not moved
 
-Customer records, bank accounts, provider tokens, mandates, and payment history stay with `<provider>`. This plan does not export, copy, or re-create them in Straddle.
+Customer records, bank accounts, provider tokens, mandates and authorizations, and payment history stay with `<provider>`. This plan does not export, copy, or re-create them in Straddle.
 
 ## Verification
 
 - Test command: `<command>`
 - New tests: `<paths>`
-- Sandbox proof: run straddle-test after review.
+- Status-mapping tests cover every row of the status mapping, including `failed` vs `reversed`.
+- Sandbox proof: run straddle-test after review, using `sandbox_outcome` values for `paid`, `failed_*`, and `reversed_*`.
 
 ## Unresolved
 
