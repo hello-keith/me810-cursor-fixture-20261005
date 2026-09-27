@@ -8,6 +8,8 @@ if [ ! -d "$case_dir/fixture" ]; then
   exit 1
 fi
 cp -R "$case_dir/fixture/." .
+# The installed SDK is fixture data for triage, not something the app commits.
+if [ -d node_modules ]; then printf 'node_modules/\n' > .gitignore; fi
 git init -q
 git add -A
 git -c user.name=eval -c user.email=eval@example.invalid commit -qm "fixture"
