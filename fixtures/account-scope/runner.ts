@@ -236,7 +236,6 @@ async function check(
   operation: Operation,
   account: { selected?: string | undefined; explicit?: string | undefined },
   expected: Expectation,
-  extraParams: Record<string, string> = {},
 ): Promise<string[]> {
   const before = loopback.requests.length;
   let observed: Observed;
@@ -244,7 +243,7 @@ async function check(
     const headers: ScopeHeaders = accountScopeHeaders(integration, operation, account);
     const invoke = bindings[operation.id];
     if (!invoke) return [`no SDK binding for operation ${operation.id}`];
-    await invoke(client, { ...headers, ...extraParams });
+    await invoke(client, headers);
     observed = { outcome: 'request' };
   } catch (error) {
     observed =
