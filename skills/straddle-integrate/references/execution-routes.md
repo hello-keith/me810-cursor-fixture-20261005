@@ -29,12 +29,14 @@ The six unmask operations and paykey reveal return unmasked personal or bank dat
 
 Run only operations in the public API contract, as [writes-and-approval.md](../../straddle-best-practices/references/writes-and-approval.md) requires. The CLI's command tree also includes internal commands outside that contract, and the existence of a command or SDK method is not evidence that its operation is public. When you cannot place an operation in the public contract and its account scope, stop before any preview.
 
-## Other writes the fixture uses
+## Other writes the fixture uses: SDK or CLI
 
-| Operation | TypeScript SDK | Straddle CLI | API MCP |
-| --- | --- | --- | --- |
-| Create organization (`POST /v1/organizations`) | `client.organizations.create` | `straddle organizations create` | permitted after approval, but prefer the SDK or CLI so every fixture write shares one route |
-| Create account (`POST /v1/accounts`) | `client.accounts.create` | `straddle accounts create` | same as above |
+Integrate and Test create fixture organizations and accounts through the SDK or CLI after the preview is approved, like every other fixture write. They do not use the API MCP for these. That rule covers this workflow only. Outside it, these remain permitted MCP operations, subject to the usual preview and approval.
+
+| Operation | TypeScript SDK | Straddle CLI |
+| --- | --- | --- |
+| Create organization (`POST /v1/organizations`) | `client.organizations.create` | `straddle organizations create` |
+| Create account (`POST /v1/accounts`) | `client.accounts.create` | `straddle accounts create` |
 
 Webhook, FIFO, and polling endpoints are created in the Straddle dashboard by the developer, not by Integrate.
 
