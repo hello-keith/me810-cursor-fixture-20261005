@@ -35,8 +35,8 @@ Versions change. Check the installed package in the developer's dependency tree 
 
 ## Deprecated paths
 
-- The Stainless-generated SDKs and their MCP server. Use the Scalar-generated SDKs above.
-- The Mintlify `docs.straddle.com/.well-known/skills` index. It recommends polling charge reads and is retiring.
+- SDK releases older than the versions above, such as PyPI `straddle` 0.x or the Go module `github.com/straddleio/straddle-go`, and any MCP server shipped with them.
+- The `docs.straddle.com/.well-known/skills` index. It recommends polling charge reads and is retiring.
 - Any local `straddle-mcp` server or "local integration MCP". The kit uses the hosted Scalar servers only.
 - The React embed wrapper. Hosted iframe onboarding is the supported path until Onboarding V2.
 

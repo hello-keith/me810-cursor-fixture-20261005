@@ -14,7 +14,7 @@ Read the repository's agent instructions, build files, dependency manifests, loc
 
 - language, framework, package manager, and test command
 - an installed Straddle SDK and the exact version resolved in the lockfile or dependency tree, not just the declared range
-- a retired SDK: the Stainless-era packages (for example PyPI `straddle` 0.5.x, or Go `github.com/straddleio/straddle-go`), which are a finding
+- a retired SDK release older than the best-practices version table (for example PyPI `straddle` 0.5.x, or Go `github.com/straddleio/straddle-go`), which is a finding
 - existing payment or bank-linking provider code that must keep working
 - existing webhook or event handling code
 
