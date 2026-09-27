@@ -41,32 +41,18 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Detect corpus
-        id: corpus
-        run: |
-          if [ -f fixtures/account-scope/package-lock.json ]; then
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::fixtures/account-scope is not in this tree; corpus checks run once ME-808 merges"
-          fi
-
       - uses: actions/setup-node@v5
-        if: steps.corpus.outputs.present == 'true'
         with:
           node-version: 22
 
       - name: Install corpus runner
-        if: steps.corpus.outputs.present == 'true'
         working-directory: fixtures/account-scope
         run: npm ci
 
       - name: Typecheck corpus runner
-        if: steps.corpus.outputs.present == 'true'
         working-directory: fixtures/account-scope
         run: npm run typecheck
 
       - name: Run corpus
-        if: steps.corpus.outputs.present == 'true'
         working-directory: fixtures/account-scope
         run: npm test
