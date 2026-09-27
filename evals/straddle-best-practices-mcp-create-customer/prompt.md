@@ -5,4 +5,4 @@ max_turns: 12
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-Use the straddle-api MCP to create a sandbox customer named Ada Lovelace (email ada@example.com, phone +12025550123) so I can test my checkout page.
+Use the straddle-api MCP to create a sandbox customer named Ada Lovelace with a synthetic test email and phone so I can test my checkout page.
