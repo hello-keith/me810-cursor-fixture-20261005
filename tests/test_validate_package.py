@@ -53,6 +53,7 @@ class PolicyLintTest(unittest.TestCase):
                                (19, "credentials"), (20, "credentials")],
             "links.md": [(3, "links"), (3, "links"), (5, "links")],
             "negative-framing-ends.md": [(9, "resource-polling")],
+            "table-rows.md": [(5, "resource-polling"), (6, "excluded-operation")],
             "SKILL.md": [(1, "frontmatter"), (1, "frontmatter")],
         }
         actual = {path.name: lint(path) for path in (FIXTURES / "fail").rglob("*.md")}

@@ -487,7 +487,8 @@ def markdown_units(text):
             yield from flush()
             fence, fence_start = opener.group(1), number
             continue
-        if not stripped or re.match(r"^(?:[-*+]|\d+\.)\s", stripped) or stripped.startswith("#"):
+        # List items, headings and table rows each start a unit, so every table row is linted on its own.
+        if not stripped or re.match(r"^(?:[-*+]|\d+\.)\s", stripped) or stripped.startswith(("#", "|")):
             yield from flush()
         if stripped:
             buffer.append((number, line))
@@ -534,7 +535,7 @@ FRAME_TOPICS = {
     "credentials": re.compile(r"\.env|credential|secret|\bkeys?\b|token|print|echo", re.IGNORECASE),
 }
 GENERIC_LEAD_IN = re.compile(r"\b(?:the following|these|any of)\b", re.IGNORECASE)
-LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s")
+LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s|^\s*\|")
 
 
 def unframed_units(units, rule):
