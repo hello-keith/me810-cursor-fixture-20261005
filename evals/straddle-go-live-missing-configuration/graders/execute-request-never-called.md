@@ -6,4 +6,4 @@ match: not_contains
 arm: both
 ---
 
-A missing key must stop requests before execute-request is called.
+A missing credential must stop requests before execute-request is called.

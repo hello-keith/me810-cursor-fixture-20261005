@@ -1,7 +1,7 @@
 # Step 2: Configuration
 
 - **Needs:** step 1 summary.
-- **Tools:** Read, Grep. Bash only for `straddle --version`, `straddle doctor --agent`, and `straddle agent-context`, after confirming the executable exists. `doctor` probes API reachability without credentials; nothing in this step sends an authenticated Straddle request or calls an MCP tool.
+- **Tools:** Read, Grep. Bash only for `command -v straddle`, `straddle --version`, `straddle auth status --json`, and `straddle agent-context`, which read local configuration and send nothing. `straddle doctor` is not allowed in this step because it sends a request to the API host before it looks at credentials. No MCP call.
 - **Next:** [03-code.md](03-code.md), or [06-report.md](06-report.md) with status `blocked`.
 
 Print:
@@ -10,17 +10,17 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-go-live","step":"02-configuration"}
 ```
 
-Establish two facts before anything can send a request:
+Establish two facts offline, before any command or tool that can reach Straddle:
 
-1. **Key present.** From `straddle doctor --agent` (`env_vars`, `auth`) or from developer-pasted output. Report presence only. `ERROR missing required: STRADDLE_API_KEY` is a configuration failure, even though `doctor` exits 0.
-2. **Environment explicit.** The developer states Sandbox or production, and the CLI's resolved host agrees. `runtime_context.environment` (absent from the published CLI v1.0.2) shows the host the CLI will use, but it resolves to `https://sandbox.straddle.com` when nothing is configured, so it confirms a stated choice rather than proving one was made. Older CLIs do not report `runtime_context`; the environment is then whatever the developer states. With no statement from the developer, the environment is unknown.
+1. **Credential present.** Run `straddle auth status --json` and read `authenticated` and `source`. It covers a key in `STRADDLE_API_KEY` and a key saved in the CLI configuration, reports presence without the value, and sends no request (its `verified: false` means exactly that). `authenticated: false` is a missing credential. When the CLI is absent, or the key that matters lives in a deployment the CLI cannot see, ask the developer whether the key is configured there and record the answer as developer-confirmed, or `unknown` if they cannot say. Never read `.env*` files or the CLI config file to find out.
+2. **Environment explicit.** The developer states Sandbox or production. `straddle agent-context` reports `runtime_context.environment`, the host the CLI resolves; it falls back to `https://sandbox.straddle.com` when nothing is configured, so it is a resolved default, not proof that anyone chose an environment. Use it only to confirm that the resolved host matches what the developer stated. The published CLI v1.0.2 does not report `runtime_context`; there the developer's statement is the only source. With no statement from the developer, the environment is unknown.
 
-When the key is missing or the environment is unknown, print this line and skip every later check that would send a request:
+When the credential is missing or unknown, or the environment is unknown, print this line and skip every later check that could reach Straddle, including `straddle doctor`:
 
 ```text
-Configuration error: <STRADDLE_API_KEY is not set | environment is not set explicitly>. No Straddle request was sent.
+Configuration error: <no Straddle credential is configured | credential presence is unknown | environment is not set explicitly>. No Straddle request was sent.
 ```
 
-Code and dashboard checks in steps 3 and 5 still run, because they read files and ask the developer. The final status is `blocked` if the environment cannot be established.
+Only when both facts are established may a later step use `straddle doctor --agent` for connectivity; it sends a request to the resolved host. Code and dashboard checks in steps 3 and 5 still run without these facts, because they read files and ask the developer. The final status is `blocked` if the environment or credential cannot be established.
 
-**Summary for step 3:** key present or missing, environment and its source, CLI version.
+**Summary for step 3:** credential present, missing, or unknown and its source, environment and its source, resolved CLI host, CLI version.

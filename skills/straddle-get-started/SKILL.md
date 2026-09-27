@@ -15,7 +15,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 
 - Read-only. Get Started writes no file, installs nothing, changes no client or MCP configuration, and sends no Straddle API request. Docs MCP search needs no credential and is allowed.
 - Repository facts come from files you read. Product, integration model, SDK, and notification path come from the developer. A framework or language narrows the SDK options; it never decides the product or integration model.
-- If the developer asks for anything that needs an authenticated request (for example "which accounts do I have"), check key presence and an explicit environment first. When either is missing, stop that request with a configuration error and point to [straddle-setup](../straddle-setup/SKILL.md). Never answer with an empty or guessed result.
+- If the developer asks for anything that needs an authenticated request (for example "which accounts do I have"), check offline first that a credential is present (`straddle auth status --json` or the developer) and that the developer has stated the environment; do not run `straddle doctor` for this, because it sends a request. When either is missing, stop that request with a configuration error and point to [straddle-setup](../straddle-setup/SKILL.md). Never answer with an empty or guessed result.
 - Python has no published Scalar SDK yet. Do not recommend `pip install straddle`; it installs a retired package.
 
 ## Steps
