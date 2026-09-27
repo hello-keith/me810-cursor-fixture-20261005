@@ -44,9 +44,12 @@ class PolicyLintTest(unittest.TestCase):
     def test_negative_fixtures_report_rule_and_line(self):
         expected = {
             "resource-polling.md": [(3, "resource-polling"), (7, "resource-polling"), (16, "resource-polling"),
-                                    (20, "resource-polling"), (23, "resource-polling"), (26, "resource-polling")],
+                                    (20, "resource-polling"), (23, "resource-polling"), (26, "resource-polling"),
+                                    (29, "resource-polling")],
             "excluded-operations.md": [(3, "excluded-operation"), (5, "excluded-operation"),
-                                       (10, "excluded-operation")],
+                                       (10, "excluded-operation"), (16, "excluded-operation")],
+            "cross-rule-framing.md": [(5, "credentials"), (10, "credentials"), (16, "credentials"), (19, "credentials"),
+                                      (23, "credentials")],
             "credentials.md": [(3, "credentials"), (5, "credentials"), (7, "credentials"), (10, "credentials"),
                                (14, "credentials"), (15, "credentials")],
             "links.md": [(3, "links"), (3, "links"), (5, "links")],

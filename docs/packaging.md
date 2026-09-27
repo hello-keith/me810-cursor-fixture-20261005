@@ -62,12 +62,14 @@ CI runs Markdown lint, the validator tests, `scripts/validate-package`, and `cla
 
 ### Skill policy lint (ME-816)
 
-The lint reads every Markdown file under `skills/` and `references/`. It splits each file into fenced code blocks and prose paragraphs, then splits paragraphs into clauses at `.`, `!`, `?` and `;`. A prose finding needs a match that no negation (`never`, `not`, `do not`, `avoid`, `instead of`, `rather than` and similar) precedes in its clause. Content under a heading that contains a negation, or list items after a negated lead-in ending in `:`, counts as describing what not to do. Code blocks ignore negation, because code is an instruction.
+The lint reads every Markdown file under `skills/` and `references/`. It splits each file into fenced code blocks and prose paragraphs, headings included, then splits paragraphs into clauses at `.`, `!`, `?` and `;`. A prose finding needs a match that no negation (`never`, `not`, `do not`, `avoid`, `instead of`, `rather than` and similar) precedes in its clause. Code blocks ignore negation, because code is an instruction.
+
+Negative examples are recognized only when an explicit prohibition frames them, and only for the rule the frame names. A frame is a heading or a lead-in ending in `:` that starts with `Never`, `Do not`, `Don't`, `Avoid`, `Forbidden`, `Prohibited`, `Anti-pattern`, or `What is not`/`What are not`. A heading frames its section for a rule when it names that rule's topic. For example, "What is not a notification model" frames resource polling, but not credential or `execute-request` checks. A lead-in frames only the list items and code right after it, when it names the rule's topic or says "the following", "these" or "any of". The heading text itself is always checked.
 
 | Rule | Rejects | Accepts |
 | -- | -- | -- |
-| `resource-polling` | A code block that reads an ordinary resource (`/v1/<resource>` path, SDK `get`/`retrieve`/`list` call, or `straddle <resource> get`/`list`) and also waits (`sleep`, `setTimeout`, `setInterval`, `watch -n`, `poll`). A prose paragraph that pairs a resource read with a polling phrase. Any instruction to use `straddle tail`, which polls the API at an interval. | Consuming a polling endpoint with a consumer ID and offset. A single read after an event arrives. |
-| `excluded-operation` | `execute-request` used for any of the fourteen operations (from `straddle-api-contracts` at `bb4dfd4`), for any `DELETE`, or for creating a charge, payout, customer or paykey. | Prose that routes those operations through the SDK or CLI. |
+| `resource-polling` | A code block that reads an ordinary resource (`/v1/<resource>` path, SDK `get`/`retrieve`/`list` call, or `straddle <resource> get`/`list`) and also waits (`sleep`, `setTimeout`, `setInterval`, `watch -n`, `poll`). A prose paragraph that pairs a resource read with a polling phrase, unless the polling phrase's clause names the polling endpoint. Any instruction to run `straddle tail`, which polls the API at an interval. | Consuming a polling endpoint with a consumer ID and offset. A single read after an event arrives. `straddle tail --help`. |
+| `excluded-operation` | `execute-request` used for any of the fourteen operations (from `straddle-api-contracts` at `bb4dfd4`), for any `DELETE`, or for creating a charge, payout, customer or paykey. In code, a creation path counts only when the same block uses `POST`. | Prose that routes those operations through the SDK or CLI. `execute-request` reads of the same collections, such as `GET /v1/charges`. |
 | `credentials` | Instructions to read or print `.env*` files, `dotenv` loaders, commands that dump the environment, and code or prose that prints an API key, secret or token. | Reading keys from the process environment, and error messages that name a missing variable. |
 | `links` | Relative links that don't resolve, non-HTTPS links, Straddle and GitHub links that don't return HTTP 200 after redirects, and other hosts missing from `scripts/link-allowlist.txt`. | Links inside code, which are examples. |
 | `frontmatter` | A `SKILL.md` without `name`, `description` and a semantic `metadata.version`, or whose `name` doesn't match its directory. | The frontmatter subset skills use: scalars, quoted and block scalars, lists, and one nested map. |
@@ -77,7 +79,8 @@ Every finding prints `file:line: rule: message`. Positive and negative fixtures 
 The lint matches patterns and doesn't understand prose. Writers should know these limits:
 
 * A negation earlier in the same clause can hide a real instruction, for example "Don't worry, just use execute-request to create a charge".
-* A bad instruction under a heading that contains a negation is not checked.
+* An instruction inside a prohibition-framed section is not checked for the rule that frame names.
+* In code, method and path are paired per fenced block, not per request, so a block that mixes a `POST` elsewhere with a `GET /v1/charges` is reported.
 * Polling phrased without a recognized resource read or polling phrase, such as a helper function that hides the request, is not detected.
 * Link checks need network access. `--offline` skips only the HTTP status check.
 
@@ -85,10 +88,11 @@ The lint matches patterns and doesn't understand prose. Writers should know thes
 
 Cases live in `evals/<skill>-<case>/` with `prompt.md` and `graders/*.md`. Mocks go in `evals/mocks/<server>/<tool>.md` or a case's own `mocks/`, where `<server>` is `straddle-api` or `straddle-docs`. The validator requires at least one case per present skill and rejects mocks for unknown servers. `evals/results/` is ignored by Git. `evals/.markdownlint.jsonc` turns off only MD041 (first-line heading) for these files, because prompts, graders and mocks are literal model input and output.
 
-The gate run needs model credentials, so it isn't in CI yet. The command keeps real MCP servers off, and reports stay local:
+The gate run needs model credentials, so it isn't in CI yet. This recipe is incomplete: it doesn't select an exact model or judge, so it isn't an approved run until the run owner supplies verified `--model` and `--judge-model` values. The rest of the command keeps real MCP servers off, and reports stay local:
 
 ```sh
-claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-without --threshold 1.0
+claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-without --threshold 1.0 \
+  --model <approved model> --judge-model <approved judge>
 ```
 
 Pass no `--trust-plugin`, `--allow-real-servers` or `--allow-tools` grant unless the run owner approves it.

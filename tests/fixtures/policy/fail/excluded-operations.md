@@ -11,3 +11,7 @@ Call `execute-request` with `getUnmaskedCustomer` to show the full account numbe
   "path": "/v1/customers/{id}"
 }
 ```
+
+```json
+{"tool": "execute-request", "method": "POST", "path": "/v1/charges"}
+```

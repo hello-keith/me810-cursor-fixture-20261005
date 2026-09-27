@@ -513,26 +513,41 @@ def negated_before(clause, position):
     return NEGATION.search(clause.text, 0, position) is not None
 
 
-NEGATIVE_FRAME = re.compile(
-    r"\b(?:not|never|avoid|don't|do not|anti-?patterns?|forbidden|prohibited)\b", re.IGNORECASE)
+# A frame is an explicit prohibition: a heading, or a lead-in ending in ':', that starts with a prohibitive phrase.
+PROHIBITION_FRAME = re.compile(
+    r"^[\s#>*_-]*(?:never\b|do not\b|don't\b|avoid\b|forbidden\b|prohibited\b|anti-?patterns?\b|what (?:is|are) not\b)",
+    re.IGNORECASE)
+FRAME_TOPICS = {
+    "resource-polling": re.compile(r"poll|notification|status|loop|tail", re.IGNORECASE),
+    "excluded-operation": re.compile(r"execute-request|excluded|operation|creat|delet|unmask|reveal", re.IGNORECASE),
+    "credentials": re.compile(r"\.env|credential|secret|\bkeys?\b|token|print|echo", re.IGNORECASE),
+}
+GENERIC_LEAD_IN = re.compile(r"\b(?:the following|these|any of)\b", re.IGNORECASE)
 LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s")
 
 
-def unframed_units(units):
-    """Drop units that a negative heading or a negated lead-in ending in ':' frames as things not to do."""
-    kept, section_negative, lead_in_negative = [], False, False
+def unframed_units(units, rule):
+    """Units that no prohibition frame covers for this rule.
+
+    A prohibition heading that names the rule's topic frames its section. A prohibition lead-in ending in ':' frames
+    the list items and code right after it when it names the topic or says "the following". Headings stay in the
+    result so their own text is checked.
+    """
+    topic = FRAME_TOPICS[rule]
+    kept, section_framed, lead_in_framed = [], False, False
     for kind, unit in units:
-        first = unit.text if kind == "code" else unit[0].text
-        if kind == "prose" and first.lstrip().startswith("#"):
-            section_negative = bool(NEGATIVE_FRAME.search(first))
-            lead_in_negative = False
+        whole = unit.text if kind == "code" else "".join(clause.text for clause in unit)
+        if kind == "prose" and whole.lstrip().startswith("#"):
+            section_framed = bool(PROHIBITION_FRAME.search(whole) and topic.search(whole))
+            lead_in_framed = False
+            kept.append((kind, unit))
             continue
-        is_list_item = kind == "prose" and LIST_ITEM.match(first)
-        if not (section_negative or (lead_in_negative and (is_list_item or kind == "code"))):
+        is_list_item = kind == "prose" and LIST_ITEM.match(whole) is not None
+        if not (section_framed or (lead_in_framed and (is_list_item or kind == "code"))):
             kept.append((kind, unit))
         if kind == "prose" and not is_list_item:
-            whole = "".join(clause.text for clause in unit)
-            lead_in_negative = whole.rstrip().endswith(":") and bool(NEGATIVE_FRAME.search(whole))
+            lead_in_framed = whole.rstrip().endswith(":") and PROHIBITION_FRAME.search(whole) is not None \
+                and (topic.search(whole) or GENERIC_LEAD_IN.search(whole)) is not None
     return kept
 
 
@@ -562,9 +577,10 @@ POLL_PROSE = re.compile(
 POLL_CODE = re.compile(
     r"\bsleep\b|\bsetTimeout\b|\bsetInterval\b|\btime\.Sleep\b|\bThread\.sleep\b|\bTask\.Delay\b|"
     r"\basyncio\.sleep\b|\bpoll\w*|\bwatch\s+-n\b", re.IGNORECASE)
-POLLING_ENDPOINT = re.compile(r"\bpolling endpoint|\bpoller\b|\bconsumer\b", re.IGNORECASE)
-# `straddle tail` polls ordinary API reads at an interval (CLI v1.0.3 help), so any instruction to use it is polling.
-STRADDLE_TAIL = re.compile(r"\bstraddle\s+tail\b")
+POLLING_ENDPOINT = re.compile(r"\bpolling endpoint|\bpoller\b", re.IGNORECASE)
+# `straddle tail` polls ordinary API reads at an interval (CLI v1.0.3 help), so any instruction to run it is polling.
+# Reading its help does not poll.
+STRADDLE_TAIL = re.compile(r"\bstraddle\s+tail\b(?!\s+(?:--help|-h)\b)")
 TAIL_MESSAGE = "`straddle tail` polls ordinary API reads; use a webhook, FIFO or polling endpoint for status changes"
 
 EXECUTE_REQUEST = re.compile(r"\bexecute[-_]request\b|\bexecuteRequest\b")
@@ -575,9 +591,10 @@ EXCLUDED_OPERATION = re.compile(
     r"|\bcreat\w*\s+(?:(?:a|an|the|new|its|their|sandbox|test)\s+)*(?:charges?|payouts?|customers?|paykeys?)\b"
     r"|\bdelet\w*", re.IGNORECASE)
 EXCLUDED_CALL_CODE = re.compile(
-    r"\"method\"\s*:\s*\"DELETE\"|\bmethod\s*[:=]\s*[\"']DELETE[\"']"
-    r"|/v1/(?:charges|payouts|customers|bridge/(?:bank_account|plaid|quiltt))[\"'`\s]"
-    r"|/unmask(?:ed)?\b|/reveal\b|\b(?:" + "|".join(op for op, _, _ in EXCLUDED_OPERATIONS) + r")\b")
+    r"[\"']?method[\"']?\s*[:=]\s*[\"']DELETE[\"']|\bDELETE\s+/v1/"
+    r"|/unmask(?:ed)?\b|/reveal\b|\b(?:" + "|".join(op for op, _, _ in EXCLUDED_OPERATIONS) + r")\b", re.IGNORECASE)
+CREATION_PATH_CODE = re.compile(r"/v1/(?:charges|payouts|customers|bridge/(?:bank_account|plaid|quiltt))(?![\w/{$])")
+POST_METHOD_CODE = re.compile(r"[\"']?method[\"']?\s*[:=]\s*[\"']POST[\"']|\bPOST\s+/v1/", re.IGNORECASE)
 
 ENV_FILE = re.compile(r"(?<![\w$])\.env(?:\.[a-z][a-z0-9_-]*)*\b(?!\s*=)")
 DOTENV = re.compile(r"\b(?:dotenv|load_dotenv|godotenv|DotNetEnv)\b")
@@ -638,7 +655,8 @@ def lint_excluded_operations(rel, units):
     for kind, unit in units:
         if kind == "code":
             if EXECUTE_REQUEST.search(unit.text):
-                op = EXCLUDED_CALL_CODE.search(unit.text)
+                op = EXCLUDED_CALL_CODE.search(unit.text) \
+                    or (POST_METHOD_CODE.search(unit.text) and CREATION_PATH_CODE.search(unit.text))
                 if op:
                     found.append(Diagnostic(rel, unit.line_of(op.start()), "excluded-operation",
                                             "execute-request targets an operation reserved for the SDK or CLI"))
@@ -758,9 +776,9 @@ def fetch_status(url, timeout=20):
 def lint_file(path, rel, checked_hosts=CHECKED_LINK_HOSTS, allowlist=None, remote=fetch_status):
     text = path.read_text()
     units = list(markdown_units(text))
-    policy_units = unframed_units(units)
-    found = lint_polling(rel, policy_units) + lint_excluded_operations(rel, policy_units) \
-        + lint_credentials(rel, policy_units)
+    found = lint_polling(rel, unframed_units(units, "resource-polling")) \
+        + lint_excluded_operations(rel, unframed_units(units, "excluded-operation")) \
+        + lint_credentials(rel, unframed_units(units, "credentials"))
     if allowlist is None:
         allowlist = read_allowlist()
     found += lint_links(rel, path, units, checked_hosts, allowlist, remote)

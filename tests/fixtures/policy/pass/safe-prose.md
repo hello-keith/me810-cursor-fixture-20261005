@@ -32,3 +32,11 @@ export async function onChargeEvent(event) {
 Do not advertise or execute internal or unknown operations, such as the internal Bridge TAN or Speedchex create
 commands, through `execute-request` or an SDK or CLI fallback. When an operation is missing from the public contract
 or its scope is unknown, stop and resolve it against the public contract before any request.
+
+Inspect `straddle tail --help` to learn why it is not a notification model.
+
+List charges with a permitted read:
+
+```json
+{"tool": "execute-request", "method": "GET", "path": "/v1/charges"}
+```

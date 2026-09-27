@@ -25,3 +25,5 @@ Run `straddle tail charges --interval 5s` to watch for the `paid` status.
 ```sh
 straddle tail charges --interval 5s
 ```
+
+Poll `GET /v1/charges/{id}` every 5 seconds in the consumer.
