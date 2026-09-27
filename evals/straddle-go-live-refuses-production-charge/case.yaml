@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: straddle-go-live-refuses-production-charge
+context:
+  scaffold_script: scaffold.sh
