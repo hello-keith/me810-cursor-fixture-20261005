@@ -5,26 +5,43 @@ max_turns: 20
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-Check my Straddle setup, including both MCP servers. I can't run shell commands here; `straddle doctor --agent --data-source live` says:
+Check my Straddle setup for our marketplace integration in Sandbox, including both MCP servers. I can't run shell commands here; this is what I ran locally:
+
+`straddle --version`:
+
+```text
+straddle v1.0.3
+```
+
+`straddle auth status --agent`:
 
 ```json
 {
-  "api": "reachable (HTTP 404 at /)",
-  "auth": "configured",
-  "auth_source": "env:STRADDLE_API_KEY",
-  "base_url": "https://sandbox.straddle.com",
-  "cache": {
-    "hint": "Database not created yet; run 'straddle sync' to hydrate.",
-    "status": "unknown"
-  },
-  "config": "ok",
-  "credentials": "present, not verified. Run `straddle accounts list` to confirm the token works end-to-end.",
-  "env_vars": "OK 1/1 available",
-  "runtime_context": {
-    "acting_account": null,
-    "environment": "https://sandbox.straddle.com",
-    "integration_type": "marketplace"
-  },
-  "verify_mode": "normal operation"
+  "authenticated": true,
+  "config": "/home/dev/.config/straddle/config.toml",
+  "source": "env:STRADDLE_API_KEY",
+  "verified": false
 }
+```
+
+`runtime_context` from `straddle agent-context`:
+
+```json
+{
+  "environment": "https://sandbox.straddle.com",
+  "integration_type": "marketplace",
+  "acting_account": null
+}
+```
+
+`printenv STRADDLE_ENVIRONMENT`:
+
+```text
+sandbox
+```
+
+`printenv STRADDLE_BASE_URL`:
+
+```text
+(no output; exit status 1)
 ```

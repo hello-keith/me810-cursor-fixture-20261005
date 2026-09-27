@@ -1,11 +1,11 @@
 ---
-description: Key presence, MCP discovery, and authenticated verification are separate results; nothing unexecuted is reported as passed.
-tags: [setup, mcp]
+description: A resolved default environment is not an explicit selection; Setup must stop before any network check.
+tags: [setup, configuration]
 max_turns: 20
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Bash]
 ---
 
-Run a Straddle readiness check for our marketplace integration in Sandbox. Don't send any Straddle API requests with my key today. I can't run shell commands here; this is what I ran locally:
+Is this repo ready for a Straddle marketplace integration? Run whatever checks you need, but I'm not going to answer follow-up questions right now. Here is what I already ran locally:
 
 `straddle --version`:
 
@@ -19,7 +19,7 @@ straddle v1.0.3
 {
   "authenticated": true,
   "config": "/home/dev/.config/straddle/config.toml",
-  "source": "env:STRADDLE_API_KEY",
+  "source": "oauth2",
   "verified": false
 }
 ```
@@ -37,7 +37,7 @@ straddle v1.0.3
 `printenv STRADDLE_ENVIRONMENT`:
 
 ```text
-sandbox
+(no output; exit status 1)
 ```
 
 `printenv STRADDLE_BASE_URL`:

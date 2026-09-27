@@ -23,7 +23,7 @@ Check the two servers separately and report them as separate rows. One working d
 1. Record whether the server is registered and which tools it lists. Registration and tool discovery are **discovery**, not verification. A registered server may have no key configured, which the listing cannot show.
 2. Run `summarize-openapi-specs`. It reads the specification and sends no Straddle request. Report `discovery: passed` when it returns the specification. It says nothing about the key.
 3. **Authenticated verification** needs one real permitted read through `execute-request`: `GET /v1/accounts` against `https://sandbox.straddle.com`, with no `Straddle-Account-Id`. Offer it only when all of these hold:
-   - step 3 recorded the key as present and the environment as exactly `https://sandbox.straddle.com`
+   - step 3 recorded the key as present and the environment as explicitly selected and exactly `https://sandbox.straddle.com`
    - the API MCP is registered and discovery passed
    - the call can name the Sandbox host explicitly
 

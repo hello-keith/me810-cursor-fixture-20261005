@@ -1,30 +1,47 @@
 ---
-description: A missing API key is a blocking configuration failure even though doctor exits 0.
+description: A missing API key is a blocking configuration failure found offline; no doctor or live request may run before prerequisites hold.
 tags: [setup, configuration]
-max_turns: 16
-allowed_tools: [Read, Glob, Grep, Skill]
+max_turns: 20
+allowed_tools: [Read, Glob, Grep, Skill, Bash]
 ---
 
-Check whether this project is ready for our Straddle SaaS integration. I can't run shell commands in this session, so here is the output of `straddle doctor --agent --data-source live`:
+Check whether this project is ready for our Straddle SaaS integration in Sandbox. Run whatever checks you need. Here is what I already ran locally, with exit statuses:
+
+`straddle --version`:
+
+```text
+straddle v1.0.3
+```
+
+`straddle auth status --agent` (exit status 4, stderr: `Error: no credentials configured`):
 
 ```json
 {
-  "api": "reachable (HTTP 404 at /)",
-  "auth": "not configured",
-  "auth_hint": "export STRADDLE_API_KEY=<your-key>",
-  "auth_key_url": "https://dashboard.straddle.com",
-  "base_url": "https://sandbox.straddle.com",
-  "cache": {
-    "hint": "Database not created yet; run 'straddle sync' to hydrate.",
-    "status": "unknown"
-  },
-  "config": "ok",
-  "env_vars": "ERROR missing required: STRADDLE_API_KEY",
-  "runtime_context": {
-    "acting_account": null,
-    "environment": "https://sandbox.straddle.com",
-    "integration_type": "saas"
-  },
-  "verify_mode": "normal operation"
+  "authenticated": false,
+  "config": "/home/dev/.config/straddle/config.toml",
+  "source": "",
+  "verified": false
 }
+```
+
+`runtime_context` from `straddle agent-context`:
+
+```json
+{
+  "environment": "https://sandbox.straddle.com",
+  "integration_type": "saas",
+  "acting_account": null
+}
+```
+
+`printenv STRADDLE_ENVIRONMENT`:
+
+```text
+sandbox
+```
+
+`printenv STRADDLE_BASE_URL`:
+
+```text
+(no output; exit status 1)
 ```

@@ -17,8 +17,8 @@ Classify every row. A check that did not run is never `passed`.
 The status is `blocked` when any of these holds:
 
 - no API key (a configuration failure, even though every other check ran)
-- no environment selected, the API host unreachable, or an invalid saved context
-- an environment other than Sandbox
+- an environment that was not explicitly selected (a resolved default without developer confirmation is a configuration failure)
+- an environment other than Sandbox, an invalid saved context, or a reachability check that ran and failed
 - the Straddle CLI is missing
 - the Docs MCP is not registered or its search failed
 - the API MCP is not registered or its discovery failed
@@ -28,7 +28,7 @@ The status is `blocked` when any of these holds:
 - the integration type or SDK is unknown and the developer has not answered
 - the only matching language is Python, which has no published Scalar SDK yet
 
-The status is `ready_with_warnings` when nothing blocks but something is incomplete: an authenticated check `not run`, a CLI older than v1.0.3 (no `runtime_context` and no `--idempotency-key` on creates), no acting account on a platform, fewer than two Sandbox accounts for a platform, the chosen SDK not installed yet, a retired SDK installed, a plugin or skill version that could not be read, or a Docs MCP that exposes execution tools. Otherwise it is `ready`.
+The status is `ready_with_warnings` when nothing blocks but something is incomplete: a reachability or authenticated check `not run`, a CLI older than v1.0.3 (no `runtime_context` and no `--idempotency-key` on creates), no acting account on a platform, fewer than two Sandbox accounts for a platform, the chosen SDK not installed yet, a retired SDK installed, a plugin or skill version that could not be read, or a Docs MCP that exposes execution tools. Otherwise it is `ready`.
 
 ## Report
 
@@ -47,9 +47,10 @@ Status: ready | ready_with_warnings | blocked
 | Skills | straddle-setup <version>, straddle-plan <version>, straddle-best-practices <version> | skill `metadata.version` |
 | Straddle Wizard | not installed / <version> | |
 | Straddle CLI | <version> / missing; idempotent creates yes (v1.0.3 or later) / no | `straddle --version` |
-| API key | present / missing (configuration failure) | `doctor` env_vars |
+| API key | present (env var / saved CLI credentials), not verified / missing (configuration failure) | `straddle auth status` |
+| Environment | <base URL>, explicitly selected (env var / developer-confirmed) / resolved default only (configuration failure) | `agent-context`, `printenv`, developer |
+| API reachability (CLI) | passed / failed / not run (<reason>) | `straddle doctor` |
 | Authenticated request (CLI) | passed / failed (<status>) / not run (<reason>) | `straddle accounts list` |
-| Environment | <base URL> | runtime_context |
 | Integration type | account / saas / marketplace / unknown | runtime_context or developer |
 | Acting account | <id> / none / not required | runtime_context |
 | Sandbox accounts for A/B | <count> / unknown | |
