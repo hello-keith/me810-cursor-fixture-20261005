@@ -17,7 +17,8 @@ Collect these answers before planning. Use what the developer already said or wh
 | Decision | Choices |
 | --- | --- |
 | Integration type | direct (`account`), SaaS, or marketplace |
-| Products | Pay by Bank charges, payouts, or both; Bridge bank connection method |
+| Products | Pay by Bank charges, payouts, or both |
+| Bank connection | the Bridge widget (session token from `POST /v1/bridge/initialize`), bank account details (`POST /v1/bridge/bank_account`), a Plaid token (`POST /v1/bridge/plaid`), or a Quiltt token (`POST /v1/bridge/quiltt`). Offer only these. |
 | SDK | TypeScript, Python, Ruby, C#, or Go |
 | Notification path | webhook endpoint, FIFO endpoint, or polling endpoint |
 | Platform onboarding (SaaS and marketplace) | the customer-facing path is hosted iframe onboarding; confirm it, and confirm Sandbox accounts will be created through the API for testing |
