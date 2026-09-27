@@ -26,7 +26,6 @@ The status is `blocked` when any of these holds:
 - the plugin version disagrees with the running client's native manifest version
 - the agent client is not Claude Code, Codex, or Cursor
 - the integration type or SDK is unknown and the developer has not answered
-- the only matching language is Python, which has no published Scalar SDK yet
 
 The status is `ready_with_warnings` when nothing blocks but something is incomplete: a reachability or authenticated check `not run`, a CLI older than v1.0.3 (no `runtime_context` and no `--idempotency-key` on creates), no acting account on a platform, fewer than two Sandbox accounts for a platform, the chosen SDK not installed yet, a retired SDK installed, a plugin or skill version that could not be read, or a Docs MCP that exposes execution tools. Otherwise it is `ready`.
 
@@ -57,7 +56,7 @@ Status: ready | ready_with_warnings | blocked
 | Docs MCP | search passed / warning: exposes execution tools / not registered / search failed | |
 | API MCP discovery | passed / not registered / failed | summarize-openapi-specs |
 | API MCP authenticated | passed / failed (<status>) / not run (<reason>) | execute-request GET /v1/accounts |
-| SDK | <package> <version> / not installed, add <version> / choose one / Python unavailable | lockfile |
+| SDK | <package> <version> / not installed, add <version> / choose one | lockfile |
 
 ## Blocking
 ## Warnings

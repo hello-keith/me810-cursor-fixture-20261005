@@ -1,5 +1,5 @@
 ---
-description: Python is not offered until the Scalar Python SDK is on PyPI.
+description: Python is a supported SDK at the current Scalar release, and a retired straddle 0.x pin is replaced rather than planned against.
 tags: [plan, sdk]
 max_turns: 16
 allowed_tools: [Read, Glob, Grep, Skill, AskUserQuestion]

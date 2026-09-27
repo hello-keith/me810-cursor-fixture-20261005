@@ -20,7 +20,7 @@ The business outcome, who uses it, and the Straddle products in scope.
 | Integration type | direct (`account`) / SaaS / marketplace | developer / Setup |
 | Products | charges / payouts / both | |
 | Bank connection | Bridge widget / Plaid / Quiltt / bank details | |
-| SDK | TypeScript / Ruby / C# / Go | |
+| SDK | TypeScript / Python / Ruby / C# / Go | |
 | Notification path | webhook endpoint / FIFO endpoint / polling endpoint | |
 | Customer-facing onboarding (platforms) | hosted iframe | |
 

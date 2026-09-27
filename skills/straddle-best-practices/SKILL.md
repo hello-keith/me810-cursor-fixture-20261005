@@ -18,7 +18,7 @@ These rules apply to every Straddle integration and to every Straddle skill. Rea
 | Ruby SDK | `straddle` 1.0.4 | RubyGems. |
 | C# SDK | `Straddle` 1.0.4 | NuGet. |
 | Go SDK | `github.com/straddle-build/straddle-go` v1.0.4 | Module path moved from `github.com/straddleio/straddle-go`. |
-| Python SDK | Not available | PyPI still serves the retired 0.5.0 package. Do not recommend `pip install straddle` until the Scalar release is published. |
+| Python SDK | `straddle` 1.0.5 | PyPI. Earlier `straddle` 0.x releases there are retired. |
 | Straddle CLI | v1.0.2 published | v1.0.3 is tagged but not yet published. It adds `--idempotency-key` on creates and `runtime_context` in `agent-context` and `doctor`. Check `straddle --version` and the command's `--help` before relying on either. |
 
 Versions change. Check the installed package in the developer's dependency tree before you rely on a method name, and prefer the SDK release's own `api.md`, README, and generated skill over memory.

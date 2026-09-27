@@ -18,11 +18,11 @@ Collect these answers before planning. Use what the developer already said or wh
 | --- | --- |
 | Integration type | direct (`account`), SaaS, or marketplace |
 | Products | Pay by Bank charges, payouts, or both; Bridge bank connection method |
-| SDK | TypeScript, Ruby, C#, or Go. Python is not available until the Scalar Python SDK is published on PyPI. |
+| SDK | TypeScript, Python, Ruby, C#, or Go |
 | Notification path | webhook endpoint, FIFO endpoint, or polling endpoint |
 | Platform onboarding (SaaS and marketplace) | the customer-facing path is hosted iframe onboarding; confirm it, and confirm Sandbox accounts will be created through the API for testing |
 
-If the developer asks for Python, say it is not published yet, and offer to plan with one of the four available SDKs or to stop. Do not plan `pip install straddle`, which installs the retired 0.5.0 package.
+If the repository already pins or installs a retired SDK release, such as PyPI `straddle` 0.x, plan the move to the version in the best-practices table instead of planning against the old release.
 
 If the developer asks to be notified by polling a charge or payout read, explain that the polling endpoint is the supported way to pull events and offer it. Do not plan a read loop.
 
