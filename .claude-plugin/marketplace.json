@@ -1,0 +1,19 @@
+{
+  "name": "straddle",
+  "owner": {
+    "name": "Straddle",
+    "url": "https://straddle.com"
+  },
+  "metadata": {
+    "description": "Straddle Developer Kit plugin.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "straddle",
+      "source": "./",
+      "description": "Straddle Developer Kit skills plus the hosted Straddle API and Docs MCP servers, for building and verifying a Straddle integration.",
+      "version": "0.1.0"
+    }
+  ]
+}

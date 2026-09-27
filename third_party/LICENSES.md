@@ -2,7 +2,7 @@
 
 ## svix/ai (MIT)
 
-`references/receiving-webhooks.md` is adapted from the `receiving-webhooks` skill in <https://github.com/svix/ai>. The original license follows.
+`skills/straddle-best-practices/references/receiving-webhooks.md` is adapted from the `receiving-webhooks` skill in <https://github.com/svix/ai>. The original license follows.
 
 ```text
 MIT License

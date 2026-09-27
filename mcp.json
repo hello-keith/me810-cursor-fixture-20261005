@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "straddle-api": {
+      "type": "streamable-http",
+      "url": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd"
+    },
+    "straddle-docs": {
+      "type": "streamable-http",
+      "url": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"
+    }
+  }
+}

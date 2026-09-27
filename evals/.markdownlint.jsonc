@@ -1,0 +1,6 @@
+// Eval prompts, graders and mocks are literal model input and tool output, so they have no title heading.
+// A nested config replaces the root config, so MD013 repeats the repository setting.
+{
+  "MD013": false,
+  "MD041": false
+}
