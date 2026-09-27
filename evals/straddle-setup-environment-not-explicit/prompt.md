@@ -5,15 +5,17 @@ max_turns: 20
 allowed_tools: [Read, Glob, Grep, Skill, Bash]
 ---
 
-Is this repo ready for a Straddle marketplace integration? Run whatever checks you need, but I'm not going to answer follow-up questions right now. Here is what I already ran locally:
+Is this repo ready for a Straddle marketplace integration? Run whatever checks you need, but I'm not going to answer follow-up questions right now.
 
-`straddle --version`:
+The Straddle CLI for this workspace is at `./bin/straddle`; call it by that path. Here is what it already printed:
+
+`./bin/straddle --version`:
 
 ```text
 straddle v1.0.3
 ```
 
-`straddle auth status --agent`:
+`./bin/straddle auth status --agent`:
 
 ```json
 {
@@ -24,7 +26,7 @@ straddle v1.0.3
 }
 ```
 
-`runtime_context` from `straddle agent-context`:
+`runtime_context` from `./bin/straddle agent-context`:
 
 ```json
 {
@@ -34,14 +36,4 @@ straddle v1.0.3
 }
 ```
 
-`printenv STRADDLE_ENVIRONMENT`:
-
-```text
-(no output; exit status 1)
-```
-
-`printenv STRADDLE_BASE_URL`:
-
-```text
-(no output; exit status 1)
-```
+`printenv STRADDLE_ENVIRONMENT` and `printenv STRADDLE_BASE_URL` each printed nothing and exited 1.
