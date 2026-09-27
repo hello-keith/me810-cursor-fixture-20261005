@@ -18,6 +18,6 @@ Read the repository's agent instructions, build files, dependency manifests, loc
 - existing payment or bank-linking provider code that must keep working
 - existing webhook or event handling code
 
-Match the language to a released SDK from the best-practices version table. If the language is Python, record that no supported Python SDK is published yet. If several languages are present, record the choice as unknown instead of guessing.
+Match the language to a released SDK from the best-practices version table. If several languages are present, record the choice as unknown instead of guessing.
 
 **Summary for step 3:** language, framework, test command, installed SDK and version (or none), retired SDK findings, provider code paths, and the SDK choice or `unknown`.
