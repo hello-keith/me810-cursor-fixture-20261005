@@ -1,0 +1,22 @@
+{
+  "name": "straddle-account-scope-corpus",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "corpus": "node runner.ts",
+    "test": "node --test runner.test.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "derive": "node derive.ts --cli",
+    "derive:check": "node derive.ts --check --cli"
+  },
+  "dependencies": {
+    "@straddlecom/straddle": "1.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "typescript": "7.0.2"
+  }
+}
