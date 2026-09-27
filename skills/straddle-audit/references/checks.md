@@ -6,7 +6,7 @@ Run these over application code. Each is a hypothesis generator; step 4 confirms
 
 | ID | Look for | Hypothesis | Triage against | Recovery |
 | --- | --- | --- | --- | --- |
-| S1 | A key literal, `sk_`/`Bearer ` strings, or a key variable in client-side code | Key exposed in source or browser bundle | Build config, which bundle the file ships in | Move to server-side secret; rotate the key in the dashboard |
+| S1 | A key literal, `sk_` or `Bearer` token strings, or a key variable in client-side code | Key exposed in source or browser bundle | Build config, which bundle the file ships in | Move to server-side secret; rotate the key in the dashboard |
 | S2 | Straddle client construction without a key check, or `?? ''` / empty-string fallbacks | Missing key silently becomes an unauthenticated request or a no-op | SDK client constructor (TypeScript throws when `bearer`/`BEARER` is empty) | Fail with a configuration error that names the variable |
 | S3 | Base URL or environment absent from configuration | The deployment targets whatever the SDK defaults to rather than the intended environment. Keys are environment-scoped, so a production key sent to the Sandbox default fails authentication (a 401 that looks like a bad key) | SDK default base URL (TypeScript defaults to Sandbox when `baseURL` and `STRADDLE_BASE_URL` are unset) | Explicit environment configuration, validated at startup with a configuration error when absent |
 | S4 | `execute-request` in scripts, agent configs, or prompts for the fourteen SDK/CLI-only operations | Excluded operation routed through the MCP | [writes-and-approval](../../straddle-best-practices/references/writes-and-approval.md) list | Route through the SDK or CLI with preview and approval |
@@ -23,6 +23,8 @@ Run these over application code. Each is a hypothesis generator; step 4 confirms
 | A5 | Account chosen by list-and-pick-first, fuzzy name match, or a stale global | Ambiguous or leaked acting account | Resolution code path | Resolve by Straddle ID or exact unique external ID; reject ambiguity |
 
 ## Notifications
+
+Anti-patterns to flag in notification code. Each row is something the audit detects and reports, never something to write:
 
 | ID | Look for | Hypothesis | Triage against | Recovery |
 | --- | --- | --- | --- | --- |

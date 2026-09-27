@@ -1,11 +1,11 @@
 # Straddle migration plan
 
 Status: draft | approved
-Provider: <provider>
-Integration model: <direct / SaaS / marketplace / Unresolved>
-SDK: <package and version / Unresolved>
-Notification path: <webhook endpoint / FIFO endpoint / polling endpoint / Unresolved>
-Switch: <flag or setting name, default>
+Provider: `<provider>`
+Integration model: `<direct / SaaS / marketplace / Unresolved>`
+SDK: `<package and version / Unresolved>`
+Notification path: `<webhook endpoint / FIFO endpoint / polling endpoint / Unresolved>`
+Switch: `<flag or setting name, default>`
 
 ## Current provider footprint
 
@@ -32,16 +32,16 @@ Files that need a change but had uncommitted work, or changes this skill does no
 
 ## Not moved
 
-Customer records, bank accounts, provider tokens, mandates, and payment history stay with <provider>. This plan does not export, copy, or re-create them in Straddle.
+Customer records, bank accounts, provider tokens, mandates, and payment history stay with `<provider>`. This plan does not export, copy, or re-create them in Straddle.
 
 ## Verification
 
 - Test command: `<command>`
-- New tests: <paths>
+- New tests: `<paths>`
 - Sandbox proof: run straddle-test after review.
 
 ## Unresolved
 
 ## Approval
 
-<date>, developer's words, rows approved. Any later change to this file voids this entry.
+`<date>`, developer's words, rows approved. Any later change to this file voids this entry.

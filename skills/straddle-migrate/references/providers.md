@@ -51,7 +51,7 @@ Use this to find a provider's footprint and describe the Straddle equivalent in 
 ## Payliance
 
 - **Find it:** `api.payliance.com`, `/api/v1/echeck/debit`, `/api/v1/echeck/credit`, `/api/v1/echecktoken/create`, `/api/v1/echeck/queryreturns`, `UniqueTranId`, SFTP settlement files.
-- **Replace:** eCheck debits and credits with charges and payouts; eCheck tokens with paykeys; scheduled calls to `queryreturns` or `retrieve` and SFTP settlement parsing with a Straddle notification endpoint ([OpenAPI](https://sandbox.api.payliance.com/swagger/v1/swagger.json)).
+- **Replace:** eCheck debits and credits with charges and payouts; eCheck tokens with paykeys; scheduled calls to `queryreturns` or `retrieve` and SFTP settlement parsing with a Straddle notification endpoint ([developer docs](https://payliance.com/developers/), which link the ACH API reference).
 - **Never moves:** eCheck tokens, stored bank details, and history.
 
 ## Other
