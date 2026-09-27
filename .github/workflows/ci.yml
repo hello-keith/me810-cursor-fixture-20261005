@@ -19,3 +19,54 @@ jobs:
         uses: DavidAnson/markdownlint-cli2-action@v24.2.0
         with:
           globs: "**/*.md"
+
+      - name: Test package validator
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Validate package, skills and links
+        run: scripts/validate-package
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Validate Claude Code manifests
+        run: |
+          npx --yes @anthropic-ai/claude-code@2.1.283 plugin validate --strict .
+          npx --yes @anthropic-ai/claude-code@2.1.283 plugin validate --strict .claude-plugin/plugin.json
+
+  account-scope:
+    name: account-scope corpus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Detect corpus
+        id: corpus
+        run: |
+          if [ -f fixtures/account-scope/package-lock.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::fixtures/account-scope is not in this tree; corpus checks run once ME-808 merges"
+          fi
+
+      - uses: actions/setup-node@v5
+        if: steps.corpus.outputs.present == 'true'
+        with:
+          node-version: 22
+
+      - name: Install corpus runner
+        if: steps.corpus.outputs.present == 'true'
+        working-directory: fixtures/account-scope
+        run: npm ci
+
+      - name: Typecheck corpus runner
+        if: steps.corpus.outputs.present == 'true'
+        working-directory: fixtures/account-scope
+        run: npm run typecheck
+
+      - name: Run corpus
+        if: steps.corpus.outputs.present == 'true'
+        working-directory: fixtures/account-scope
+        run: npm test
