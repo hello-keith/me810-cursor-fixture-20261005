@@ -31,5 +31,5 @@ Use the CLI for diagnostics, sandbox reference data, and approved sandbox writes
 - Add `--data-source live` to every read. The local store in the published CLI (v1.0.2) is not scoped by environment and account, so cached rows can mix Sandbox and Production or two accounts. Keep the flag until a published release scopes the store.
 - Run writes with `--dry-run` first. See [writes-and-approval.md](writes-and-approval.md).
 - `straddle doctor --agent` reports configuration and key presence (never its value). It does not verify that the key works. CLI v1.0.3 (tagged, not yet published) adds `runtime_context` with the environment, integration type, and acting account to `doctor` and `agent-context`. v1.0.2 does not report it, so treat those values as unknown there rather than guessing.
-- `straddle which "<capability>" --agent` finds the command for a task. `straddle sandbox` prints deterministic `sandbox_outcome` values and test bank data.
+- `straddle which "<capability>" --agent` finds the command for a task. `straddle sandbox` prints deterministic `sandbox_outcome` values and test bank data. A command that exists in the CLI is not proof that its operation is in the public contract; check the contract before using it.
 - Do not run `straddle sync`, `sql`, or other local-store commands for integration work.

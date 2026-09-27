@@ -21,7 +21,11 @@ The hosted API MCP's `execute-request` can reach every operation a key allows. S
 | `getUnmaskedLinkedBankAccount` | `GET /v1/linked_bank_accounts/{linked_bank_account_id}/unmask` |
 | `revealPaykey` | `GET /v1/paykeys/{id}/reveal` |
 
-Any `DELETE` added to the contract later joins this list. When unsure whether an operation is on it, treat it as excluded.
+Any `DELETE` added to the public contract later joins this list.
+
+## Public contract only
+
+Use only operations published in the public API contract (1.0.4). An operation outside it, or one whose contract or account scope you cannot confirm, is not run at all: not through `execute-request`, the SDK, or the CLI, even when a CLI command or SDK method exists for it. Stop, say so, and resolve it against the public contract before planning or running anything.
 
 ## Preview and approval
 
