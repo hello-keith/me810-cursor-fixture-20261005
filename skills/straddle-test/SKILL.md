@@ -1,0 +1,51 @@
+---
+name: straddle-test
+description: Verify a finished Straddle integration and write sanitized evidence to straddle-test-evidence.md. Use when a developer wants to test, verify, prove, or QA their Straddle integration or Sandbox setup, run the Straddle test matrix, check account A/B isolation or Straddle-Account-Id header behavior, prove paid, failed, returned (R01), or retried payments, confirm onboarding, or confirm webhook, FIFO, or polling endpoint delivery, or after straddle-integrate reports complete. Test does not change the integration, and any Sandbox write it needs goes through an exact preview and explicit approval.
+metadata:
+  version: 0.1.0
+---
+
+# Straddle Test
+
+Run the verification the approved `straddle-integration-plan.md` names, against the integration Integrate built, and record what passed, what failed, and what did not run in `straddle-test-evidence.md`.
+
+Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules apply to every step. Test uses the same preview, approval, and execution routes as [straddle-integrate](../straddle-integrate/SKILL.md), and cites them instead of restating them.
+
+## Boundaries
+
+- **No architecture changes.** Test does not edit application code, configuration, or dependencies. The only file it writes is `straddle-test-evidence.md`. A gap or failing check is a finding for Integrate, not something Test fixes.
+- **Missing configuration stops every Straddle request.** Test establishes the environment and credentials with Integrate's offline checks, never `straddle doctor`. Without an explicit Sandbox environment and a credential for a route, Test runs only offline checks and discovery on that route, and records a configuration error for everything else.
+- **Sandbox writes need an exact preview and explicit approval**, following Integrate's [preview step](../straddle-integrate/steps/04-preview.md). A denial or a changed context means zero writes. The fourteen excluded operations run only through the SDK or CLI.
+- **Status arrives through the selected notification path.** Test observes transitions through the webhook, FIFO, or polling endpoint, waiting at most ten minutes. It never loops on charge, payout, account, or list reads. Dashboard email is a human confirmation only.
+- **Evidence is sanitized.** No keys, signing secrets, tokens, unmasked data, or full request bodies with personal data.
+- **Evidence claims only what ran.** Discovery is reported separately from authenticated execution. Evidence never says Scalar enforces the fourteen exclusions.
+
+## Steps
+
+1. [steps/01-begin.md](steps/01-begin.md): confirm the plan, integration, and configuration, and select the scenarios.
+2. [steps/02-offline.md](steps/02-offline.md): run the repository's tests and check the offline matrix.
+3. [steps/03-preview.md](steps/03-preview.md): preview the Sandbox writes the scenarios need, and get approval.
+4. [steps/04-sandbox.md](steps/04-sandbox.md): run the approved scenarios and observe notifications.
+5. [steps/05-verify.md](steps/05-verify.md): run independent reads, keeping discovery and authenticated results separate.
+6. [steps/06-evidence.md](steps/06-evidence.md): write the evidence file and the final marker.
+
+Each step file lists what it needs, its allowed tools, the next step, and its summary and marker.
+
+## Markers
+
+Print each marker on its own line, exactly as shown, with one-line JSON:
+
+```text
+STRADDLE_PROGRESS {"skill":"straddle-test","step":"01-begin"}
+STRADDLE_ABORT {"skill":"straddle-test","step":"03-preview","reason":"configuration error: STRADDLE_API_KEY is not set"}
+STRADDLE_HANDOFF {"skill":"straddle-test","status":"partial","report":"<summary>"}
+```
+
+`status` is one of:
+
+- `passed`: every selected scenario ran and passed.
+- `failed`: at least one scenario ran and failed.
+- `partial`: nothing failed, but some scenarios did not run, for example Sandbox scenarios waiting for approval or configuration.
+- `blocked`: no approved plan or integration exists to test.
+
+Emit `STRADDLE_ABORT` when the run stops early, and still print the handoff and evidence file.
