@@ -50,3 +50,4 @@ Run these over application code. Each is a hypothesis generator; step 4 confirms
 | C1 | Hand-built HTTP requests to `straddle.com` | Paths, fields, or headers drift from the contract | Contract operation | Use the SDK method |
 | C2 | Status or event-type strings not in the contract | Handler never matches, or matches the wrong state | Contract enums and `webhooks` | Use contract values |
 | C3 | `config.sandbox_outcome` outside tests | Sandbox control in a production path | Contract field description | Gate to tests |
+| C4 | Calls to operations absent from the public contract (for example CLI commands or paths annotated internal), through any route | Code depends on an operation outside the public contract | Public contract operation list | Stop and resolve against the public contract; replace with a public operation or remove the dependency with the developer's approval |

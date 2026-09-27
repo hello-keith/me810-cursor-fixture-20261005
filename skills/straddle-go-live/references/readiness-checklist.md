@@ -14,6 +14,7 @@ Every row is required unless it says otherwise. SDK facts below were checked aga
 | Idempotent creates | Every customer, paykey, charge, and payout create sends an idempotency key derived from the intent and a stable external ID. |
 | Ambiguous-result recovery | A timeout or dropped response on a create retries with the same idempotency key or looks up the exact external ID. No unbounded create retry. |
 | Fourteen operations | No script, agent configuration, or code path sends the fourteen SDK/CLI-only operations through `execute-request`. |
+| Public contract only | Every Straddle operation the code, scripts, or agent configuration uses is in the public API contract. Nothing calls an internal or unknown operation by SDK, CLI, or MCP. |
 | Notification path | One of webhook endpoint, FIFO endpoint, or polling endpoint is implemented. No loop on resource reads (`charges.retrieve`, `GET /v1/charges/{id}`, list calls) or `straddle tail` discovers status. |
 | Webhook verification | Per [receiving-webhooks.md](../../straddle-best-practices/references/receiving-webhooks.md): raw body, verified signature, missing secret fails, `2xx` only after persisting, duplicates are no-ops. With the TypeScript SDK, `client.webhooks.unwrap` skips verification when `headers` is omitted, so the call must pass the request headers. |
 | Platform event routing | SaaS and marketplace handlers route on the event's `account_id` and reject accounts the platform does not own. |

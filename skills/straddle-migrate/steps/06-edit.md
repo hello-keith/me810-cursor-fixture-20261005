@@ -15,6 +15,7 @@ Before the first edit, run `git status --porcelain` again. If any approved file 
 Make the approved changes, one row at a time:
 
 - Read the installed Straddle SDK in the dependency tree (its `api.md`, README, and resource source) before naming a method, parameter, or option. Do not write calls from memory or from another version's docs.
+- Use only operations in the public Straddle API contract. If an SDK method, CLI command, or path is absent from the public contract or its scope is unclear, stop and resolve it against the public contract; do not fall back to the SDK, CLI, or MCP for it.
 - Put Straddle calls behind the approved switch. The existing provider path stays the default unless the plan says otherwise, and keeps working unchanged.
 - Read the API key and environment from the application's configuration and fail with a configuration error that names the missing value before any request. Do not rely on an SDK default environment.
 - Apply account scope for the chosen model through the SDK's own parameter. Send an idempotency key and a stable external ID on every create.
