@@ -1,7 +1,7 @@
 # Step 2: Sources
 
 - **Needs:** step 1 summary.
-- **Tools:** Read, Glob, Grep; `straddle-docs` `search-documentation`; `straddle-api` `search-openapi-operations` and `summarize-openapi-specs`. No `execute-request`. No writes.
+- **Tools:** Read, Glob, Grep; Bash only for `straddle which "<capability>" --agent` and `straddle <command> --help`; `straddle-docs` `search-documentation`; `straddle-api` `search-openapi-operations` and `summarize-openapi-specs`. No `execute-request`. No writes.
 - **Next:** [03-write-plan.md](03-write-plan.md).
 
 Print:

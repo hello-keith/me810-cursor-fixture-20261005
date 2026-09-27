@@ -10,10 +10,13 @@ The same content is published as [llms.txt](https://straddle-build-straddle-open
 
 ## API MCP (`straddle-api`)
 
-`https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd`, authenticated with the caller's own key as `Authorization: Bearer ${STRADDLE_API_KEY}`. No Scalar login. It exposes `summarize-openapi-specs`, `search-openapi-operations`, `search-documentation`, and `execute-request`.
+`https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd`, authenticated with the caller's own Straddle API key. No Scalar login. It exposes `summarize-openapi-specs`, `search-openapi-operations`, `search-documentation`, and `execute-request`.
+
+The plugin's shared MCP declaration carries no credential or header. Each developer supplies the key through their client's documented secret input, following the published [connect-mcp guide](https://straddle-build-straddle-openapi.apidocumentation.com/connect-mcp), with manual configuration as the fallback. A registered server with no key configured is not authenticated, so never treat registration or discovery as proof of access.
 
 - `summarize-openapi-specs` and `search-openapi-operations` read the specification and send no Straddle request. A successful call proves discovery, not that the key works.
-- `execute-request` sends a real Straddle request with the caller's key. Use it only for permitted reads, and never for the fourteen operations in [writes-and-approval.md](writes-and-approval.md). It is not read-only.
+- `execute-request` sends a real Straddle request with the caller's key. It is not read-only. It may run permitted reads, and permitted writes only after the preview and approval in [writes-and-approval.md](writes-and-approval.md). It never runs the fourteen excluded operations listed there, whatever the approval.
+- Individual skills can be stricter. Setup and Plan make no remote writes, so they use only the reads their steps name.
 - Keep the client's tool approval prompts on.
 
 ## SDKs

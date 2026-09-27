@@ -5,9 +5,9 @@
 | Operation group | Direct (`account`) | SaaS | Marketplace |
 | --- | --- | --- | --- |
 | Create customer, create paykey through Bridge (`bank_account`, `plaid`, `quiltt`), Bridge initialize | Omit | Required | Omit |
-| Other customer and paykey reads and updates, paykey reveal and unmask | Omit | Send the selected account | Omit |
+| Other customer and paykey reads and updates, paykey reveal and unmask | Omit | Send when an account is selected, otherwise omit | Omit |
 | Create charge or payout, charge refund, resubmit, authorization upload | Omit | Required | Required |
-| Other charge, payout, funding-event, and payment reads and updates | Omit | Send the selected account | Send the selected account |
+| Other charge, payout, funding-event, and payment reads and updates | Omit | Send when an account is selected, otherwise omit | Send when an account is selected, otherwise omit |
 | Organizations, accounts, account settings, representatives, linked bank accounts, onboarding | Omit | Omit | Omit |
 
 ## Failing case for each integration type

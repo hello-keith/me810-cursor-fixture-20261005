@@ -13,7 +13,7 @@ The hosted API MCP installation is named `production` inside Scalar. That name s
 
 ## Credentials
 
-- Read the key from the process environment as `STRADDLE_API_KEY`. The SDKs, the CLI, and the API MCP header template (`Authorization: Bearer ${STRADDLE_API_KEY}`) all read it there.
+- Application code, the SDKs, and the CLI read the key from the process environment as `STRADDLE_API_KEY`. The API MCP gets the key through the selected client's documented secret input, as described in [tools.md](tools.md). The plugin's MCP declaration holds no key or header.
 - Never open, print, copy, or summarize `.env*` files, credential stores, private keys, or the CLI's config files. Report whether a key is present, never its value.
 - Never echo a key, include it in a log, plan, test fixture, commit, or chat message, or ship it in a browser bundle. Browser code talks to your server, and your server talks to Straddle.
 - Do not export a key saved in the CLI to another tool.
