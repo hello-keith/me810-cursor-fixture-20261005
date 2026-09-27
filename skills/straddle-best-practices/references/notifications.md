@@ -20,4 +20,4 @@ Reading a resource once, for example to show its current state on a page or to r
 
 ## Handling deliveries
 
-Follow the repository's [receiving-webhooks.md](../../../references/receiving-webhooks.md) for signature verification from the raw body, prompt `2xx` responses, retries, duplicate delivery, and the polling endpoint's consumer and offset handling.
+Follow [receiving-webhooks.md](receiving-webhooks.md) for signature verification from the raw body, prompt `2xx` responses, retries, duplicate delivery, and the polling endpoint's consumer and offset handling.

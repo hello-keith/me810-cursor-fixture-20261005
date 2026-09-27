@@ -30,14 +30,14 @@ Versions change. Check the installed package in the developer's dependency tree 
 3. **Creates are idempotent.** Send an idempotency key on every create and give resources stable external IDs. After an ambiguous result, recover with the same key or an exact external-ID lookup, not a fresh create. See [writes-and-approval.md](references/writes-and-approval.md).
 4. **Fourteen operations never use `execute-request`.** Charge, payout, and customer creation, the three paykey-creation endpoints, every `DELETE`, the six unmask operations, and paykey reveal run through the released SDK or the Straddle CLI, after a preview and explicit approval. Scalar does not enforce this, so you must. See [writes-and-approval.md](references/writes-and-approval.md).
 5. **Writes need a preview and approval.** Show environment, acting account, operation, payload summary, and idempotency key before any remote write. A changed target or payload needs a new approval. Integration work uses Sandbox.
-6. **Notifications.** Use a webhook endpoint, a FIFO endpoint, or a polling endpoint. Never loop on ordinary resource reads such as `GET /v1/charges/{id}` to discover status. Dashboard email is a human confirmation, not a notification model. See [notifications.md](references/notifications.md).
+6. **Notifications.** Use a webhook endpoint, a FIFO endpoint, or a polling endpoint. Never loop on ordinary resource reads such as `GET /v1/charges/{id}` to discover status. Dashboard email is a human confirmation, not a notification model. See [notifications.md](references/notifications.md) and, for any handler, [receiving-webhooks.md](references/receiving-webhooks.md).
 7. **Tools.** Use the Docs MCP for documentation, the SDK for application code, and the CLI for diagnostics and approved sandbox helpers. The API MCP can run permitted operations, including reads and approved writes outside the fourteen, under rule 5. A skill may narrow this further, as Setup and Plan do. See [tools.md](references/tools.md).
 
 ## Deprecated paths
 
 - SDK releases older than the versions above, such as PyPI `straddle` 0.x or the Go module `github.com/straddleio/straddle-go`, and any MCP server shipped with them.
 - The `docs.straddle.com/.well-known/skills` index. It recommends polling charge reads and is retiring.
-- Any local `straddle-mcp` server or "local integration MCP". The kit uses the hosted Scalar servers only.
+- Any MCP server other than the hosted Scalar API MCP and Docs MCP in [tools.md](references/tools.md). Use only the hosted Scalar servers.
 - The React embed wrapper. Hosted iframe onboarding is the supported path until Onboarding V2.
 
 ## When a rule blocks the task
