@@ -1,7 +1,7 @@
 # Step 1: Begin
 
 - **Needs:** the developer's request, `straddle-integration-plan.md`, and the Integrate report when one exists.
-- **Tools:** Read, Glob, Grep; Bash only for the configuration presence checks in Integrate's [step 1](../../straddle-integrate/steps/01-begin.md) and `straddle --version`. No writes, and no Straddle request.
+- **Tools:** Read, Glob, Grep; Bash only for the offline configuration checks in Integrate's [step 1](../../straddle-integrate/steps/01-begin.md), `straddle --version`, and `straddle auth status --agent`. No writes, and no command that can reach Straddle, including `straddle doctor`.
 - **Next:** [02-offline.md](02-offline.md).
 
 Print:
@@ -12,7 +12,7 @@ STRADDLE_PROGRESS {"skill":"straddle-test","step":"01-begin"}
 
 Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and the plan. When there is no approved plan, or the repository has no Straddle integration code, print `STRADDLE_ABORT`, write the evidence file with status `blocked`, and hand off to Plan or Integrate.
 
-Run the configuration presence checks from Integrate's step 1 and record **configured** or **configuration error** with exactly what is missing. Never print a value.
+Run the offline configuration checks from Integrate's step 1 and record **configured** or **configuration error** for each route, with exactly what is missing. Never print a value.
 
 ## Select scenarios
 

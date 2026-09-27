@@ -51,5 +51,5 @@ Use `execute-request` for independent verification reads that are not on the exc
 
 Neither tool reliably refuses a missing key for you, so check before calling either one.
 
-- The CLI sends a request even when `STRADDLE_API_KEY` is unset. Integrate checks the key and environment first and does not run a live CLI command until both are present.
+- The CLI sends a request even when no credential is configured, and `straddle doctor` sends `GET /` before it checks auth. Integrate runs the offline checks in [step 1](../steps/01-begin.md) first and does not run a live CLI command until they pass.
 - The TypeScript SDK reads `BEARER`, not `STRADDLE_API_KEY`, when no `bearer` option is given, and it defaults to the Sandbox base URL. Application code passes `bearer` from `STRADDLE_API_KEY` explicitly and resolves the base URL from an explicit environment, and it throws a configuration error when either is missing.

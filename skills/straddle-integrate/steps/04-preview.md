@@ -21,7 +21,7 @@ List every intended write in execution order, including every organization and a
 
 - Environment: sandbox, https://sandbox.straddle.com (configured | configuration error: <what is missing>)
 - Integration type: <direct | saas | marketplace>
-- Configuration: STRADDLE_API_KEY <present | missing>, STRADDLE_ENVIRONMENT <value | unset>
+- Configuration: environment <explicit sandbox | unset | other>; credential per route: SDK `STRADDLE_API_KEY` <present | missing>, CLI `auth status` <env | saved | none>, API MCP <developer-confirmed | unknown>
 
 | # | Operation | Executing tool | Acting account (Straddle-Account-Id) | Payload summary | External ID | Idempotency key | If it exists |
 | --- | --- | --- | --- | --- | --- | --- | --- |
