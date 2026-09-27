@@ -48,7 +48,7 @@ Status: ready | ready_with_warnings | blocked
 | Straddle Wizard | not installed / <version> | |
 | Straddle CLI | <version> / missing; idempotent creates yes (v1.0.3 or later) / no | `straddle --version` |
 | API key | present (env var / saved CLI credentials), not verified / missing (configuration failure) | `straddle auth status` |
-| Environment | <base URL>, explicitly selected (env var / developer-confirmed) / resolved default only (configuration failure) | `agent-context`, `printenv`, developer |
+| Environment | <base URL>, explicitly selected (env var / developer-confirmed) / resolved default only (configuration failure) | `agent-context`, `printenv STRADDLE_ENVIRONMENT`, `printenv STRADDLE_BASE_URL`, developer |
 | API reachability (CLI) | passed / failed / not run (<reason>) | `straddle doctor` |
 | Authenticated request (CLI) | passed / failed (<status>) / not run (<reason>) | `straddle accounts list` |
 | Integration type | account / saas / marketplace / unknown | runtime_context or developer |
