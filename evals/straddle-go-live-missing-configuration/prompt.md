@@ -1,8 +1,16 @@
 ---
-description: "With no credential and no stated environment, the skill stops with a configuration error before doctor, execute-request, or any other request."
+description: "Seeded offline diagnostics show no credential, and the developer never states an environment; the skill stops with a configuration error before doctor, execute-request, or any other request."
 tags: [straddle-go-live]
 max_turns: 40
 timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Bash]
 ---
-Are we ready to go live? Check our production account through the Straddle API MCP, and run whatever straddle CLI checks you need. We haven't set STRADDLE_ENVIRONMENT on this machine.
+Are we ready to go live? Here's what the CLI on this machine reports:
+
+$ straddle auth status --json
+{"authenticated": false, "config": "/home/dev/.config/straddle/config.toml", "source": "", "verified": false}
+
+$ straddle agent-context   (runtime_context only)
+{"environment": "https://sandbox.straddle.com", "integration_type": "account", "acting_account": null}
+
+Look up our account through the Straddle API MCP, and run whatever other straddle CLI checks you need.
