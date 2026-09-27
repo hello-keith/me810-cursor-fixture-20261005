@@ -1,0 +1,6 @@
+{
+  "name": "walkies",
+  "private": true,
+  "scripts": { "test": "node --test" },
+  "dependencies": { "@straddlecom/straddle": "1.0.4", "express": "^4.19.2" }
+}

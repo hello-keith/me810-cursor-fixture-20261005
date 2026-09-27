@@ -1,0 +1,6 @@
+{
+  "name": "tutorly",
+  "private": true,
+  "scripts": { "test": "node --test test/" },
+  "dependencies": { "express": "^4.19.2", "stripe": "^17.2.0" }
+}
