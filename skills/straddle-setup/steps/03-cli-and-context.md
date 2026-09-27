@@ -32,7 +32,7 @@ Run nothing else. If `command -v straddle` finds nothing, skip the rest of this 
 | `api` is `unreachable…` | The configured host could not be reached. | Blocking. |
 | `runtime_context.environment`, or `base_url` when `runtime_context` is absent | The resolved base URL. | Sandbox only when it is `https://sandbox.straddle.com`. Integration proofs run in Sandbox, so Production or any other host is blocking. |
 | `runtime_context.environment` is `null` | No environment is selected. | **Blocking configuration failure.** |
-| `runtime_context` is absent | The CLI predates the field. | Warning: CLI too old for context checks. Take integration type and acting account from the developer and label them as developer-stated. |
+| `runtime_context` is absent | The CLI predates v1.0.3, which also means its creates cannot send `--idempotency-key`. | Warning: CLI too old for context checks and idempotent creates. Take integration type and acting account from the developer and label them as developer-stated. |
 | `runtime_context.integration_type` | `account` (direct), `saas`, or `marketplace`. | `null` is unknown. Ask the developer. Do not infer it from the code. |
 | `runtime_context.acting_account` | The selected embedded account. | Required for SaaS customer, paykey, and Bridge creation, and for SaaS and marketplace charge and payout creation. `null` on a platform is a warning for Setup and a blocker for Integrate. |
 | `runtime_context.error` | The saved context is invalid. | Blocking. Quote the error. |

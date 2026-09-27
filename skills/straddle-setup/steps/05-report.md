@@ -28,7 +28,7 @@ The status is `blocked` when any of these holds:
 - the integration type or SDK is unknown and the developer has not answered
 - the only matching language is Python, which has no published Scalar SDK yet
 
-The status is `ready_with_warnings` when nothing blocks but something is incomplete: an authenticated check `not run`, the CLI too old to report `runtime_context`, no acting account on a platform, fewer than two Sandbox accounts for a platform, the chosen SDK not installed yet, a retired SDK installed, a plugin or skill version that could not be read, or a Docs MCP that exposes execution tools. Otherwise it is `ready`.
+The status is `ready_with_warnings` when nothing blocks but something is incomplete: an authenticated check `not run`, a CLI older than v1.0.3 (no `runtime_context` and no `--idempotency-key` on creates), no acting account on a platform, fewer than two Sandbox accounts for a platform, the chosen SDK not installed yet, a retired SDK installed, a plugin or skill version that could not be read, or a Docs MCP that exposes execution tools. Otherwise it is `ready`.
 
 ## Report
 
@@ -46,7 +46,7 @@ Status: ready | ready_with_warnings | blocked
 | Native client manifest | <version> / none for this client | `.claude-plugin/`, `.codex-plugin/`, or `.cursor-plugin/` `plugin.json` |
 | Skills | straddle-setup <version>, straddle-plan <version>, straddle-best-practices <version> | skill `metadata.version` |
 | Straddle Wizard | not installed / <version> | |
-| Straddle CLI | <version> / missing | `straddle --version` |
+| Straddle CLI | <version> / missing; idempotent creates yes (v1.0.3 or later) / no | `straddle --version` |
 | API key | present / missing (configuration failure) | `doctor` env_vars |
 | Authenticated request (CLI) | passed / failed (<status>) / not run (<reason>) | `straddle accounts list` |
 | Environment | <base URL> | runtime_context |
