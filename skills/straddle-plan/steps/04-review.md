@@ -17,7 +17,7 @@ Read only the plan file. Fix every item that fails:
 - [ ] No status is discovered by repeating `GET` on a charge, payout, or list endpoint, and `straddle tail` is not a notification path.
 - [ ] Dashboard email appears, if at all, only as a human confirmation.
 - [ ] Header rules match [account-scope.md](../../straddle-best-practices/references/account-scope.md) for the integration type. Direct sends no account header. Marketplace customer, paykey, and Bridge calls omit it. SaaS customer, paykey, and Bridge creation require it. SaaS and marketplace charge and payout creation, refund, resubmit, and authorization upload require it. Other charge and payout reads and updates send it only when an account is selected.
-- [ ] Every create has an idempotency key and an external ID.
+- [ ] Every create has an idempotency key and an external ID. Each key scheme yields 10 to 40 characters, reuses the key for a retry of the same request, and gives each distinct write its own key, with no truncated raw IDs.
 - [ ] Every future write has a preview and approval line and runs in Sandbox.
 - [ ] No key, token, or `.env` content appears. The plan says keys come from `STRADDLE_API_KEY` in the environment.
 - [ ] Missing key or environment is planned as a configuration error before any request.
