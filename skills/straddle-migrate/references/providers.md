@@ -23,7 +23,7 @@ These come from the public Straddle API contract. Use them exactly; do not inven
 - **`failed` vs `reversed`.** A return before the payment reached `paid` is `failed`; a return after `paid` is `reversed`. The Sandbox outcomes follow the same split (`failed_insufficient_funds` vs `reversed_insufficient_funds`). Return details are in the payment's status details; read the contract for the exact field.
 - **`consent_type`** on a charge: `internet` (online and mobile authorization) or `signed` (written or PDF-signed agreement). There is no telephone value, so a provider's TEL flows need a decision.
 - **Objects:** customer; paykey (a bank account tokenized through Bridge: the widget, `POST /v1/bridge/bank_account`, `POST /v1/bridge/plaid`, or `POST /v1/bridge/quiltt`); charge (debit); payout (credit); funding event (settlement to the account's bank); organization and embedded account for platforms, selected with `Straddle-Account-Id`.
-- **Creates** take an `Idempotency-Key` header and an `external_id`.
+- **Creates** take an `Idempotency-Key` header and an `external_id`. The key must be 10 to 40 characters: the API rejects other lengths with 400, and returns 409 when a key is reused for a different request. A prefix plus a UUID (for example `resubmit-<charge id>-<attempt>`) exceeds 40 characters, so derive a compact key for each intent, such as a hash of the intent string.
 - **Notifications** use a Straddle webhook, FIFO, or polling endpoint, signed with Standard Webhooks, per [receiving-webhooks.md](../../straddle-best-practices/references/receiving-webhooks.md). Events include `charge.event.v1`, `payout.event.v1`, `paykey.event.v1`, `customer.event.v1`.
 
 ## What every provider migration has in common

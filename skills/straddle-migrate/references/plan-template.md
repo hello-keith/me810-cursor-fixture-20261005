@@ -29,7 +29,7 @@ Every provider status the application stores or reacts to, mapped to a Straddle 
 
 - Returns before `paid` (`failed`) and after `paid` (`reversed`): how the application reacts to each, keyed on the Straddle return code.
 - Notifications of change: what Straddle does with corrections (with the source), and what the application must still handle.
-- Retries: which return codes may be re-presented, and how: Straddle resubmit or a fresh create, each with its own idempotency key.
+- Retries: which return codes may be re-presented, and how: Straddle resubmit or a fresh create, each with its own idempotency key of 10 to 40 characters.
 - Accounts to stop debiting after fatal returns: what Straddle does (with the source), and what the application must still do.
 
 ## Consent
