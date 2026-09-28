@@ -30,6 +30,8 @@ Organization and account-management operations omit the header for every model. 
 
 ## Documentation topics to search
 
+The published docs are at `https://straddle-build-straddle-openapi.apidocumentation.com`. Search them through the Docs MCP when it is available.
+
 | Choice | Docs MCP query |
 | --- | --- |
 | Pay by Bank | "Pay by Bank", "Bridge", "paykeys", "charges" |
