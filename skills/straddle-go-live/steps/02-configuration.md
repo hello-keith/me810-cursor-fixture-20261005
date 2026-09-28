@@ -21,6 +21,8 @@ When the credential is missing or unknown, or the environment is unknown, print 
 Configuration error: <no Straddle credential is configured | credential presence is unknown | environment is not set explicitly>. No Straddle request was sent.
 ```
 
+When the credential is missing, the fix is the developer's: set `STRADDLE_API_KEY` in their own shell or deployment secrets, or save a key with `straddle auth set-token` (`straddle auth setup` prints how to obtain one). Name only subcommands that appear in the installed CLI's `straddle auth --help`, and never ask for the key in chat.
+
 Only when both facts are established may a later step use `straddle doctor --agent` for connectivity; it sends a request to the resolved host. Code and dashboard checks in steps 3 and 5 still run without these facts, because they read files and ask the developer. The final status is `blocked` if the environment or credential cannot be established.
 
 **Summary for step 3:** credential present, missing, or unknown and its source, environment and its source, resolved CLI host, CLI version.

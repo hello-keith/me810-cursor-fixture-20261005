@@ -34,7 +34,7 @@ Model: <direct / SaaS / marketplace>   SDK: <package version>   Environment chec
 - <production read: not run / ran once with status N>
 ```
 
-End with:
+End with the checklist below. Leave every box unchecked. The checklist is for the developer to tick after checking, not a record of what the skill verified.
 
 ```markdown
 ## Verify before merging

@@ -12,6 +12,8 @@ STRADDLE_PROGRESS {"skill":"straddle-get-started","step":"03-choices"}
 
 Ask every choice that is still `unanswered`, one short question each, with the repository hint shown beside it so the developer can confirm or correct it. Offer only real options.
 
+A choice the developer already stated is answered. Record it with source `developer`, give its Straddle meaning in one line if that helps, and do not ask it again. Ask about it only when repository evidence contradicts it, and then show that evidence.
+
 1. **Product.** Pay by Bank charges, payouts, platform onboarding of businesses, or a combination.
 2. **Integration model.** Direct account (one business moving its own money), SaaS platform (your clients own their customers), or marketplace (the platform owns customers and pays sellers). Explain the consequence in one line each: a direct account never sends `Straddle-Account-Id`; SaaS and marketplace act for an explicitly selected embedded account on some operations. Do not pick one because the code mentions "sellers" or "tenants".
 3. **SDK.** Offer the published SDK for each language the repository actually uses, from the Current versions table in [straddle-best-practices](../../straddle-best-practices/SKILL.md) (TypeScript, Python, Go, Ruby, C#). When the lockfile pins a retired release, say which and offer the current one.
