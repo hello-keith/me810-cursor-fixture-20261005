@@ -14,7 +14,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 ## Boundaries
 
 - **No architecture changes.** Test does not edit application code, configuration, or dependencies. The only file it writes is `straddle-test-evidence.md`. A gap or failing check is a finding for Integrate, not something Test fixes.
-- **Missing configuration stops every Straddle request.** Test establishes the environment and credentials with Integrate's offline checks, never `straddle doctor`. Without an explicit Sandbox environment and a credential for a route, Test runs only offline checks and discovery on that route, and records a configuration error for everything else.
+- **Missing configuration stops every Straddle request.** Test establishes the environment and credentials with Integrate's offline checks, never `straddle doctor`. Without an accepted target (explicit Straddle Sandbox, or the offline synthetic localhost target under every condition below) and a credential for a route, Test runs only offline checks and discovery on that route, and records a configuration error for everything else.
 - **Sandbox writes need an exact preview and explicit approval**, following Integrate's [preview step](../straddle-integrate/steps/04-preview.md). A denial or a changed context means zero writes. The fourteen excluded operations run only through the SDK or CLI.
 - **Status arrives through the selected notification path.** Test observes transitions through the webhook, FIFO, or polling endpoint, waiting at most ten minutes. It never loops on charge, payout, account, or list reads. Dashboard email is a human confirmation only.
 - **Evidence is sanitized.** No keys, signing secrets, tokens, unmasked data, or full request bodies with personal data.
