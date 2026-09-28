@@ -30,7 +30,7 @@ Each step file lists what it needs, its allowed tools, the next step, and its su
 
 ## Markers
 
-Print each marker on its own line, exactly as shown, with one-line JSON. Print every step's `STRADDLE_PROGRESS` marker, in order, when that step starts, even when several steps finish before you reply:
+Print each marker on its own line, exactly as shown, with one-line JSON. Print every step's `STRADDLE_PROGRESS` marker, in order, when that step starts, even when several steps finish before you reply or the request already answers a step's questions:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-plan","step":"01-decisions"}

@@ -4,7 +4,7 @@
 - **Tools:** Read, Glob, AskUserQuestion. No writes.
 - **Next:** [02-sources.md](02-sources.md).
 
-Print:
+Print this even when the request already supplies every decision:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-plan","step":"01-decisions"}
