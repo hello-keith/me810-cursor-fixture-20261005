@@ -60,7 +60,8 @@
       {
         "file": "cli-1.0.3.tgz",
         "url": "https://registry.npmjs.org/@straddlecom/cli/-/cli-1.0.3.tgz",
-        "integrity": "sha512-Ra9Tr53pMa/uXaBVEGvgbE0Z09HYn9SpwnOpCUzVOywVrAQ+JpmsDB9qKTAMRj0Flduv3yOGOWsWQi8ON97g9w=="
+        "integrity": "sha512-Ra9Tr53pMa/uXaBVEGvgbE0Z09HYn9SpwnOpCUzVOywVrAQ+JpmsDB9qKTAMRj0Flduv3yOGOWsWQi8ON97g9w==",
+        "note": "npm registry dist.integrity; these tarball bytes were not rehashed for this manifest"
       }
     ]
   },

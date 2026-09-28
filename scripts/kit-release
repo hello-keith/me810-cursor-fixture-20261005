@@ -300,6 +300,7 @@ def generate(root, commit, inputs):
             "repository": inputs["plugin_repository"],
             "archive": {"file": archive_name, "format": "zip, stored entries, fixed timestamps",
                         "sha256": archive_sha, "bytes": len(archive), "files": len(files)},
+            "content_sha256": tree_digest(files),
             "release": release,
         },
         "skills": skills,

@@ -63,7 +63,7 @@ scripts/kit-release check --release       # fails unless every component has pub
 
 The plugin archive holds what a client loads: the root and native manifests, `mcp.json`, `assets/`, `skills/`, `references/`, `third_party/`, `LICENSE` and `README.md`. It is built from git objects at the given commit, not the working tree, with stored entries, a fixed 1980-01-01 timestamp and the git file modes. The same commit gives the same bytes on any machine and zlib. `kit/` is excluded, so the commit that records the manifest rebuilds the archive the manifest names. Claude Code can load the archive directly with `claude --plugin-dir straddle-plugin-<version>.zip`, which is package-loaded evidence, not a marketplace install.
 
-Each skill digest is the sha256 of a `sha256sum`-style listing of the skill directory, so it doesn't depend on the archive format. Commit plugin source changes first: `generate` and `check` read plugin files from the commit and inputs from the working tree.
+`plugin.content_sha256` and each skill's `sha256` hash a `sha256sum`-style listing, one `<sha256>  <path>` line per file sorted by repository path, over the plugin files or the skill directory. They don't depend on the archive format, so the Wizard can verify an installed or fetched plugin directory against them. Commit plugin source changes first: `generate` and `check` read plugin files from the commit and inputs from the working tree.
 
 ### Provenance
 
