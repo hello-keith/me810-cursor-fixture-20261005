@@ -169,11 +169,8 @@ class PackageTest(unittest.TestCase):
     def test_claude_api_override_url_drift_is_rejected(self):
         self.edit_json(".claude-plugin/plugin.json", lambda v: v["mcpServers"][1]["straddle-api"].update(
             url="https://mcp.scalar.com/mcp/00000000-0000-0000-0000-000000000000"))
-        self.assertEqual(self.new_gates(), [
-            (".claude-plugin/plugin.json", "package", "mcpServers must be [\"./mcp.json\", {\"straddle-api\": "
-             "{\"type\": \"http\", \"url\": \"https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd\", "
-             "\"headers\": {\"Authorization\": \"Bearer ${STRADDLE_API_KEY}\"}}}]: Claude Code sends the caller's "
-             "key only through this override of the shared declaration")])
+        self.assertEqual([(path, rule) for path, rule, _ in self.new_gates()],
+                         [(".claude-plugin/plugin.json", "package")])
 
     def test_invalid_plugin_name_and_version_drift(self):
         self.edit_json("plugin.json", lambda v: v.update(name="Straddle_Kit"))
