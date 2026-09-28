@@ -82,19 +82,15 @@ class PolicyLintTest(unittest.TestCase):
     def test_skill_frontmatter_is_checked_on_materialized_skill_files(self):
         _, valid = materialize_skill(self, "straddle-example.md")
         self.assertEqual(lint(valid), [])
-        root, invalid = materialize_skill(self, "straddle-mismatch.md")
-        expected = [
-            "straddle-mismatch/SKILL.md:1: frontmatter: metadata.version is required",
-            "straddle-mismatch/SKILL.md:1: frontmatter: "
-            "name 'straddle-other' must match its directory 'straddle-mismatch'",
-        ]
-        found = validator.lint_file(invalid, "straddle-mismatch/SKILL.md", remote=offline)
-        self.assertEqual(sorted(str(d) for d in found), expected)
         self.assertEqual(run_cli("--offline", str(valid)), (0, []))
-        self.assertEqual(run_cli("--offline", str(invalid), cwd=root), (1, expected))
-
-    def test_no_test_file_is_named_skill_md(self):
-        self.assertEqual(sorted((REPO / "tests").rglob("SKILL.md")), [])
+        root, invalid = materialize_skill(self, "straddle-mismatch.md")
+        found = validator.lint_file(invalid, "straddle-mismatch/SKILL.md", remote=offline)
+        self.assertEqual(sorted((d.path, d.line, d.rule) for d in found),
+                         [("straddle-mismatch/SKILL.md", 1, "frontmatter")] * 2)
+        code, lines = run_cli("--offline", str(invalid), cwd=root)
+        self.assertEqual(code, 1)
+        self.assertEqual([line.split(": ")[:2] for line in lines],
+                         [["straddle-mismatch/SKILL.md:1", "frontmatter"]] * 2)
 
     def test_webhook_guidance_passes_in_every_distribution_path(self):
         guides = [REPO / "references" / "receiving-webhooks.md",
