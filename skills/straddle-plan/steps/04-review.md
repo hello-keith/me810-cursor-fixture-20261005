@@ -4,7 +4,7 @@
 - **Tools:** Read, Grep, Edit on `straddle-integration-plan.md` only.
 - **Next:** [05-handoff.md](05-handoff.md).
 
-Print:
+Print this once, right after reading this file and before the next step file, even when every item passes and you make no edit:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-plan","step":"04-review"}
