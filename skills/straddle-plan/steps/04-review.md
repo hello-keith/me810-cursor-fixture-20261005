@@ -10,7 +10,7 @@ STRADDLE_PROGRESS {"skill":"straddle-plan","step":"04-review"}
 - **Tools:** Read, Grep, Edit on `straddle-integration-plan.md` only.
 - **Next:** [05-handoff.md](05-handoff.md).
 
-Read only the plan file. Fix every item that fails:
+Read `straddle-integration-plan.md` from disk with the Read tool now, even if you just wrote it, and check that copy rather than your memory of it. Read nothing else. Fix every item that fails:
 
 - [ ] No planned write uses `execute-request` for customer, paykey, charge, or payout creation, a `DELETE`, an unmask, or paykey reveal.
 - [ ] Every planned operation is in the public API contract. Anything outside it, or with unclear contract or account scope, is removed and listed under unresolved decisions, with no SDK or CLI fallback.
