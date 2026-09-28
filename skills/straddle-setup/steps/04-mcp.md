@@ -16,7 +16,7 @@ Check the two servers separately and report them as separate rows. One working d
 
 1. Record whether the server is registered and which tools it lists.
 2. Run one `search-documentation` query, such as `webhook signature verification`. A relevant result is `passed`.
-3. The Docs MCP must be search-only. If it lists `execute-request`, `search-openapi-operations`, or `summarize-openapi-specs`, report it as a **warning: Docs MCP exposes API execution tools**, do not call them, and continue.
+3. The Docs MCP must be search-only. If it lists `execute-request`, `search-openapi-operations`, or `summarize-openapi-specs`, report it as a **warning: Docs MCP exposes API execution tools**, do not call them, and continue. The hosted server publishes that tool list, so re-registering the client does not change it and the connect-mcp guide has no fix for it. The only next action is to leave those tools unused.
 
 ## API MCP (`straddle-api`)
 
