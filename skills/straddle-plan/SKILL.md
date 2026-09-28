@@ -13,7 +13,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 
 ## Boundaries
 
-- The only file Plan writes is `straddle-integration-plan.md`. It does not edit application code, install packages, or change configuration.
+- Plan writes only `straddle-integration-plan.md`, plus, in step 6 and only after the developer approves the plan, at most one companion view, `straddle-plan-visual.html`, at the repository root. It does not edit application code, install packages, or change configuration.
 - No remote writes. Plan never creates, deletes, unmasks, or reveals anything, and never runs a bootstrap. It may read the Docs MCP and the installed SDK source.
 - Plan asks for decisions it cannot read from the repository. It does not pick the integration type, SDK, or notification path for the developer.
 - Do not read `.env*`, credential stores, or private keys.
@@ -24,7 +24,8 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 2. [steps/02-sources.md](steps/02-sources.md): read the repository, the installed SDK source, and the current Straddle docs.
 3. [steps/03-write-plan.md](steps/03-write-plan.md): write the plan from [references/plan-template.md](references/plan-template.md).
 4. [steps/04-review.md](steps/04-review.md): check the plan file against the rules and fix it.
-5. [steps/05-handoff.md](steps/05-handoff.md): summarize and print the final marker.
+5. [steps/05-handoff.md](steps/05-handoff.md): summarize, print the handoff marker, and leave the plan for the developer's review.
+6. [steps/06-show-me.md](steps/06-show-me.md): only after the developer explicitly approves the current plan, show it visually with [references/show-me.md](references/show-me.md).
 
 Each step file lists what it needs, its allowed tools, the next step, and its summary and marker.
 

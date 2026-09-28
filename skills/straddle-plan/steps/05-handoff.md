@@ -2,7 +2,7 @@
 
 - **Needs:** step 4 summary.
 - **Tools:** none.
-- **Next:** the developer approves the plan, then Integrate runs it.
+- **Next:** the developer reviews the plan. Only after they explicitly approve it, [06-show-me.md](06-show-me.md) shows it, then Integrate runs it.
 
 Print:
 
@@ -37,3 +37,5 @@ Then print on one line:
 ```text
 STRADDLE_HANDOFF {"skill":"straddle-plan","status":"<draft|blocked>","report":"<one-paragraph summary including the plan path>"}
 ```
+
+**Summary for step 6:** the plan path and the handoff status.
