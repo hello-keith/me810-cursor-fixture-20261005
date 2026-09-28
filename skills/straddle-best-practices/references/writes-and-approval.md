@@ -40,7 +40,7 @@ Proceed only after an explicit yes. A changed environment, account, operation, o
 
 ## Idempotency
 
-- Send an idempotency key on every create. Derive it from something stable for that intent, such as the external ID plus the operation, so a retry of the same intent reuses it.
+- Send an idempotency key on every create. The contract allows 10 to 40 characters. Derive it deterministically from the logical request: a retry of the same request reuses its key, and each distinct write, including each deliberate resubmit attempt, gets its own. Concatenating an operation name with a raw ID can exceed 40 characters. Use a short operation prefix plus a fixed-length hash of the request's identity instead, for example `chg-` plus the first 32 hex characters of SHA-256 of the charge's external ID. Never truncate a raw ID to fit, because truncated IDs can collide.
 - Give every created resource a stable, non-sensitive external ID.
 - Use IDs returned by successful create responses in the next step's ID fields. Do not rediscover them with list calls.
 - A charge's or payout's `paykey` field takes the full paykey token. It does not take the paykey `id`, or the masked `paykey` that `bank_account` and `plaid` creates return. Get the full token from `revealPaykey` or `getUnmaskedPaykey`, which are among the fourteen, so use the SDK or CLI after their own approval, or from a `quiltt` create response. Use it within one SDK process or one CLI command without printing it. Never write it to a plan, preview, log, report, test, evidence, or commit. Follow the contract field, not the value's shape.
