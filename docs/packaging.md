@@ -105,3 +105,9 @@ The `STRADDLE_PROGRESS` lines a skill prints when it enters a step are best-effo
 ### Inventory shell reads (ME-669)
 
 During `straddle-migrate` step 2, Bash is limited to the bounded read-only local inspection listed in the Tools line of [`skills/straddle-migrate/steps/02-inventory.md`](../skills/straddle-migrate/steps/02-inventory.md). Credentials, network calls, installs and writes stay prohibited there; other steps keep their own tool lines.
+
+### Early blocked Integrate replies (ME-670)
+
+An Integrate reply that stops before a configured preview may be a short blocked summary: it names the blocker, reports zero Straddle API requests, keeps the excluded operations on the SDK or CLI, and shows no sensitive value. The operation-by-operation route, account and approval table is still required before any execution, and the excluded-operation rules, approvals, output safety, header rules and configuration gates are unchanged, so a blocked reply offers no API request, including a permitted read. The three `straddle-integrate-*-excluded-ops` routing graders accept either form. The SaaS case's unconditional account-A regex was removed, because its configured-preview branch keeps that requirement.
+
+No eval ran against this change, so existing scores stay attached to the source and rubric they ran with. Reviewing the retained db8b1c9 marketplace run `claude-eval-5rWp5H` by hand against the new criterion still fails it, because its blocked summary offers an API MCP read before configuration is confirmed.

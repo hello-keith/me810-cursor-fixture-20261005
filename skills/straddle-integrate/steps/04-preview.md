@@ -12,6 +12,8 @@ STRADDLE_PROGRESS {"skill":"straddle-integrate","step":"04-preview"}
 
 When the plan has no Sandbox writes, say so and go to step 6.
 
+When step 1 recorded a **configuration error**, including an offline synthetic localhost target with any condition not yet confirmed, such as the sandboxed session, build no preview, run no dry run, and do not ask for approval. Give the short blocked report described under [Markers](../SKILL.md#markers), ask only for the missing confirmation, and say that no Straddle request will be sent until the named values are set in the developer's own shell. Then print `STRADDLE_ABORT` with `configuration error: <what is missing>`, continue at step 6, and hand off with `blocked`, never `awaiting_approval`. The full preview below is built only once step 1 records **configured**.
+
 ## Build the preview
 
 List every intended write in execution order, including every organization and account to reuse or create, and every excluded read (unmask or reveal) the plan needs. Write exact values, not placeholders, except for IDs that only a previous create in this run can return. Name those by the row they come from.
@@ -19,7 +21,7 @@ List every intended write in execution order, including every organization and a
 ```markdown
 ## Straddle Sandbox preview
 
-- Environment: sandbox, https://sandbox.straddle.com (configured | configuration error: <what is missing>)
+- Environment: sandbox, https://sandbox.straddle.com
 - Target: Straddle Sandbox | offline synthetic localhost (not Straddle Sandbox) <exact base URL>
 - Integration type: <direct | saas | marketplace>
 - Configuration: environment <explicit sandbox | unset | other>; credential per route: SDK `STRADDLE_API_KEY` <present | missing>, CLI `auth status` <env | saved | none>, API MCP <developer-confirmed | unknown>
@@ -48,8 +50,7 @@ When step 1 recorded **configured** and a row uses the CLI, run it with `--dry-r
 
 ## Ask for approval
 
-- When step 1 recorded a **configuration error**, show the preview and do not ask for approval. That includes an offline synthetic localhost target with any condition not yet confirmed, such as the sandboxed session. Ask only for the missing confirmation and hand off `blocked`, never `awaiting_approval`, in that reply. Say that no Straddle request will be sent until the named variables are set in the developer's own shell, then print `STRADDLE_ABORT` with `configuration error: <what is missing>` and continue at step 6, handing off with `blocked`.
-- Otherwise ask one question: approve these exact rows, yes or no.
+Ask one question: approve these exact rows, yes or no.
 
 Only a yes given after this exact preview counts. These do not count:
 
