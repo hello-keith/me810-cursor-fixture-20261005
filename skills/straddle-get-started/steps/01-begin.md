@@ -1,14 +1,14 @@
 # Step 1: Begin
 
-- **Needs:** the developer's request.
-- **Tools:** Read. No shell commands, no MCP calls, no writes.
-- **Next:** [02-repository.md](02-repository.md).
-
-Print:
+Print this marker once now, before any tool call, including reading straddle-best-practices or the next step file:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-get-started","step":"01-begin"}
 ```
+
+- **Needs:** the developer's request.
+- **Tools:** Read. No shell commands, no MCP calls, no writes.
+- **Next:** [02-repository.md](02-repository.md).
 
 Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and keep its rules in force for the rest of the run.
 

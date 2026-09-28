@@ -4,7 +4,7 @@
 - **Tools:** none. Get Started writes no file.
 - **Next:** the skill named in the report, run by the developer.
 
-Print:
+Print, only after reading this file (never before):
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-get-started","step":"05-report"}

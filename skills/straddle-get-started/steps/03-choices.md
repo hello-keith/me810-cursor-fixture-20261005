@@ -1,14 +1,14 @@
 # Step 3: Choices only the developer can make
 
-- **Needs:** step 1 and step 2 summaries.
-- **Tools:** AskUserQuestion when the client has it, otherwise ask in chat. Read for follow-up evidence. No writes.
-- **Next:** [04-route.md](04-route.md).
-
-Print:
+Print this marker once now, before any tool call, including a follow-up Read or reading the next step file:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-get-started","step":"03-choices"}
 ```
+
+- **Needs:** step 1 and step 2 summaries.
+- **Tools:** AskUserQuestion when the client has it, otherwise ask in chat. Read for follow-up evidence. No writes.
+- **Next:** [04-route.md](04-route.md).
 
 Ask every choice that is still `unanswered`, one short question each, with the repository hint shown beside it so the developer can confirm or correct it. Offer only real options.
 
@@ -19,6 +19,6 @@ A choice the developer already stated is answered. Record it with source `develo
 3. **SDK.** Offer the published SDK for each language the repository actually uses, from the Current versions table in [straddle-best-practices](../../straddle-best-practices/SKILL.md) (TypeScript, Python, Go, Ruby, C#). When the lockfile pins a retired release, say which and offer the current one.
 4. **Notification path.** Webhook endpoint (public HTTPS handler), FIFO endpoint (strict order), or polling endpoint (no public URL needed). Dashboard email is a human confirmation, not one of these options, and looping on resource reads is never offered.
 
-If the client cannot ask interactively (a non-interactive run), list the open questions in the report, set the handoff status to `needs_input`, and do not answer them yourself.
+When an answer isn't available in this turn, because you asked in chat or the client can't ask at all, don't stop here to wait. Record each unanswered choice as `open`, then continue to step 4 and step 5 and end with the `needs_input` report and `STRADDLE_HANDOFF` before yielding. Don't guess the answers, start the next skill, install anything, or write files.
 
 **Summary for step 4:** each choice with its source (`developer` or `open`).
