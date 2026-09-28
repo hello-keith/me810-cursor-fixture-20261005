@@ -4,7 +4,7 @@
 - **Tools:** Read, Write, Edit for `straddle-integration-plan.md` only.
 - **Next:** [04-review.md](04-review.md).
 
-Print:
+Print this once, right after reading this file and before reading the template or any reference:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-plan","step":"03-write-plan"}

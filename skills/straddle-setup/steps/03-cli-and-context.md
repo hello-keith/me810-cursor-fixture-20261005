@@ -4,7 +4,7 @@
 - **Tools:** Bash for the commands in the allowlist below only. If you cannot run commands, ask the developer to run the offline commands and paste the output.
 - **Next:** [04-mcp.md](04-mcp.md).
 
-Print:
+Print this once, right after reading this file and before any other tool call or the next step file, even when the developer already pasted the command output and you run no command:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-setup","step":"03-cli-and-context"}

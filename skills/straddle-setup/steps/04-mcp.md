@@ -4,7 +4,7 @@
 - **Tools:** the `straddle-docs` and `straddle-api` MCP tools named below, and nothing else from those servers.
 - **Next:** [05-report.md](05-report.md).
 
-Print:
+Print this once, right after reading this file and before the first MCP call:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-setup","step":"04-mcp"}
