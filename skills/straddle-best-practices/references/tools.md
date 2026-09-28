@@ -28,7 +28,7 @@ Application code uses the released Scalar SDK for the developer's language (vers
 Use the CLI for diagnostics, sandbox reference data, and approved sandbox writes.
 
 - Add `--agent` to every command for JSON and non-interactive output.
-- Add `--data-source live` to every read. The local store in the published CLI (v1.0.2) is not scoped by environment and account, so cached rows can mix Sandbox and Production or two accounts. Keep the flag until a published release scopes the store.
+- Add `--data-source live` to every read. Integration verification needs the API's current state, and a local snapshot can be stale.
 - Run writes with `--dry-run` first. See [writes-and-approval.md](writes-and-approval.md).
 - `straddle auth status --agent` and `straddle agent-context` run offline. The first reports whether a key is configured (environment or saved CLI credentials), never its value. The second reports `runtime_context` with the resolved environment, integration type, and acting account (CLI v1.0.3 and later; absent in v1.0.2). The resolved environment defaults to Sandbox, so it is not proof of an explicit selection.
 - `straddle doctor --agent` sends `GET /` to the resolved host before it reports, so it is a network check, not a preflight. Its `credentials: present, not verified` does not verify the key.
