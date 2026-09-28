@@ -58,7 +58,7 @@ python3 -m unittest discover -s tests -v
 
 The package checks validate `plugin.json` and `mcp.json` against the vendored Agent Plugins 1.0.0 schemas in `scripts/schemas/`. They also check the fixed MCP servers, name and version agreement across the manifests, the Codex `interface` fields, that PNG assets are square, the Cursor variables schema, all nine required skills, and eval case layout. They fetch the Codex `websiteURL`, `privacyPolicyURL` and `termsOfServiceURL` and require HTTP 200, like Markdown links. They report missing skills and missing Codex URLs as failures, because both are real release requirements.
 
-CI runs Markdown lint, the validator tests, `scripts/validate-package`, and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job whenever that directory exists.
+CI runs Markdown lint, the validator tests, `scripts/validate-package`, and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job on every run.
 
 ### Skill policy lint (ME-816)
 
@@ -88,7 +88,7 @@ The lint matches patterns and doesn't understand prose. Writers should know thes
 
 Cases live in `evals/<skill>-<case>/` with `prompt.md` and `graders/*.md`. Mocks go in `evals/mocks/<server>/<tool>.md` or a case's own `mocks/`, where `<server>` is `straddle-api` or `straddle-docs`. The validator requires at least one case per present skill and rejects mocks for unknown servers. `evals/results/` is ignored by Git. `evals/.markdownlint.jsonc` turns off only MD041 (first-line heading) for these files, because prompts, graders and mocks are literal model input and output.
 
-The gate run needs model credentials, so it isn't in CI yet. The approved model and judge are both `claude-opus-5-5`, confirmed by a native Claude Code preflight. The command keeps real MCP servers off, and reports stay local:
+Model evals run on the existing exe.dev VM with the Claude Code login already approved there, not in GitHub CI, which stays deterministic. The approved model and judge are both `claude-opus-5-5`. The command keeps real MCP servers off, and reports stay local:
 
 ```sh
 claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-without --threshold 1.0 \
