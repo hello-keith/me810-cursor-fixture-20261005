@@ -1,6 +1,6 @@
 ---
 name: straddle-integrate
-description: Implement an approved straddle-integration-plan.md in the developer's repository with the installed Straddle SDK, then preview and run the approved Sandbox setup. Use when a developer wants to build, wire up, or finish a Straddle integration (Pay by Bank charges or payouts, customers, Bridge paykeys, marketplace or SaaS sellers, hosted onboarding, webhook, FIFO, or polling endpoint handling), asks to create Sandbox accounts, customers, paykeys, or charges for their app, or says the Straddle plan is approved. Changes only the files the plan approves and never writes to Straddle without an exact preview and explicit approval.
+description: Implement an approved straddle-integration-plan.md in the developer's repository with the installed Straddle SDK, then preview and run the approved Sandbox setup. Use when a developer wants to build, wire up, or finish a Straddle integration (Pay by Bank charges or payouts, customers, Bridge paykeys, marketplace or SaaS sellers, hosted onboarding, webhook, FIFO, or polling endpoint handling), asks to create Sandbox accounts, customers, paykeys, or charges for their app, or says the Straddle plan is approved, or asks to run, change, or retry a previewed or approved Sandbox write (for example for another account or after a timeout), or to reveal, unmask, or delete Straddle Sandbox data. Changes only the files the plan approves and never writes to Straddle without an exact preview and explicit approval.
 metadata:
   version: 0.1.0
 ---
