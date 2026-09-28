@@ -19,6 +19,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 - **Status arrives through the selected notification path.** Test observes transitions through the webhook, FIFO, or polling endpoint, waiting at most ten minutes. It never loops on charge, payout, account, or list reads. Dashboard email is a human confirmation only.
 - **Evidence is sanitized.** No keys, signing secrets, tokens, unmasked data, or full request bodies with personal data.
 - **Evidence claims only what ran.** Discovery is reported separately from authenticated execution. Evidence never says Scalar enforces the fourteen exclusions.
+- **Offline synthetic target.** Test accepts the explicitly declared localhost target under the same conditions as Integrate ([offline-synthetic-target.md](../straddle-integrate/references/offline-synthetic-target.md)). Its evidence is labelled offline synthetic proof and never counts as live Straddle Sandbox proof.
 
 ## Steps
 

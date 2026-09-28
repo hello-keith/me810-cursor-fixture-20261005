@@ -10,7 +10,7 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-integrate","step":"05-execute"}
 ```
 
-Check configuration again before the first request, using the step 1 presence checks. When the key or a Sandbox environment is now missing, print `STRADDLE_ABORT` with `configuration error: <what is missing>`, send nothing, and continue at step 6, handing off with `blocked`.
+Check configuration again before the first request, using the step 1 checks, and confirm the target (Straddle Sandbox, or the exact offline synthetic localhost URL) still matches the approved preview. When the key or a Sandbox environment is now missing, print `STRADDLE_ABORT` with `configuration error: <what is missing>`, send nothing, and continue at step 6, handing off with `blocked`.
 
 Run the approved rows in order, exactly as previewed.
 
@@ -21,7 +21,7 @@ Run the approved rows in order, exactly as previewed.
 - **Failures.** On a `4xx`, stop at that row. Report the status and error type without echoing request bodies that contain personal data, and do not continue with rows that depend on it.
 - **Excluded reads** (unmask and reveal) run through the SDK or CLI only. Record that they succeeded, not what they returned.
 
-Record, for every row: the operation, executing tool, acting account, external ID, idempotency key, the result status, and the returned ID. Mark each resource `created` or `reused`.
+Record, for every row: the operation, executing tool, acting account, external ID, idempotency key, the result status, and the returned ID. Mark each resource `created` or `reused`. For an offline synthetic target, mark every row `synthetic upstream record`, and skip the notification endpoint and independent verification sections below, because neither exists offline.
 
 ## Notification endpoints
 

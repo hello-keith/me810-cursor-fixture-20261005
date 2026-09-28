@@ -16,6 +16,7 @@ Report in this shape. State what the run verified and what it did not. A passing
 # Straddle Integrate report
 
 Status: complete | awaiting_approval | blocked (<reason>)
+Target: Straddle Sandbox | offline synthetic localhost <base URL>: offline synthetic proof, not live Straddle Sandbox proof
 
 ## Code changes
 | File | Change | Test |
@@ -23,7 +24,7 @@ Status: complete | awaiting_approval | blocked (<reason>)
 ## Server-side resources
 | Resource | ID | External ID | Acting account | Created, reused, or enabled | Tool |
 
-(Organizations, accounts, customers, paykeys, charges or payouts, and any webhook, FIFO, or polling endpoint the developer enabled. Write "None" when the run made no Sandbox write.)
+(Organizations, accounts, customers, paykeys, charges or payouts, and any webhook, FIFO, or polling endpoint the developer enabled. Write "None" when the run made no Sandbox write. For an offline synthetic target, title this section "Synthetic upstream records" instead, because nothing was created at Straddle.)
 
 ## Not done
 (Preview rows not approved or not run, indeterminate rows, configuration errors, failed checks.)

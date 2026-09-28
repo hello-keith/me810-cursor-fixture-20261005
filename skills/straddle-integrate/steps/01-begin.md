@@ -29,12 +29,12 @@ Establish the environment and credential presence before running any command tha
 
 ```bash
 printf 'STRADDLE_ENVIRONMENT=%s\n' "${STRADDLE_ENVIRONMENT:-<unset>}"
-test -n "$STRADDLE_BASE_URL" && echo "STRADDLE_BASE_URL set" || echo "STRADDLE_BASE_URL unset"
+printf 'STRADDLE_BASE_URL=%s\n' "${STRADDLE_BASE_URL:-<unset>}"
 if [ -n "${STRADDLE_API_KEY:-}" ]; then key=present; else key=missing; fi
 echo "STRADDLE_API_KEY $key"
 ```
 
-**Environment.** Only an explicit selection counts: `STRADDLE_ENVIRONMENT=sandbox`, or `STRADDLE_BASE_URL=https://sandbox.straddle.com`, in the environment the run executes in. A default is not a selection. That includes the SDK's default base URL and the CLI's `runtime_context.environment`, which reports what the CLI resolved, not what the developer chose. Any other value, including Production, is a configuration error for Integrate.
+**Environment.** Only an explicit selection counts: `STRADDLE_ENVIRONMENT=sandbox`, or `STRADDLE_BASE_URL=https://sandbox.straddle.com`, in the environment the run executes in. A default is not a selection. That includes the SDK's default base URL and the CLI's `runtime_context.environment`, which reports what the CLI resolved, not what the developer chose. The one other accepted target is an explicitly declared offline synthetic localhost upstream, under every condition in [offline-synthetic-target.md](../references/offline-synthetic-target.md). Any other value, including Production, an undeclared localhost URL, or any other host, is a configuration error for Integrate.
 
 **Credential presence, per route.** Each check reports presence only and never proves the key works.
 
@@ -45,8 +45,8 @@ echo "STRADDLE_API_KEY $key"
 
 Record, for each route the plan's writes use:
 
-- **configured:** the environment is explicitly Sandbox, and that route's credential is present or developer-confirmed.
-- **configuration error:** the environment is not explicit or not Sandbox, or that route has no credential or an unknown one. Name exactly what is missing.
+- **configured:** the environment is explicitly Sandbox, and that route's credential is present or developer-confirmed. Record the target as `Straddle Sandbox` or `offline synthetic localhost <exact base URL>`.
+- **configuration error:** the environment is not explicit or not Sandbox, a localhost target is missing any condition in [offline-synthetic-target.md](../references/offline-synthetic-target.md), or that route has no credential or an unknown one. Name exactly what is missing.
 
 A configuration error does not stop code changes to approved files, because those send no request. It does stop every Straddle request on the affected routes later in the run: no SDK call, CLI command without `--dry-run`, or `execute-request`. Say so now, in one sentence, so the developer can fix it in their own shell while the code work proceeds.
 

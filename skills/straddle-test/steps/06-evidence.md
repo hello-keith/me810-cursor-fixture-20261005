@@ -19,6 +19,7 @@ Write `straddle-test-evidence.md` at the repository root, replacing any earlier 
 - Run: <run ID>, <date>
 - Integration type: <direct | saas | marketplace>
 - Environment: sandbox, <base URL> | configuration error: <what is missing>
+- Target: Straddle Sandbox | offline synthetic localhost <base URL>: offline synthetic proof, not live Straddle Sandbox proof
 - SDK: <package> <version>. CLI: <version or not used>
 - Notification path: <webhook | FIFO | polling endpoint>
 
@@ -47,7 +48,7 @@ Sanitize before writing:
 - Resource IDs, external IDs, statuses, return codes, event IDs, and HTTP status codes are fine.
 - Never write keys, signing secrets, bearer tokens, polling tokens, unmasked or revealed values, bank numbers, or customer personal data. Summarize them as `present` or `redacted`.
 
-Write "None" for empty sections. Do not describe a scenario that did not run as passed.
+Write "None" for empty sections. Do not describe a scenario that did not run as passed. For an offline synthetic target, the server-side resources section lists synthetic upstream records only, and notification and lifecycle scenarios such as `paid`, the `R01` return, or delivered events are `not run: offline synthetic target`.
 
 Tell the developer the status and the path, then print:
 
