@@ -1,7 +1,7 @@
 ---
 name: show-me
 description: Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.
-source: humanlayer/skills plugins/show-me/skills/show-me/SKILL.md at ca7c808 (MIT, Copyright (c) 2026 HumanLayer; notice in third-party-licenses.md beside this file), as adapted in straddleio/straddle-form .agents/skills/show-me/SKILL.md at 545d9975cda57031fe4b900242089b90355c2fc6. The body below is that form copy, verbatim. Loaded by straddle-plan step 6; not a standalone skill.
+source: humanlayer/skills plugins/show-me/skills/show-me/SKILL.md at 6ab9013 (MIT, Copyright (c) 2026 HumanLayer; notice in third-party-licenses.md beside this file), as adapted in straddleio/straddle-form .agents/skills/show-me/SKILL.md at 545d9975cda57031fe4b900242089b90355c2fc6. The body below is that form copy, verbatim. Loaded by straddle-plan step 6; not a standalone skill.
 ---
 
 Help the user understand the current topic of conversation visually. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.

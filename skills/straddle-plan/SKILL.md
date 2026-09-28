@@ -25,7 +25,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 3. [steps/03-write-plan.md](steps/03-write-plan.md): write the plan from [references/plan-template.md](references/plan-template.md).
 4. [steps/04-review.md](steps/04-review.md): check the plan file against the rules and fix it.
 5. [steps/05-handoff.md](steps/05-handoff.md): summarize, print the handoff marker, and leave the plan for the developer's review.
-6. [steps/06-show-me.md](steps/06-show-me.md): only after the developer explicitly approves the current plan, show it visually with [references/show-me.md](references/show-me.md).
+6. [steps/06-show-me.md](steps/06-show-me.md): only after a `draft` handoff and the developer's explicit approval of the current plan, show it visually with [references/show-me.md](references/show-me.md).
 
 Each step file lists what it needs, its allowed tools, the next step, and its summary and marker.
 
@@ -40,3 +40,5 @@ STRADDLE_HANDOFF {"skill":"straddle-plan","status":"draft","report":"<summary>"}
 ```
 
 `status` is `draft` when the plan is complete and awaits the developer's approval, or `blocked` when unresolved decisions stop implementation.
+
+`STRADDLE_HANDOFF` ends the planning turn. Step 6 continues on a later turn, only when the handoff was `draft` and the developer then explicitly approves the plan. It prints its own `STRADDLE_PROGRESS` marker and no second handoff.

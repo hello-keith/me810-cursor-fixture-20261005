@@ -2,7 +2,7 @@
 
 - **Needs:** step 4 summary.
 - **Tools:** none.
-- **Next:** the developer reviews the plan. Only after they explicitly approve it, [06-show-me.md](06-show-me.md) shows it, then Integrate runs it.
+- **Next:** the developer reviews the plan. When the status is `draft` and they explicitly approve it, [06-show-me.md](06-show-me.md) shows it on that later turn, then Integrate runs it. A `blocked` plan goes back to its unresolved decisions first.
 
 Print:
 
