@@ -38,7 +38,7 @@ Status: routed | needs_input | blocked
 ## Open questions
 ```
 
-End with:
+End with the checklist below. Leave every box unchecked. The checklist is for the developer to tick after checking, not a record of what the skill verified.
 
 ```markdown
 ## Verify before merging
