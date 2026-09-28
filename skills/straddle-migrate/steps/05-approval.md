@@ -14,7 +14,7 @@ Show the developer the authorized-modifications table and the not-moved section,
 
 - **Yes:** add an `## Approval` entry with the date, the developer's words, and the row count approved. Continue to step 6.
 - **Changes requested:** update the plan, then ask again. The earlier answer does not carry over.
-- **Plan has `Unresolved` items that affect a listed file:** do not ask for approval yet; hand off with `awaiting_approval`.
+- **Plan has `Unresolved` items that affect a listed file:** do not ask for approval yet. Go to step 8 and hand off there with `awaiting_approval`.
 - **No or stop:** print `STRADDLE_ABORT` with the reason and go to step 8.
 
 **Summary for step 6:** approval recorded (yes or no), the approved rows.
