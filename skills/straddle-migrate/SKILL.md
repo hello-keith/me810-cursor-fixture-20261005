@@ -45,4 +45,4 @@ STRADDLE_ABORT {"skill":"straddle-migrate","step":"05-approval","reason":"develo
 STRADDLE_HANDOFF {"skill":"straddle-migrate","status":"awaiting_approval","report":"<one-paragraph summary>"}
 ```
 
-`status` is `awaiting_approval` when the plan is written but not approved, `migrated` when approved edits are done and reviewed, or `blocked` when a choice, a dirty file, or a boundary stops the run. Emit `STRADDLE_ABORT` when the developer declines or stops.
+`status` is `awaiting_approval` when the plan is written but not approved, `migrated` when approved edits are done and reviewed, or `blocked` when a dirty file or a boundary stops the run. An open choice is not `blocked`: it goes into the plan as `Unresolved`, and the status is `awaiting_approval`. Emit `STRADDLE_ABORT` when the developer declines or stops.
