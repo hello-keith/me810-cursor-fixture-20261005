@@ -97,3 +97,7 @@ claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-withou
 ```
 
 Pass no `--trust-plugin`, `--allow-real-servers` or `--allow-tools` grant unless the run owner approves it.
+
+### Progress markers
+
+The `STRADDLE_PROGRESS` lines a skill prints when it enters a step are best-effort in native clients, and no repository check or release gate depends on them. They show roughly where a run went, but they aren't evidence that a step finished, that the developer approved anything, or that a run passed. Deterministic progress is the Wizard's job (ME-667), which reports it from client events. Where a client doesn't expose those events, report progress there as unsupported or unverified rather than inferring it from markers. Content, safety, approval, abort handling, a truthful final handoff, native-client verification, and the walkthrough and publication approval all remain release requirements.
