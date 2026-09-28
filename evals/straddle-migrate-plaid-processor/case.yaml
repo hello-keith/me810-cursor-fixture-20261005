@@ -1,4 +1,4 @@
 schema_version: "1.1"
-name: straddle-get-started-python-blocked
+name: straddle-migrate-plaid-processor
 context:
   scaffold_script: scaffold.sh

@@ -46,6 +46,8 @@ End with:
 - [ ] The Straddle path is off by default or switched exactly as the plan says.
 - [ ] Missing Straddle key or environment raises a configuration error in the new code.
 - [ ] No customer data, provider token, or key appears in code, tests, the plan, or this report.
+- [ ] Every provider status the code used maps to a Straddle status in the plan, and `failed` and `reversed` are handled separately.
+- [ ] The consent decision for Straddle-path customers is recorded, with who made it.
 - [ ] Tests ran, and their result is stated above.
 ```
 

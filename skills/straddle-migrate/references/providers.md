@@ -1,68 +1,37 @@
 # Provider mapping
 
-Use this to find a provider's footprint and describe the Straddle equivalent in the plan. It maps concepts and names the provider mechanisms a migration must replace, not Straddle method names: read the installed Straddle SDK and the Docs MCP for exact calls. Nothing in a "Never moves" line is migrated by this skill. Provider facts were checked against each provider's public documentation on 2026-09-27 and can change; confirm against the provider's current docs when a detail matters.
+Read this file, then the one file for the provider being migrated. Each provider file tells you how to find the provider's footprint in a repository, how its objects, statuses, returns, consent and notifications map to Straddle, what never moves, and where migrations usually go wrong. It maps concepts and mechanisms, not Straddle method names: read the installed Straddle SDK and the Docs MCP for exact calls.
 
-## Straddle side, for every provider
+Provider facts come from each provider's public documentation, researched on 2026-09-27. Docs change, so confirm a detail against the linked source before code depends on it. When a file says a provider has no feature, it means the feature was not documented in the sources reviewed, not that it cannot exist. Every mapping table is a proposal for the plan, and the developer confirms it. Rows marked "proposal" are the least certain, because the provider's model has no direct counterpart.
 
-- Bank linking becomes a Straddle paykey through Bridge: the Bridge widget, raw bank details (`POST /v1/bridge/bank_account`), or a Plaid processor token (`POST /v1/bridge/plaid`).
-- Debits become charges, credits become payouts, each with an `Idempotency-Key` and a stable `external_id`.
-- Provider webhooks become a Straddle webhook, FIFO, or polling endpoint, verified per [receiving-webhooks.md](../../straddle-best-practices/references/receiving-webhooks.md). The provider's signature scheme does not carry over.
-- Connected, sub-, or originator accounts hint at SaaS or marketplace. The developer chooses the model.
-- Only operations in the public Straddle API contract are used.
+| Provider | File |
+| --- | --- |
+| Stripe | [providers/stripe.md](providers/stripe.md) |
+| Plaid | [providers/plaid.md](providers/plaid.md) |
+| Moov | [providers/moov.md](providers/moov.md) |
+| Modern Treasury | [providers/modern-treasury.md](providers/modern-treasury.md) |
+| Dwolla | [providers/dwolla.md](providers/dwolla.md) |
+| Paya (Paya Connect, now Nuvei) | [providers/paya.md](providers/paya.md) |
+| Payliance | [providers/payliance.md](providers/payliance.md) |
+| Other (hand-rolled NACHA, another processor) | [providers/other.md](providers/other.md) |
 
-## Stripe
+## Straddle vocabulary to map onto
 
-- **Find it:** `stripe` package, `us_bank_account`, `paymentIntents`, `setupIntents`, `financial_connections`, `payouts`, Connect `accounts`, `constructEvent`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`.
-- **Replace:** PaymentIntent debits with charges; SetupIntent / Financial Connections linking with Bridge; Stripe payouts with Straddle payouts; the `Stripe-Signature` (`t=…,v1=…`, `whsec_` secret) handler with a new Straddle handler on its own route.
-- **Idempotency:** Stripe takes an `Idempotency-Key` on POST ([docs](https://docs.stripe.com/api/idempotent_requests)). Keep the existing derivation logic if it is stable per intent; do not reuse Stripe keys as Straddle keys across providers.
-- **Never moves:** Stripe customers, PaymentMethods, mandates, and charge history.
+These come from the public Straddle API contract. Use them exactly; do not invent statuses.
 
-## Plaid
+- **Payment statuses** (charges and payouts): `created`, `scheduled`, `validating`, `pending`, `on_hold`, `paid`, `failed`, `cancelled`, `reversed`.
+- **`failed` vs `reversed`.** A return before the payment reached `paid` is `failed`; a return after `paid` is `reversed`. The Sandbox outcomes follow the same split (`failed_insufficient_funds` vs `reversed_insufficient_funds`). Return details are in the payment's status details; read the contract for the exact field.
+- **`consent_type`** on a charge: `internet` (online and mobile authorization) or `signed` (written or PDF-signed agreement). There is no telephone value, so a provider's TEL flows need a decision.
+- **Objects:** customer; paykey (a bank account tokenized through Bridge: the widget, `POST /v1/bridge/bank_account`, `POST /v1/bridge/plaid`, or `POST /v1/bridge/quiltt`); charge (debit); payout (credit); funding event (settlement to the account's bank); organization and embedded account for platforms, selected with `Straddle-Account-Id`.
+- **Creates** take an `Idempotency-Key` header and an `external_id`.
+- **Notifications** use a Straddle webhook, FIFO, or polling endpoint, signed with Standard Webhooks, per [receiving-webhooks.md](../../straddle-best-practices/references/receiving-webhooks.md). Events include `charge.event.v1`, `payout.event.v1`, `paykey.event.v1`, `customer.event.v1`.
 
-- **Find it:** `plaid` package, `linkTokenCreate`, `itemPublicTokenExchange`, `processorTokenCreate`, `authGet`, `access_token`, `PLAID_CLIENT_ID`, `PLAID_SECRET`, `PLAID_ENV`.
-- **Replace:** Plaid lists `straddle` as a processor for `/processor/token/create` once the Straddle integration is enabled in the Plaid Dashboard ([docs](https://plaid.com/docs/auth/partnerships/straddle/)). For new links, keep Plaid Link, create a Straddle processor token, and send it to `POST /v1/bridge/plaid` to get a paykey. If the app sends raw numbers from `/auth/get` to another processor, the Straddle path uses the processor token instead.
-- **Never moves:** existing Items and access tokens. Creating processor tokens for already-linked customers is a transfer of existing customer data and stays outside this skill.
+## What every provider migration has in common
 
-## Moov
-
-- **Find it:** `moovfinancial/moov-*` SDKs (TypeScript, Go, Python, Ruby, .NET, Java, PHP), `api.moov.io`, `X-Moov-Version`, `/accounts/{accountID}/transfers`, `paymentMethodID`.
-- **Replace:** transfers (`POST /accounts/{accountID}/transfers`, required `x-idempotency-key`, source and destination payment methods, `secCode`) with charges or payouts; Moov bank-account payment methods with paykeys ([docs](https://docs.moov.io/api/money-movement/transfers/create/)).
-- **Never moves:** Moov accounts, bank accounts, payment methods, and transfer history.
-
-## Modern Treasury
-
-- **Find it:** `modern-treasury` / `modern_treasury` SDKs, `app.moderntreasury.com`, `PaymentOrder`, `Counterparty`, `ExternalAccount`, `ExpectedPayment`, `direction: debit|credit`.
-- **Replace:** debit payment orders with charges and credit payment orders with payouts; counterparties and external accounts with customers and paykeys.
-- **Idempotency:** Modern Treasury keys are route-independent and scoped per API key ([docs](https://docs.moderntreasury.com/platform/reference/idempotent-requests)). Straddle keys should be derived per operation intent so a key reused across routes does not collide.
-- **Never moves:** counterparties, external accounts, ledgers, and payment history.
-
-## Dwolla
-
-- **Find it:** `dwolla-v2` package, `funding-sources`, `transfers`, `customers`, `webhook-subscriptions`, `X-Request-Signature-SHA-256`, `DWOLLA_KEY`, `DWOLLA_SECRET`.
-- **Replace:** transfers between funding sources with charges or payouts; funding sources with paykeys; the Dwolla webhook handler (HMAC-SHA256 of the body in `X-Request-Signature-SHA-256`, unordered deliveries) with a Straddle handler ([docs](https://developers.dwolla.com/docs/working-with-webhooks)). Dwolla also takes an `Idempotency-Key` header ([docs](https://developers.dwolla.com/docs/api-reference/api-fundamentals/idempotency-key)).
-- **Never moves:** Dwolla customers, funding sources, and transfer history.
-
-## Paya (Paya Connect, now Nuvei)
-
-- **Find it:** `payaconnect.com`, `/v2/transactions`, `/v2/accountvaults`, `account_vault_id`, `ach_sec_code`, `/v2/postbackconfigs`, `developer-id`, `user-api-key`.
-- **Replace:** ACH `POST /v2/transactions` debits and credits with charges and payouts; account vaults with paykeys; postbacks with a Straddle notification endpoint. Paya postbacks authenticate with optional Basic auth rather than a signature ([docs](https://docs.payaconnect.com/developers/api/endpoints/postbackconfigs)), so the Straddle handler adds signature verification the old one never had.
-- **Never moves:** account vault tokens, stored bank details, and history.
-
-## Payliance
-
-- **Find it:** `api.payliance.com`, `/api/v1/echeck/debit`, `/api/v1/echeck/credit`, `/api/v1/echecktoken/create`, `/api/v1/echeck/queryreturns`, `UniqueTranId`, SFTP settlement files.
-- **Replace:** eCheck debits and credits with charges and payouts; eCheck tokens with paykeys; scheduled calls to `queryreturns` or `retrieve` and SFTP settlement parsing with a Straddle notification endpoint ([developer docs](https://payliance.com/developers/), which link the ACH API reference).
-- **Never moves:** eCheck tokens, stored bank details, and history.
-
-## Other
-
-- **Find it:** `nacha`, `ach`, `routing_number`, `account_number`, fixed-width file builders, SFTP uploads, bank return-file parsers.
-- **Replace:** each flow the developer describes with charges, payouts, paykeys, and a notification endpoint. File generation and SFTP code stay in place behind the switch.
-- **Never moves:** stored bank details, generated files, and history.
-
-## Rules for every provider
-
-- A provider status-polling loop or scheduled status/returns query becomes a Straddle notification consumer, never a loop on `GET /v1/charges/{id}` or similar reads.
-- Raw account and routing numbers the application already stores are customer data. Do not write code that reads them to create Straddle paykeys.
-- Customer, paykey, charge, and payout creation happen in application code through the SDK, with idempotency keys and external IDs. The skill does not run them.
-- Old provider webhook handlers stay. The Straddle handler is a separate route.
+1. **Bank accounts do not transfer.** This is a product rule, not a technical limit. Some providers can hand back full bank details (Plaid's `/auth/get` returns account and routing numbers, Stripe's migrations team exports them on request, Modern Treasury shows them when its data privacy controls are off), and Plaid Items can mint Straddle processor tokens. Using any stored bank details, tokens, or Items for existing customers is customer-data migration, which this skill never does. Provider tokens are also scoped to their provider. Customers on the Straddle path link again through Bridge.
+2. **Consent needs a decision.** Most existing authorizations name the old provider or its payment system, or at least came with that provider's descriptor. The plan records whether Straddle-path customers re-authorize, which `consent_type` applies, and who confirmed it (typically the developer's compliance owner). Default proposal: collect a new authorization on the Straddle path.
+3. **Statuses and returns must be mapped explicitly.** Every provider status the application reacts to maps to a Straddle status in the plan, including the late-return case (`reversed`) and notification-of-change handling.
+4. **In-flight payments finish where they started.** Payments already submitted, scheduled, or future-dated on the old provider stay there; returns and refunds for them keep flowing through the old provider for weeks (unauthorized returns can arrive up to 60 days later).
+5. **Webhook handlers are rewritten, not ported.** Each provider signs differently (or not at all). The Straddle handler is a new route using Standard Webhooks; the old handler stays for in-flight payments.
+6. **Polling becomes a notification endpoint.** Several providers encourage or require status polling or report queries. On Straddle that becomes a webhook, FIFO, or polling endpoint consumer, never a loop on `GET /v1/charges/{id}`.
+7. **Provider-side automation must not be assumed to carry over.** Automatic NOC corrections, account blocking after returns, and provider-sent customer emails belong to the old provider. For each one the application relies on, check what Straddle does from the Straddle docs and contract, and write the result in the plan: covered by Straddle (with the source), or an application responsibility with a named owner.

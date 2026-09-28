@@ -22,7 +22,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 
 ## Supported providers
 
-Stripe, Plaid, Moov, Modern Treasury, Dwolla, Paya, Payliance, and Other. [references/providers.md](references/providers.md) maps each provider's concepts to Straddle and names what never moves.
+Stripe, Plaid, Moov, Modern Treasury, Dwolla, Paya, Payliance, and Other. [references/providers.md](references/providers.md) gives the Straddle vocabulary and what every migration has in common, and links one file per provider. Each provider file covers how to find the provider in a repository, how its objects, statuses, returns, consent, idempotency, and notifications map to Straddle, what never moves, and the provider's common migration pitfalls. Read only the file for the provider being migrated.
 
 ## Steps
 

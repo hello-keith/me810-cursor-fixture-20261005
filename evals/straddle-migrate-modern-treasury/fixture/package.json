@@ -1,0 +1,6 @@
+{
+  "name": "payroll-lite",
+  "private": true,
+  "scripts": { "test": "node --test test/" },
+  "dependencies": { "modern-treasury": "^2.30.0", "express": "^4.19.2" }
+}

@@ -13,7 +13,7 @@ STRADDLE_PROGRESS {"skill":"straddle-get-started","step":"02-repository"}
 Collect only facts you can cite as `path` or `path:line`:
 
 1. **Languages and frameworks** from dependency manifests and lockfiles (`package.json`, `go.mod`, `Gemfile`, `*.csproj`, `pyproject.toml`, `requirements*.txt`).
-2. **Existing Straddle code.** The package name and resolved version from the lockfile for `@straddlecom/straddle`, `github.com/straddle-build/straddle-go`, the `straddle` gem, or the `Straddle` NuGet package. Flag the retired Stainless-era packages (`github.com/straddleio/straddle-go`, the Python `straddle` 0.5.x) as retired.
+2. **Existing Straddle code.** The package name and resolved version from the lockfile for `@straddlecom/straddle`, `github.com/straddle-build/straddle-go`, the `straddle` gem, or the `Straddle` NuGet package. Flag the retired Stainless-era packages (`github.com/straddleio/straddle-go`, the Python `straddle` 0.x releases) as retired.
 3. **Existing payment provider code.** Imports or SDK dependencies for Stripe, Plaid, Moov, Modern Treasury, Dwolla, Paya, Payliance, or any hand-rolled ACH/NACHA code (treat that as "Other").
 4. **Hints about the business shape**, such as seller, merchant, tenant, or sub-account models, and a README description. Record these as hints for the questions in step 3, never as the answer.
 5. **Existing plan files**: `straddle-integration-plan.md`, `straddle-migration-plan.md`. Read them if present.
