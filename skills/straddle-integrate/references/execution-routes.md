@@ -29,6 +29,14 @@ The six unmask operations and paykey reveal return unmasked personal or bank dat
 
 Run only operations in the public API contract, as [writes-and-approval.md](../../straddle-best-practices/references/writes-and-approval.md) requires. The CLI's command tree also includes internal commands outside that contract, and the existence of a command or SDK method is not evidence that its operation is public. When you cannot place an operation in the public contract and its account scope, stop before any preview.
 
+## Paykey tokens for charges and payouts
+
+Follow the contract's field meanings, and never guess a value's kind from its shape. In API contract 1.0.4, a charge's or payout's `paykey` request field is "the paykey token that identifies the customer's bank account". It is not the paykey's resource `id`. The Bridge `bank_account` and `plaid` create responses return that token masked.
+
+- **ID fields take IDs.** Fields such as `customer_id` and `organization_id`, and the ID in a path like `/v1/paykeys/{id}/reveal`, take `data.id` from the earlier create response.
+- **The payment `paykey` field takes the full token.** When the paykey came from a Bridge `bank_account` or `plaid` create, get the full token with `revealPaykey` or `getUnmaskedPaykey`. Both are excluded operations, so they run through the SDK or CLI only, as their own preview rows with approval. Never pass the paykey's `id` or a masked value.
+- **Keep the token out of the record.** Never print, log, or write a full token into a plan, preview, report, evidence file, test, or commit. Get it and use it in one step: in a single SDK process that does not print it, or in a single CLI command that passes it to the payment without printing it (check the CLI's output flags with `--help` first). The preview names the reveal or unmasked-read row and the payment row that uses it, never the token. Payment responses return the paykey masked, so record the payment ID only.
+
 ## Other writes the fixture uses: SDK or CLI
 
 Integrate and Test create fixture organizations and accounts through the SDK or CLI after the preview is approved, like every other fixture write. They do not use the API MCP for these. That rule covers this workflow only. Outside it, these remain permitted MCP operations, subject to the usual preview and approval.
