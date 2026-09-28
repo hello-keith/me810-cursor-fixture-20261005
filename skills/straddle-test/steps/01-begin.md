@@ -1,6 +1,6 @@
 # Step 1: Begin
 
-- **Needs:** the developer's request, `straddle-integration-plan.md`, and the Integrate report when one exists.
+- **Needs:** the developer's request, the approved plan (`straddle-integration-plan.md`, or `straddle-migration-plan.md` for a migration), and the Integrate or Migrate report when one exists.
 - **Tools:** Read, Glob, Grep; Bash only for the offline configuration checks in Integrate's [step 1](../../straddle-integrate/steps/01-begin.md), `straddle --version`, and `straddle auth status --agent`. No writes, and no command that can reach Straddle, including `straddle doctor`.
 - **Next:** [02-offline.md](02-offline.md).
 
@@ -10,13 +10,21 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-test","step":"01-begin"}
 ```
 
-Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and the plan. When there is no approved plan, or the repository has no Straddle integration code, print `STRADDLE_ABORT`, write the evidence file with status `blocked`, and hand off to Plan or Integrate.
+Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and the plan. When there is no approved plan, or the repository has no Straddle integration code, print `STRADDLE_ABORT`, write the evidence file with status `blocked`, and hand off to Plan, Integrate, or Migrate.
+
+## Which plan
+
+- `straddle-integration-plan.md` is approved under Integrate's [step 1](../../straddle-integrate/steps/01-begin.md) rules: its plan state is `Approved`, or the developer approves it in this conversation. `straddle-migration-plan.md` is approved under Migrate's rules: its status is `approved` and its Approval section records the developer's words and the approved rows, or the developer approves it in this conversation. The migration template voids a recorded approval on any later change to the file, so a migration plan edited after its approval is not approved until the developer says so again. A draft plan, or one with no approval by either route, blocks Test as if there were no plan.
+- When only one plan file exists, that is the plan.
+- When both exist, use the one the developer or the handoff named: a request that mentions the migration, the Migrate report, or `straddle-migration-plan.md` selects the migration plan, and one that mentions Integrate or `straddle-integration-plan.md` selects the integration plan. When neither is named and only one is approved and lists the Straddle code under test, use that one. Otherwise ask the developer which plan to test against, and do not choose.
+- A migration plan supplies the integration model, SDK, notification path, the flows and status mapping, the authorized files, and its Verification section (test command, new tests, status-mapping coverage, and the `sandbox_outcome` values for Sandbox proof). It has no Sandbox writes table and names no acting accounts. Take the scenario rows below from its Verification section; when a selected scenario needs a decision the plan does not make, such as the acting accounts A and B for a SaaS or marketplace migration or an outcome the plan does not list, ask the developer and record the answer as developer-stated. Do not infer it, and do not run that scenario without it.
+- Either plan's approval covers its file changes only. Every Sandbox write this run makes still gets its own preview and explicit yes in step 3.
 
 Run the offline configuration checks from Integrate's step 1 and record **configured** or **configuration error** for each route, with exactly what is missing. Never print or read a credential value. The non-secret `STRADDLE_ENVIRONMENT` and `STRADDLE_BASE_URL` values may be shown, as Integrate's step 1 does, and the target is recorded as `Straddle Sandbox` or `offline synthetic localhost <base URL>`.
 
 ## Select scenarios
 
-Take the scenarios from the plan's verification section, and confirm them with the developer when the plan is unclear. Only the plan's integration type and notification path apply.
+Take the scenarios from the plan's verification section, and confirm them with the developer when the plan is unclear. Only the plan's integration type (a migration plan's integration model) and notification path apply.
 
 | Scenario | Proves | Needs Sandbox writes |
 | --- | --- | --- |

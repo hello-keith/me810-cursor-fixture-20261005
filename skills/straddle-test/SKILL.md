@@ -7,7 +7,7 @@ metadata:
 
 # Straddle Test
 
-Run the verification the approved `straddle-integration-plan.md` names, against the integration Integrate built, and record what passed, what failed, and what did not run in `straddle-test-evidence.md`.
+Run the verification the approved plan names, against the Straddle code that plan authorized, and record what passed, what failed, and what did not run in `straddle-test-evidence.md`. The plan is `straddle-integration-plan.md` from [straddle-plan](../straddle-plan/SKILL.md) and [straddle-integrate](../straddle-integrate/SKILL.md), or `straddle-migration-plan.md` from [straddle-migrate](../straddle-migrate/SKILL.md). Test needs only one of them.
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules apply to every step. Test uses the same preview, approval, and execution routes as [straddle-integrate](../straddle-integrate/SKILL.md), and cites them instead of restating them.
 
@@ -16,6 +16,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 - **No architecture changes.** Test does not edit application code, configuration, or dependencies. The only file it writes is `straddle-test-evidence.md`. A gap or failing check is a finding for Integrate, not something Test fixes.
 - **Missing configuration stops every Straddle request.** Test establishes the environment and credentials with Integrate's offline checks, never `straddle doctor`. Without an accepted target (explicit Straddle Sandbox, or the offline synthetic localhost target under every condition below) and a credential for a route, Test runs only offline checks and discovery on that route, and records a configuration error for everything else.
 - **Sandbox writes need an exact preview and explicit approval**, following Integrate's [preview step](../straddle-integrate/steps/04-preview.md). A denial or a changed context means zero writes. The fourteen excluded operations run only through the SDK or CLI.
+- **Plan approval is not write approval.** An approved integration or migration plan authorizes the file changes it lists and names the verification to run. It authorizes no Straddle request. Every Sandbox write still needs its own exact preview and explicit yes in this run. A plan that is not approved under the rules in [step 1](steps/01-begin.md) blocks Test as if there were no plan.
 - **Status arrives through the selected notification path.** Test observes transitions through the webhook, FIFO, or polling endpoint, waiting at most ten minutes. It never loops on charge, payout, account, or list reads. Dashboard email is a human confirmation only.
 - **Evidence is sanitized.** No keys, signing secrets, tokens, unmasked data, or full request bodies with personal data, in the evidence file or in replies. Never offer to show unmasked data.
 - **Evidence claims only what ran.** Discovery is reported separately from authenticated execution. Evidence never says Scalar enforces the fourteen exclusions.
@@ -47,6 +48,6 @@ STRADDLE_HANDOFF {"skill":"straddle-test","status":"partial","report":"<summary>
 - `passed`: every selected scenario ran and passed.
 - `failed`: at least one scenario ran and failed.
 - `partial`: nothing failed, but some scenarios did not run, for example Sandbox scenarios waiting for approval or configuration.
-- `blocked`: no approved plan or integration exists to test.
+- `blocked`: no approved integration or migration plan, or no Straddle integration code, exists to test.
 
 Emit `STRADDLE_ABORT` when the run stops early, and still print the handoff and evidence file.

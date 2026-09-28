@@ -28,7 +28,7 @@ The version is `0.1.0` in `plugin.json`, all three native manifests, and both ve
 | Server | URL | Credential |
 | -- | -- | -- |
 | `straddle-api` | `https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd` | The caller's Straddle API key as a bearer token, supplied through the client. |
-| `straddle-docs` | `https://straddle-build-straddle-openapi.apidocumentation.com/mcp` | None. It is intended to be search-only once ME-809 removes its binding to the API installation. |
+| `straddle-docs` | `https://straddle-build-straddle-openapi.apidocumentation.com/mcp` | None. The skills use it for documentation search only; API execution stays on `straddle-api` under the skills' existing rules, whatever tools the docs server lists. |
 
 Registering the plugin's servers and authenticating `straddle-api` are separate steps. Each client's credential route is below. All three use `STRADDLE_API_KEY`, the same environment variable the SDKs and the CLI read.
 
@@ -105,6 +105,12 @@ The `STRADDLE_PROGRESS` lines a skill prints when it enters a step are best-effo
 ### Inventory shell reads (ME-669)
 
 During `straddle-migrate` step 2, Bash is limited to the bounded read-only local inspection listed in the Tools line of [`skills/straddle-migrate/steps/02-inventory.md`](../skills/straddle-migrate/steps/02-inventory.md). Credentials, network calls, installs and writes stay prohibited there; other steps keep their own tool lines.
+
+### Plan handoffs into Integrate and Test
+
+Integrate's source step reads the installed SDK for every SDK in the Current versions table, Python included: the released PyPI `straddle` package is read from the environment's `site-packages` the way `node_modules/@straddlecom/straddle/` is read for TypeScript, and method names come from the installed package source. An older instruction that stopped Integrate when a plan named Python was removed; the version table in [`skills/straddle-best-practices/SKILL.md`](../skills/straddle-best-practices/SKILL.md) is the single source for which release each SDK must be.
+
+Test accepts either approved plan: `straddle-integration-plan.md` from Plan and Integrate, or `straddle-migration-plan.md` from Migrate, whose Verification section names the test command, the new tests, the status-mapping coverage, and the `sandbox_outcome` values. The rules in [`skills/straddle-test/steps/01-begin.md`](../skills/straddle-test/steps/01-begin.md) say how each plan is approved (the integration plan under Integrate's existing step 1 rules, the migration plan under Migrate's, either also by the developer in the conversation), that the developer's or the handoff's named plan wins when both exist and Test asks rather than choosing when neither is named, what a migration plan does not supply (Sandbox write rows and acting accounts, which Test asks the developer for), and that an unapproved or voided plan blocks Test. Neither plan's approval authorizes a Straddle request; each Sandbox write still needs its own preview and approval in the run. The `straddle-integrate-python-approved-plan`, `straddle-test-migration-plan`, and `straddle-test-migration-plan-unapproved` cases cover these handoffs.
 
 ### Early blocked Integrate replies (ME-670)
 

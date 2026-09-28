@@ -2,7 +2,7 @@
 
 - **Needs:** every earlier summary.
 - **Tools:** none.
-- **Next:** [straddle-test](../../straddle-test/SKILL.md) to prove the new path in Sandbox, after the developer reviews the diff.
+- **Next:** [straddle-test](../../straddle-test/SKILL.md) to prove the new path in Sandbox, after the developer reviews the diff. Test reads the approved `straddle-migration-plan.md` and its Verification section directly; no `straddle-integration-plan.md` is needed, and the plan's approval authorizes no Sandbox write.
 
 Print:
 

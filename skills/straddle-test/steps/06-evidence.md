@@ -17,6 +17,7 @@ Write `straddle-test-evidence.md` at the repository root, replacing any earlier 
 
 - Status: passed | failed | partial | blocked
 - Run: <run ID>, <date>
+- Plan: straddle-integration-plan.md | straddle-migration-plan.md, <approval state>
 - Integration type: <direct | saas | marketplace>
 - Environment: sandbox, <base URL> | configuration error: <what is missing>
 - Target: Straddle Sandbox | offline synthetic localhost <base URL>: offline synthetic proof, not live Straddle Sandbox proof
