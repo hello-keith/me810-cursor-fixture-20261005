@@ -12,7 +12,7 @@ STRADDLE_PROGRESS {"skill":"straddle-test","step":"01-begin"}
 
 Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and the plan. When there is no approved plan, or the repository has no Straddle integration code, print `STRADDLE_ABORT`, write the evidence file with status `blocked`, and hand off to Plan or Integrate.
 
-Run the offline configuration checks from Integrate's step 1 and record **configured** or **configuration error** for each route, with exactly what is missing. Never print a value.
+Run the offline configuration checks from Integrate's step 1 and record **configured** or **configuration error** for each route, with exactly what is missing. Never print or read a credential value. The non-secret `STRADDLE_ENVIRONMENT` and `STRADDLE_BASE_URL` values may be shown, as Integrate's step 1 does, and the target is recorded as `Straddle Sandbox` or `offline synthetic localhost <base URL>`.
 
 ## Select scenarios
 

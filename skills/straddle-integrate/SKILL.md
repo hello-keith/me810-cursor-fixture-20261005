@@ -17,7 +17,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 - **No remote write without an exact, current approval.** Every Sandbox write appears in a preview that names its environment, base URL, acting account, operation, executing tool, payload summary, external ID, and idempotency key. Only an explicit yes to that preview counts. A denial or a changed environment, account, operation, or payload means zero writes until a new preview is approved.
 - **Missing configuration stops the run.** Integrate first establishes, with offline checks only, an explicitly selected Sandbox environment and a credential for each route it will use. Without them it makes no Straddle request of any kind and reports a configuration error. Code changes to approved files are not requests and may still be made.
 - **The fourteen excluded operations run only through the SDK or CLI**, never the API MCP's `execute-request`. Other permitted API MCP operations stay available, mainly reads for independent verification.
-- **Sandbox only.** Integrate never writes to Production.
+- **Sandbox only.** Integrate never writes to Production. The one other accepted target is an explicitly declared offline synthetic localhost upstream ([offline-synthetic-target.md](references/offline-synthetic-target.md)). It is offline proof only and never counts as live Sandbox proof.
 - **No invented callbacks.** Hosted onboarding is completed by a person. Integrate resolves the account through the selected notification path or an authenticated exact external-ID lookup.
 
 ## Steps
@@ -30,7 +30,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 6. [steps/06-review.md](steps/06-review.md): review the files and writes the earlier summaries touched.
 7. [steps/07-handoff.md](steps/07-handoff.md): report code changes, server-side resources, and the final marker.
 
-Each step file lists what it needs, its allowed tools, the next step, and its summary and marker. References: [execution-routes.md](references/execution-routes.md) and [onboarding.md](references/onboarding.md).
+Each step file lists what it needs, its allowed tools, the next step, and its summary and marker. References: [execution-routes.md](references/execution-routes.md), [onboarding.md](references/onboarding.md), and [offline-synthetic-target.md](references/offline-synthetic-target.md).
 
 ## Markers
 

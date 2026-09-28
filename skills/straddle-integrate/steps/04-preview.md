@@ -20,6 +20,7 @@ List every intended write in execution order, including every organization and a
 ## Straddle Sandbox preview
 
 - Environment: sandbox, https://sandbox.straddle.com (configured | configuration error: <what is missing>)
+- Target: Straddle Sandbox | offline synthetic localhost (not Straddle Sandbox) <exact base URL>
 - Integration type: <direct | saas | marketplace>
 - Configuration: environment <explicit sandbox | unset | other>; credential per route: SDK `STRADDLE_API_KEY` <present | missing>, CLI `auth status` <env | saved | none>, API MCP <developer-confirmed | unknown>
 
@@ -40,6 +41,7 @@ Rules for the table:
 - **Idempotency key.** Write the key you will pass on every create. A CLI row is allowed only when the installed CLI lists `--idempotency-key` for that create. Otherwise the row uses the SDK. Never infer the key from `--dry-run` output, because the dry run does not print it.
 - **Sandbox outcomes.** Include the `config.sandbox_outcome` values the plan tests, such as `verified`, `active`, `paid`, and `reversed_insufficient_funds`.
 - **Payload.** Use synthetic, non-sensitive data. No real names, bank numbers, or keys.
+- **Offline synthetic target.** When step 1 recorded one, write the exact localhost base URL in place of the Sandbox URL, and list no API MCP verification reads, per [offline-synthetic-target.md](../references/offline-synthetic-target.md). An approval covers that target only. Switching between it and Straddle Sandbox changes the target and needs a new preview.
 
 When step 1 recorded **configured** and a row uses the CLI, run it with `--dry-run --agent` and show the result under the table. A dry run is not a substitute for the preview.
 
