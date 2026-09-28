@@ -30,7 +30,7 @@ Run the steps in order. Each step file lists what it needs, the tools it may use
 
 ## Markers
 
-Print each marker on its own line exactly as shown, so the Straddle Wizard can parse it. The JSON stays on one line.
+Print each marker on its own line exactly as shown, so the Straddle Wizard can parse it. The JSON stays on one line. Open one step file at a time: read it, print its `STRADDLE_PROGRESS` marker, do its work, and only then open the next step file. This applies even when the request already answers the step's questions. Each marker goes in your text before that step's first tool call. Do not read ahead through later steps, save markers up, or print them after the work or in the final report. A step with no tool calls prints its marker before its output.
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-get-started","step":"02-repository"}
