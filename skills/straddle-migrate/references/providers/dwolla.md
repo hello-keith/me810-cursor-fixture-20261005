@@ -4,7 +4,7 @@ Covers the Dwolla Balance API. Dwolla Connect (payments through your own bank to
 
 ## Find it
 
-- Packages: npm `dwolla` and legacy `dwolla-v2`, PyPI `dwollav2`, gem `dwolla_v2`, Composer `dwolla/dwolla-php`, NuGet `Dwolla.Client`. No Go SDK.
+- Packages: npm `dwolla` and legacy `dwolla-v2`, PyPI `dwollav2`, gem `dwolla_v2`, Composer `dwolla/dwolla-php`, NuGet `Dwolla.Client`. No Go SDK was found in the sources reviewed.
 - Strings: `api.dwolla.com`, `api-sandbox.dwolla.com`, `application/vnd.dwolla.v1.hal+json`, `/funding-sources`, `/transfers`, `/mass-payments`, `/on-demand-authorizations`, `/exchanges`, `X-Request-Signature-SHA-256`, `X-Dwolla-Topic`, `DWOLLA_KEY`, `DWOLLA_SECRET`, `DWOLLA_WEBHOOK_SECRET`, `dwolla-web.js`.
 
 ## Map

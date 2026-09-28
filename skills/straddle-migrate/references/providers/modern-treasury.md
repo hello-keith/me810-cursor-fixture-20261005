@@ -2,7 +2,7 @@
 
 ## Find it
 
-- Packages: npm `modern-treasury`, PyPI `modern-treasury` (import `modern_treasury`), gem `modern_treasury`, Go `github.com/Modern-Treasury/modern-treasury-go/v2`, Maven `com.moderntreasury:modern-treasury-java`. No NuGet package.
+- Packages: npm `modern-treasury`, PyPI `modern-treasury` (import `modern_treasury`), gem `modern_treasury`, Go `github.com/Modern-Treasury/modern-treasury-go/v2`, Maven `com.moderntreasury:modern-treasury-java`. No NuGet package was found in the sources reviewed.
 - Strings: `app.moderntreasury.com/api`, `paymentOrders.create`, `/api/payment_orders`, `/api/counterparties`, `/api/external_accounts`, `/api/returns`, `originating_account_id`, `receiving_account_id`, `plaid_processor_token`, `X-Signature`, `X-Webhook-ID`, `MODERN_TREASURY_API_KEY`, `MODERN_TREASURY_ORGANIZATION_ID`, `MODERN_TREASURY_WEBHOOK_KEY`.
 
 ## Map
@@ -18,7 +18,7 @@
 | Internal account per customer or legal entity | embedded account (proposal: SaaS when each customer is the merchant, marketplace when the platform is) |
 | Bank transactions and balance reports | funding events |
 
-One `direction` field splits into two Straddle operations with different account-scope rules; the plan lists both.
+One `direction` field splits into two Straddle operations, a charge and a payout. The plan lists both, each with the account scope the chosen integration model requires.
 
 ## Status mapping
 
