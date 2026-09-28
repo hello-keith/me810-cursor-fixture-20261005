@@ -17,5 +17,16 @@
     "mcp",
     "sdk"
   ],
-  "mcpServers": "./mcp.json"
+  "mcpServers": [
+    "./mcp.json",
+    {
+      "straddle-api": {
+        "type": "http",
+        "url": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd",
+        "headers": {
+          "Authorization": "Bearer ${STRADDLE_API_KEY}"
+        }
+      }
+    }
+  ]
 }

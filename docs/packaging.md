@@ -1,6 +1,6 @@
 # Straddle Agent Plugin packaging
 
-This repository is one Straddle Agent Plugin. The root `plugin.json`, `mcp.json` and `skills/` form the portable [Agent Plugins 1.0.0](https://github.com/agentplugins/agent-plugins-spec) package. Claude Code, Codex and Cursor each read their own manifest beside it, and every manifest points at the same `mcp.json`.
+This repository is one Straddle Agent Plugin. The root `plugin.json`, `mcp.json` and `skills/` form the portable [Agent Plugins 1.0.0](https://github.com/agentplugins/agent-plugins-spec) package. Claude Code, Codex and Cursor each read their own manifest beside it, and every manifest points at the same `mcp.json`. Claude Code's manifest also redeclares `straddle-api` with the caller's key, because Claude sends no credential to a plugin server otherwise (see [MCP servers and credentials](#mcp-servers-and-credentials)).
 
 Native installation in each client has not been accepted yet. The commands below are the intended install paths, and they stay unverified until the ME-666 clean-profile checks pass in Claude Code, Codex and Cursor.
 
@@ -10,7 +10,7 @@ Native installation in each client has not been accepted yet. The commands below
 | -- | -- | -- |
 | `plugin.json` | Agent Plugins clients, including Codex when its `$schema` is present | Name, version, description, author, homepage, repository, license. |
 | `mcp.json` | Every client, through its manifest's `mcpServers` | The `straddle-api` and `straddle-docs` servers. |
-| `.claude-plugin/plugin.json` | Claude Code | Metadata and `"mcpServers": "./mcp.json"`. Skills load from `skills/`. |
+| `.claude-plugin/plugin.json` | Claude Code | Metadata and `mcpServers`: the shared `./mcp.json`, then a `straddle-api` override that adds `Authorization: Bearer ${STRADDLE_API_KEY}`. Skills load from `skills/`. |
 | `.claude-plugin/marketplace.json` | Claude Code and Codex marketplaces | One plugin entry, `straddle`, with source `./`. |
 | `.codex-plugin/plugin.json` | Codex, as an overlay on the root manifest | The `interface` block and PNG assets. The privacy and terms URLs are Straddle's published [Privacy Policy](https://legal.straddle.com/legal/legal/privacy-policy) and [Straddle Services Agreement](https://legal.straddle.com/legal/legal/straddle-services-agreement), both listed in `legal.straddle.com/sitemap.xml`. |
 | `.cursor-plugin/plugin.json` | Cursor | Metadata, `logo`, and the `STRADDLE_API_KEY` variable prompt. |
@@ -30,10 +30,10 @@ The version is `0.1.0` in `plugin.json`, all three native manifests, and both ve
 | `straddle-api` | `https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd` | The caller's Straddle API key as a bearer token, supplied through the client. |
 | `straddle-docs` | `https://straddle-build-straddle-openapi.apidocumentation.com/mcp` | None. It is intended to be search-only once ME-809 removes its binding to the API installation. |
 
-Registering the plugin's servers and authenticating `straddle-api` are separate steps. Each client's documented credential route is below. None of them is verified yet with the plugin installed.
+Registering the plugin's servers and authenticating `straddle-api` are separate steps. Each client's credential route is below. All three use `STRADDLE_API_KEY`, the same environment variable the SDKs and the CLI read.
 
-* **Claude Code.** The [published setup guide](https://straddle-build-straddle-openapi.apidocumentation.com/connect-mcp) adds a client-level server whose header reads the key from the environment: `claude mcp add --transport http --scope local straddle-api <API URL> --header 'Authorization: Bearer ${STRADDLE_API_KEY}'`. Claude Code keeps plugin servers separate from client-level servers, so this adds a second `straddle-api` registration rather than authenticating the plugin's own server.
-* **Codex.** In a scratch `CODEX_HOME`, a client-level server with the same name replaced the plugin's server: `codex mcp add straddle-api --url <API URL> --bearer-token-env-var STRADDLE_API_KEY`. Codex removes an `Authorization` header from Agent Plugins MCP config, so the plugin alone registers `straddle-api` without a credential.
+* **Claude Code.** Set `STRADDLE_API_KEY` in the environment Claude Code starts from. Claude Code sends no `Authorization` header to a plugin server unless the manifest declares one, and `mcp.json` must not, so `.claude-plugin/plugin.json` loads `./mcp.json` and then redeclares only `straddle-api` with `"type": "http"`, the same URL, and `Authorization: Bearer ${STRADDLE_API_KEY}`. Claude Code reads the later declaration of a server name, expands `${STRADDLE_API_KEY}` from the environment, and keeps `straddle-docs` from `mcp.json` without a header. The validator requires the override's URL to match `mcp.json`. When the variable is unset, Claude Code does not fail: it sends the literal text `Bearer ${STRADDLE_API_KEY}`. The server should reject that like any invalid key, and Setup then reports `authenticated: failed` for the API MCP, so check that the variable is set before starting Claude Code. The separate client-level command in the [published setup guide](https://straddle-build-straddle-openapi.apidocumentation.com/connect-mcp) is not needed with the plugin installed.
+* **Codex.** The plugin can't carry the key: Codex removes an `Authorization` header from Agent Plugins MCP config and accepts no bearer setting there, so the plugin alone registers `straddle-api` without a credential. The supported fallback is Codex's own client-level server, which replaces the plugin's server of the same name: `codex mcp add straddle-api --url <API URL> --bearer-token-env-var STRADDLE_API_KEY`. This is a Codex configuration step for the developer, not part of the plugin.
 * **Cursor.** `.cursor-plugin/plugin.json` declares `STRADDLE_API_KEY` under `variables` so the dashboard prompts for it. `mcp.json` has no `${STRADDLE_API_KEY}` placeholder, so it is unproven whether Cursor injects the value into the plugin's server.
 
 ## Install paths
