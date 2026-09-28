@@ -24,10 +24,10 @@ Write `straddle-test-evidence.md` at the repository root, replacing any earlier 
 - Notification path: <webhook | FIFO | polling endpoint>
 
 ## Offline checks
-| Check | Result | Source |
+| Check | Result | Evidence level | Source |
 
 ## Sandbox scenarios
-| Scenario | Result (passed, failed, not run, not observed) | Evidence |
+| Scenario | Result (passed, failed, not run, not observed) | Evidence level | Evidence |
 
 ## Discovery and authenticated execution
 | Check | Result |
@@ -38,7 +38,7 @@ Write `straddle-test-evidence.md` at the repository root, replacing any earlier 
 | Operation | Executing tool |
 
 ## Server-side resources
-| Resource | ID | External ID | Acting account | Created, reused, or observed |
+| Resource | ID | External ID | Acting account | Status | Executing tool | Replayed | Created, reused, or observed |
 
 ## Findings for Integrate
 ```
@@ -47,6 +47,10 @@ Sanitize before writing:
 
 - Resource IDs, external IDs, statuses, return codes, event IDs, and HTTP status codes are fine.
 - Never write keys, signing secrets, bearer tokens, polling tokens, unmasked or revealed values, bank numbers, or customer personal data. Summarize them as `present` or `redacted`.
+
+Give each check and scenario one evidence level: `configured` (settings or code exist, nothing exercised them), `offline-tested` (a test in this run exercised it with the network stubbed), `synthetic` (a mock, a synthetic upstream, or a delivery you signed yourself), `live-observed` (Straddle Sandbox returned or delivered it in this run), or `not verified`. Only `live-observed` rows are evidence of Straddle's behavior.
+
+For a paykey, the resources table records its ID and status, never the token.
 
 Write "None" for empty sections. Do not describe a scenario that did not run as passed. For an offline synthetic target, the server-side resources section lists synthetic upstream records only, and notification and lifecycle scenarios such as `paid`, the `R01` return, or delivered events are `not run: offline synthetic target`.
 

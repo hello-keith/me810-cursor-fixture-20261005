@@ -12,7 +12,7 @@ STRADDLE_PROGRESS {"skill":"straddle-test","step":"05-verify"}
 
 Record three results separately. None of them implies another.
 
-1. **Discovery.** Call `summarize-openapi-specs` once. It reads the API description and sends no Straddle request, so it proves the API MCP is registered, not that any key works.
+1. **Discovery.** Call `summarize-openapi-specs` once. It reads the API description and sends no Straddle request, so it proves the API MCP is registered, not that any key works. A request shape that passed against a mock or placeholder tool schema, for example in an eval, proves nothing about the hosted tool's actual input schema. Only an authenticated call through the hosted tool shows it accepts the request.
 2. **Authenticated execution.** Only for a configured route: run one permitted read per created resource through `execute-request`, for example `GET /v1/accounts/{account_id}` or `GET /v1/charges/{id}` once, passing the acting account where the read takes one. Record each status code. A `401` is an authentication failure. Report it without guessing whether the key or the client's MCP secret input is wrong. When not configured, record `not run: configuration error`. For an offline synthetic target, record `not run: offline synthetic target`, because the hosted API MCP always reaches real Straddle.
 3. **Exclusion routing.** Record the tool that executed each of the fourteen excluded operations this run used. Every one must be the SDK or CLI. This is evidence about the skill's routing, not about Scalar: Scalar does not enforce the exclusions, so never write that it does.
 
