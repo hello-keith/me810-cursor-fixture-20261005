@@ -49,6 +49,6 @@ Proceed only after an explicit yes. A changed environment, account, operation, o
 ## CLI writes
 
 - Run `--dry-run` first and show its output as the preview. The dry run does not print the idempotency key, so list it in the preview yourself.
-- Pass `--idempotency-key <key>` on every create. It sends the `Idempotency-Key` header. `--idempotent` is not a substitute: it only treats an already-existing result as a no-op and sends no key. `--idempotency-key` first appears in CLI v1.0.3 (tagged, not yet published). If the installed CLI's `--help` for that create does not list it, do not run the create through the CLI; use the SDK's idempotency option instead.
+- Pass `--idempotency-key <key>` on every create. It sends the `Idempotency-Key` header. `--idempotent` is not a substitute: it only treats an already-existing result as a no-op and sends no key. `--idempotency-key` first appears in CLI v1.0.3. If the installed CLI's `--help` for that create does not list it, do not run the create through the CLI; use the SDK's idempotency option instead.
 - Add `--agent` for JSON output and non-interactive mode.
 - Pass IDs from one response straight into the next command. Do not write tool JSON to temporary files or pipe it through `jq`.
