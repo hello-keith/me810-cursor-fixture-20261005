@@ -1,14 +1,14 @@
 # Step 4: Docs MCP and API MCP
 
-- **Needs:** step 3 summary.
-- **Tools:** the `straddle-docs` and `straddle-api` MCP tools named below, and nothing else from those servers.
-- **Next:** [05-report.md](05-report.md).
-
-Print this once, right after reading this file and before the first MCP call:
+Print this marker once now, before any tool call, including ToolSearch or reading the next step:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-setup","step":"04-mcp"}
 ```
+
+- **Needs:** step 3 summary.
+- **Tools:** the `straddle-docs` and `straddle-api` MCP tools named below, and nothing else from those servers.
+- **Next:** [05-report.md](05-report.md).
 
 Check the two servers separately and report them as separate rows. One working does not imply the other.
 

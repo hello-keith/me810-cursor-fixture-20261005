@@ -1,14 +1,14 @@
 # Step 4: Review
 
-- **Needs:** step 3 summary.
-- **Tools:** Read, Grep, Edit on `straddle-integration-plan.md` only.
-- **Next:** [05-handoff.md](05-handoff.md).
-
-Print this once, right after reading this file and before the next step file, even when every item passes and you make no edit:
+Print this marker once now, before any tool call, including ToolSearch or reading the next step, even when the review requires no edit:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-plan","step":"04-review"}
 ```
+
+- **Needs:** step 3 summary.
+- **Tools:** Read, Grep, Edit on `straddle-integration-plan.md` only.
+- **Next:** [05-handoff.md](05-handoff.md).
 
 Read only the plan file. Fix every item that fails:
 
