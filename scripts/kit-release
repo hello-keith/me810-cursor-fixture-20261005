@@ -11,10 +11,10 @@ import base64
 import hashlib
 import io
 import json
-import re
 import subprocess
 import sys
 import zipfile
+from importlib.machinery import SourceFileLoader
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +24,7 @@ MANIFEST = "kit/manifest.yaml"
 PLUGIN_PATHS = (".claude-plugin", ".codex-plugin", ".cursor-plugin", "LICENSE", "README.md", "assets", "mcp.json",
                 "plugin.json", "references", "skills", "third_party")
 ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
+VALIDATOR = SourceFileLoader("validate_package", str(ROOT / "scripts" / "validate-package")).load_module()
 RELEASED = "released"
 LOCAL_CANDIDATE = "local-candidate"
 
@@ -80,10 +81,11 @@ def tree_digest(files):
 
 
 def skill_version(text, name):
-    match = re.search(r"^metadata:\s*\n(?:[ \t]+.*\n)*?[ \t]+version:\s*['\"]?([^'\"\s]+)", text, re.MULTILINE)
-    if not match:
+    lines, _ = VALIDATOR.split_frontmatter(text)
+    metadata = VALIDATOR.parse_frontmatter(lines or [])[0].get("metadata")
+    if not isinstance(metadata, dict) or not metadata.get("version"):
         raise KitError(f"skills/{name}/SKILL.md has no metadata.version")
-    return match.group(1)
+    return metadata["version"]
 
 
 def plugin_facts(files):
