@@ -11,6 +11,8 @@ Accept it only when all of these hold. If any does not, treat the run as a confi
 - In this conversation, before the preview, the developer explicitly declares two things: that this base URL is a synthetic local upstream for offline proof, and that the configured key is a synthetic value, not a Straddle key. Do not infer either from the URL or the key's shape, and never read or print the key.
 - The developer also confirms that this client session runs with its command sandbox enabled, with network access limited to binding and reaching localhost, through settings scoped to this session (for example a task-local file passed with `--settings`), and with no global, user, or managed policy change. If the sandbox is disabled, bypassed, or unknown, or localhost access came from a global or user settings change, the target is not accepted. A synthetic run must not leave the machine through an unsandboxed shell.
 
+Until every condition above is confirmed, the target is a configuration error, not a pending question. You may ask for the missing confirmation, but in that reply do not ask for approval of any write, and hand off `blocked`. Ask for approval only in a later reply, after every condition holds and you have shown a fresh preview.
+
 Do not change client, sandbox, or network settings yourself to reach the target, and do not ask the developer to loosen them beyond that session-local localhost binding. When the local upstream cannot be reached, report that and stop.
 
 ## What changes

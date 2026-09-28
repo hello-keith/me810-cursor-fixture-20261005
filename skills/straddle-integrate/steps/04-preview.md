@@ -38,7 +38,7 @@ Rules for the table:
 
 - **Executing tool.** Use the SDK method or CLI command from [execution-routes.md](../references/execution-routes.md), verified in step 2. The fourteen excluded operations always show the SDK or CLI, never `execute-request`, including when the developer asks for the MCP. Say why in one line.
 - **Acting account.** Show the account ID and how it was resolved (Straddle ID or exact external ID), or `omitted` with the rule that omits it. Direct integrations never send it.
-- **Idempotency key.** Write the key you will pass on every create. A CLI row is allowed only when the installed CLI lists `--idempotency-key` for that create. Otherwise the row uses the SDK. Never infer the key from `--dry-run` output, because the dry run does not print it.
+- **Idempotency key.** Write the key you will pass on every create. It must be 10 to 40 characters and derived as in [Idempotency by route](../references/execution-routes.md#idempotency-by-route). A CLI row is allowed only when the installed CLI lists `--idempotency-key` for that create. Otherwise the row uses the SDK. Never infer the key from `--dry-run` output, because the dry run does not print it.
 - **Paykey tokens.** A charge or payout row that uses a paykey from a Bridge `bank_account` or `plaid` create depends on a `revealPaykey` or `getUnmaskedPaykey` row, which is itself an excluded operation (SDK or CLI) needing approval. Name that row, never the token. See [Paykey tokens for charges and payouts](../references/execution-routes.md#paykey-tokens-for-charges-and-payouts).
 - **Sandbox outcomes.** Include the `config.sandbox_outcome` values the plan tests, such as `verified`, `active`, `paid`, and `reversed_insufficient_funds`.
 - **Payload.** Use synthetic, non-sensitive data. No real names, bank numbers, or keys.
@@ -48,7 +48,7 @@ When step 1 recorded **configured** and a row uses the CLI, run it with `--dry-r
 
 ## Ask for approval
 
-- When step 1 recorded a **configuration error**, show the preview and do not ask for approval. Say that no Straddle request will be sent until the named variables are set in the developer's own shell, then print `STRADDLE_ABORT` with `configuration error: <what is missing>` and continue at step 6, handing off with `blocked`.
+- When step 1 recorded a **configuration error**, show the preview and do not ask for approval. That includes an offline synthetic localhost target with any condition not yet confirmed, such as the sandboxed session. Ask only for the missing confirmation and hand off `blocked`, never `awaiting_approval`, in that reply. Say that no Straddle request will be sent until the named variables are set in the developer's own shell, then print `STRADDLE_ABORT` with `configuration error: <what is missing>` and continue at step 6, handing off with `blocked`.
 - Otherwise ask one question: approve these exact rows, yes or no.
 
 Only a yes given after this exact preview counts. These do not count:

@@ -54,7 +54,9 @@ Use `execute-request` for independent verification reads that are not on the exc
 
 ## Idempotency by route
 
-- **SDK.** Pass `Idempotency-Key` in the create params (10 to 40 characters). Derive it from the external ID and operation, for example `chg-order-a-0001`, so a retry of the same intent reuses it.
+The contract requires an `Idempotency-Key` of 10 to 40 characters. The API answers `400` for a key outside that range, and `409` when a key is reused for a different request. Derive each key deterministically from the operation and the external ID, so a retry of the same request reuses the same key and two different requests never share one. When the plain form (for example `chg-order-a-0001`) would exceed 40 characters, keep a short operation prefix and replace the external ID with a stable digest of it, such as the first 24 hex characters of its SHA-256. Check the length before the preview, never by trial against the API.
+
+- **SDK.** Pass `Idempotency-Key` in the create params, derived as above, for example `chg-order-a-0001`.
 - **CLI.** Pass `--idempotency-key <key>` on every create. It first appears in CLI v1.0.3, so check the create's `--help`. When the installed CLI does not list it, run that create through the SDK instead. `--idempotent` is not a substitute: it treats an already-existing result as success and sends no key. `--dry-run` output does not show the key, so the preview states the key you will pass rather than reading it back from the dry run.
 
 ## Configuration checks by route

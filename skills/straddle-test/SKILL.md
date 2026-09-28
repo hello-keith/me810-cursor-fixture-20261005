@@ -34,7 +34,7 @@ Each step file lists what it needs, its allowed tools, the next step, and its su
 
 ## Markers
 
-Print each marker on its own line, exactly as shown, with one-line JSON:
+Print each marker on its own line, exactly as shown, with one-line JSON. Print each step's `STRADDLE_PROGRESS` marker, in order, in your text before that step's first tool call, even when the request already answers the step's questions. Do not save markers up and print them after the work or in the final report. A step with no tool calls prints its marker before its output:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-test","step":"01-begin"}
