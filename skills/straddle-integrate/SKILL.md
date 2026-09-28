@@ -34,7 +34,7 @@ Each step file lists what it needs, its allowed tools, the next step, and its su
 
 ## Markers
 
-Print each marker on its own line, exactly as shown, with one-line JSON. Print each step's `STRADDLE_PROGRESS` marker, in order, in your text before that step's first tool call, even when the request already answers the step's questions. Do not save markers up and print them after the work or in the final report. A step with no tool calls prints its marker before its output:
+Print each marker on its own line, exactly as shown, with one-line JSON. Open one step file at a time, in order, even when the request already answers the step's questions or the step needs no tools. Read the step file, then print its `STRADDLE_PROGRESS` marker immediately, before any other tool call, including reading a reference or the next step file. Do the step's work, and only then open the next step file. Do not read ahead, read several step files in one call or command, save markers up, or print them after the work or in the final report.
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-integrate","step":"01-begin"}
