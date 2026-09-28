@@ -2,7 +2,7 @@
 
 - **Needs:** summaries from steps 2 to 4.
 - **Tools:** none. Do not write a file unless the developer asks for one.
-- **Next:** hand off to [straddle-plan](../../straddle-plan/SKILL.md) when the status is not `blocked`.
+- **Next:** hand off to [straddle-plan](../../straddle-plan/SKILL.md) when the status is not `blocked`. When it is `blocked`, the run ends at the handoff and waits for the developer.
 
 Print:
 
@@ -66,6 +66,8 @@ Status: ready | ready_with_warnings | blocked
 
 Next actions are exact, non-destructive steps the developer can choose, such as `export STRADDLE_API_KEY` in their own shell or following the connect-mcp guide. For a platform, the next Integrate action is creating or reusing the two Sandbox accounts after its preview and approval. Setup does not do it.
 
+If the developer asked for Straddle operations rather than a readiness check, Setup runs none of them. List each requested operation under Next actions as work for [straddle-integrate](../../straddle-integrate/SKILL.md) once the blockers are fixed, and word the reply as [straddle-best-practices](../../straddle-best-practices/SKILL.md#when-a-rule-blocks-the-task) requires when a rule blocks the task.
+
 End with:
 
 ```markdown
@@ -82,3 +84,5 @@ Then print the handoff on one line:
 ```text
 STRADDLE_HANDOFF {"skill":"straddle-setup","status":"<status>","report":"<one-paragraph summary of the table and blockers>"}
 ```
+
+The handoff ends Setup's turn. Don't continue into the developer's original request after it, whether with more tool calls or by asking for values that would let the request run as asked.

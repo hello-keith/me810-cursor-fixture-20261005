@@ -42,4 +42,8 @@ Versions change. Check the installed package in the developer's dependency tree 
 
 ## When a rule blocks the task
 
-Stop and say which rule applies and why. Offer the supported alternative, for example an SDK call instead of `execute-request`, or a polling endpoint instead of a status loop. Do not work around a rule silently.
+Stop and say which rule applies and why. Check the whole request against every rule above, not only the first one that stops it, and do not work around a rule silently.
+
+- **Missing configuration blocks every request.** When rule 1 stops the task, name what is missing and say that no Straddle API request was sent. Offer no Straddle API request, not even a permitted read, until the developer has set it. For any write or any of the fourteen operations, Sandbox is the only environment to ask for (rule 5); do not offer Production as a choice.
+- **Name the other rules the request hits in the same reply.** List each requested operation that did not run. Any of the fourteen operations the developer asked for will run only through the SDK or CLI after a preview and approval (rule 4), never through `execute-request`, including after the configuration is fixed.
+- **Otherwise offer the supported alternative**, for example an SDK call instead of `execute-request`, or a polling endpoint instead of a status loop.
