@@ -1,0 +1,414 @@
+#!/usr/bin/env python3
+"""Build the checksummed Straddle plugin candidate and generate kit/manifest.yaml.
+
+kit/manifest.yaml is a pure function of kit/release-inputs.json and the committed plugin source, so `check`
+regenerates it and compares bytes. The plugin archive is built from git objects, never the working tree, and
+excludes kit/, so the commit that records the manifest rebuilds the same archive. See docs/packaging.md.
+"""
+
+import argparse
+import base64
+import hashlib
+import io
+import json
+import re
+import subprocess
+import sys
+import zipfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+INPUTS = "kit/release-inputs.json"
+MANIFEST = "kit/manifest.yaml"
+# What a client loads. evals/, tests/, fixtures/, scripts/, docs/ and kit/ are development files.
+PLUGIN_PATHS = (".claude-plugin", ".codex-plugin", ".cursor-plugin", "LICENSE", "README.md", "assets", "mcp.json",
+                "plugin.json", "references", "skills", "third_party")
+ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
+RELEASED = "released"
+LOCAL_CANDIDATE = "local-candidate"
+
+
+class KitError(Exception):
+    pass
+
+
+def git(root, *args, stdin=None):
+    result = subprocess.run(["git", "-C", str(root), *args], input=stdin, capture_output=True)
+    if result.returncode != 0:
+        raise KitError(f"git {' '.join(args)}: {result.stderr.decode().strip()}")
+    return result.stdout
+
+
+def source_files(root, commit):
+    """[(path, mode, bytes)] for the plugin paths at commit, sorted by path."""
+    listing = git(root, "ls-tree", "-r", "-z", "--full-tree", commit, "--", *PLUGIN_PATHS).decode()
+    entries = []
+    for record in filter(None, listing.split("\0")):
+        meta, path = record.split("\t", 1)
+        mode, kind, sha = meta.split()
+        if kind != "blob" or mode not in ("100644", "100755"):
+            raise KitError(f"{path}: plugin files must be regular files, found {kind} {mode}")
+        entries.append((path, mode, sha))
+    if not entries:
+        raise KitError(f"no plugin files at {commit}")
+    batch = git(root, "cat-file", "--batch", stdin="".join(f"{sha}\n" for _, _, sha in entries).encode())
+    files, offset = [], 0
+    for path, mode, _ in entries:
+        header_end = batch.index(b"\n", offset)
+        size = int(batch[offset:header_end].split()[2])
+        files.append((path, mode, batch[header_end + 1:header_end + 1 + size]))
+        offset = header_end + 1 + size + 1
+    return sorted(files)
+
+
+def build_archive(files):
+    """A zip with stored entries, fixed timestamps and git modes: same files, same bytes, on any zlib."""
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_STORED) as archive:
+        for path, mode, data in files:
+            info = zipfile.ZipInfo(path, ZIP_TIMESTAMP)
+            info.create_system = 3
+            info.external_attr = int(mode, 8) << 16
+            archive.writestr(info, data)
+    return buffer.getvalue()
+
+
+def tree_digest(files):
+    """sha256 of a sha256sum-style listing, so a directory has one digest independent of archive format."""
+    listing = "".join(f"{hashlib.sha256(data).hexdigest()}  {path}\n" for path, _, data in files)
+    return hashlib.sha256(listing.encode()).hexdigest()
+
+
+def skill_version(text, name):
+    match = re.search(r"^metadata:\s*\n(?:[ \t]+.*\n)*?[ \t]+version:\s*['\"]?([^'\"\s]+)", text, re.MULTILINE)
+    if not match:
+        raise KitError(f"skills/{name}/SKILL.md has no metadata.version")
+    return match.group(1)
+
+
+def plugin_facts(files):
+    by_path = {path: data for path, _, data in files}
+    plugin = json.loads(by_path["plugin.json"])
+    skills = sorted({path.split("/")[1] for path in by_path if path.startswith("skills/")})
+    return plugin, [{
+        "name": name,
+        "version": skill_version(by_path[f"skills/{name}/SKILL.md"].decode(), name),
+        "sha256": tree_digest([f for f in files if f[0].startswith(f"skills/{name}/")]),
+    } for name in skills]
+
+
+# ---------------------------------------------------------------------------
+# Inputs: released components carry public proof; local candidates carry local bytes. Nothing is inferred.
+
+
+def require(value, where):
+    if value in (None, "", [], {}):
+        raise KitError(f"{INPUTS}: {where} is required")
+    return value
+
+
+def check_inputs(inputs):
+    kit = require(inputs.get("kit"), "kit")
+    if kit.get("status") not in ("candidate", "release"):
+        raise KitError(f"{INPUTS}: kit.status must be candidate or release")
+    for key in ("cli", "contract", "hosted_mcp"):
+        require(inputs.get(key), key)
+    require(inputs.get("sdks"), "sdks")
+    if inputs["hosted_mcp"].get("contract_version_served") != inputs["contract"].get("version"):
+        raise KitError(f"{INPUTS}: hosted_mcp.contract_version_served must equal contract.version: the hosted MCP "
+                       "reports server version latest, so it is pinned by the contract version it serves")
+    wizard = require(inputs.get("wizard"), "wizard (the Wizard npm pack artifact is a true dependency)")
+    for field in ("package", "version", "bin", "provenance"):
+        require(wizard.get(field), f"wizard.{field}")
+    if wizard["provenance"] == LOCAL_CANDIDATE:
+        artifact = require(wizard.get("artifact"), "wizard.artifact")
+        for field in ("file", "sha256", "integrity"):
+            require(artifact.get(field), f"wizard.artifact.{field}")
+        require((wizard.get("source") or {}).get("commit"), "wizard.source.commit")
+
+
+def release_problems(inputs, plugin_version, root, commit):
+    """Why this manifest cannot be validated as a published release. Empty only with public proof for everything."""
+    problems = []
+    if inputs["kit"]["status"] != "release":
+        problems.append(f"kit.status is {inputs['kit']['status']!r}; a published release requires 'release'")
+    components = {"cli": inputs["cli"], "contract": inputs["contract"], "hosted_mcp": inputs["hosted_mcp"],
+                  "wizard": inputs["wizard"], **{f"sdks.{k}": v for k, v in sorted(inputs["sdks"].items())}}
+    for name, component in components.items():
+        if component.get("provenance") != RELEASED:
+            problems.append(f"{name}: provenance is {component.get('provenance')!r}, not published")
+            continue
+        evidence = component.get("evidence") or {}
+        if name == "hosted_mcp":
+            if not evidence.get("observed_at"):
+                problems.append("hosted_mcp: no observation of the contract version it serves")
+        elif not evidence.get("url") or not (evidence.get("digest") or {}).get("value"):
+            problems.append(f"{name}: released without a public url and digest in evidence")
+    release = inputs.get("plugin_release") or {}
+    tag = f"v{plugin_version}"
+    if release.get("tag") != tag or not release.get("checksum_url"):
+        problems.append(f"plugin: no published release (plugin_release.tag {tag} and checksum_url)")
+    else:
+        try:
+            if git(root, "rev-parse", f"{tag}^{{commit}}").strip() != git(root, "rev-parse", commit).strip():
+                problems.append(f"plugin: tag {tag} does not point at {commit}")
+        except KitError:
+            problems.append(f"plugin: tag {tag} does not exist in this repository")
+    for gate in inputs.get("gates", []):
+        if gate.get("status") != "passed" or not gate.get("evidence"):
+            problems.append(f"gate {gate.get('id')}: {gate.get('status')}")
+    return problems
+
+
+# ---------------------------------------------------------------------------
+# Instructions, generated from manifest facts. Candidate commands read artifacts from $STRADDLE_KIT_DIR.
+
+
+def instructions(plugin, archive_name, archive_sha, inputs):
+    name, version = plugin["name"], plugin["version"]
+    market = f"{name}@{name}"
+    repo = inputs["plugin_repository"]
+    servers = json.dumps({"straddle-api": inputs["hosted_mcp"]["api_url"],
+                          "straddle-docs": inputs["hosted_mcp"]["docs_url"]})
+    api_url = inputs["hosted_mcp"]["api_url"]
+    tag = f"v{version}"
+    wizard = inputs["wizard"]
+    # One extraction path for every version, so a marketplace registered at install reads the new files on update.
+    candidate_dir = f'"$STRADDLE_KIT_DIR/{name}-plugin"'
+    verify_zip = f'(cd "$STRADDLE_KIT_DIR" && echo "{archive_sha}  {archive_name}" | shasum -a 256 -c -)'
+    extract = f'rm -rf {candidate_dir} && unzip -q "$STRADDLE_KIT_DIR/{archive_name}" -d {candidate_dir}'
+    wizard_tgz = (wizard.get("artifact") or {}).get("file")
+    wizard_candidate = None
+    if wizard_tgz:
+        verify_tgz = f'(cd "$STRADDLE_KIT_DIR" && echo "{wizard["artifact"]["sha256"]}  {wizard_tgz}" | shasum -a 256 -c -)'
+        wizard_candidate = {
+            "install": [verify_tgz, f'npm install --global "$STRADDLE_KIT_DIR/{wizard_tgz}"'],
+            "update": [verify_tgz, f'npm install --global "$STRADDLE_KIT_DIR/{wizard_tgz}"'],
+            "remove": [f"npm uninstall --global {wizard['package']}"],
+            "validate": [f"test \"$({wizard['bin']} --version)\" = \"{wizard['version']}\""],
+        }
+    claude_validate = [
+        f"claude plugin list --json | python3 -c 'import json,sys; p={{x[\"id\"]: x for x in json.load(sys.stdin)}}"
+        f"[\"{market}\"]; assert p[\"version\"]==\"{version}\" and p[\"enabled\"] and "
+        f"{{k: v[\"url\"] for k, v in p[\"mcpServers\"].items()}}=={servers}, p'",
+    ]
+    codex_validate = [
+        f"codex plugin list --json | python3 -c 'import json,sys; p={{x[\"pluginId\"]: x for x in "
+        f"json.load(sys.stdin)[\"installed\"]}}[\"{market}\"]; assert p[\"version\"]==\"{version}\" and p[\"enabled\"], p'",
+        f"codex mcp list --json | python3 -c 'import json,sys; s={{x[\"name\"]: x[\"transport\"][\"url\"] for x in "
+        f"json.load(sys.stdin) if x[\"enabled\"]}}; assert all(s.get(k)==v for k, v in {servers}.items()), s'",
+    ]
+    codex_key = f"codex mcp add straddle-api --url {api_url} --bearer-token-env-var STRADDLE_API_KEY"
+    wizard_spec = f"{wizard['package']}@{wizard['version']}"
+    wizard_validate = [f"test \"$({wizard['bin']} --version)\" = \"{wizard['version']}\""]
+    published_integrity = ((wizard.get("evidence") or {}).get("digest") or {}).get("value")
+    if wizard["provenance"] == RELEASED and published_integrity:
+        wizard_validate.append(f"test \"$(npm view {wizard_spec} dist.integrity)\" = \"{published_integrity}\"")
+    return {
+        "wizard": {
+            "candidate": wizard_candidate,
+            "release": {
+                "install": [f"npm install --global {wizard_spec}"],
+                "update": [f"npm install --global {wizard_spec}"],
+                "remove": [f"npm uninstall --global {wizard['package']}"],
+                "validate": wizard_validate,
+            },
+        },
+        "claude-code": {
+            "candidate": {
+                "install": [verify_zip, extract, f"claude plugin marketplace add {candidate_dir}",
+                            f"claude plugin install {market}"],
+                "configure": ["Start Claude Code from a shell where STRADDLE_API_KEY is set."],
+                "update": [verify_zip, extract, f"claude plugin marketplace update {name}",
+                           f"claude plugin update {market}"],
+                "remove": [f"claude plugin uninstall {market}", f"claude plugin marketplace remove {name}"],
+                "validate": claude_validate,
+            },
+            "release": {
+                "install": [f"claude plugin marketplace add https://github.com/{repo}.git#{tag}",
+                            f"claude plugin install {market}"],
+                "configure": ["Start Claude Code from a shell where STRADDLE_API_KEY is set."],
+                "update": [f"claude plugin marketplace remove {name}",
+                           f"claude plugin marketplace add https://github.com/{repo}.git#{tag}",
+                           f"claude plugin install {market}"],
+                "remove": [f"claude plugin uninstall {market}", f"claude plugin marketplace remove {name}"],
+                "validate": claude_validate,
+            },
+        },
+        "codex": {
+            "candidate": {
+                "install": [verify_zip, extract, f"codex plugin marketplace add {candidate_dir}",
+                            f"codex plugin add {market}"],
+                "configure": [codex_key],
+                "update": [verify_zip, extract, f"codex plugin add {market}"],
+                "remove": [f"codex plugin remove {market}", f"codex plugin marketplace remove {name}",
+                           "codex mcp remove straddle-api"],
+                "validate": codex_validate,
+            },
+            "release": {
+                "install": [f"codex plugin marketplace add {repo} --ref {tag}", f"codex plugin add {market}"],
+                "configure": [codex_key],
+                "update": [f"codex plugin marketplace remove {name}",
+                           f"codex plugin marketplace add {repo} --ref {tag}", f"codex plugin add {market}"],
+                "remove": [f"codex plugin remove {market}", f"codex plugin marketplace remove {name}",
+                           "codex mcp remove straddle-api"],
+                "validate": codex_validate,
+            },
+        },
+        "cursor": {
+            "manual": True,
+            "candidate": "not available: Cursor imports a team marketplace from a GitHub repository, not a local archive",
+            "release": {
+                "install": [f"In the Cursor dashboard, import https://github.com/{repo} at {tag} as a team "
+                            "marketplace, then install the Straddle plugin."],
+                "configure": ["Enter your Straddle API key when Cursor prompts for STRADDLE_API_KEY."],
+                "update": ["Point the team marketplace at the new tag and update the Straddle plugin."],
+                "remove": ["Uninstall the Straddle plugin, then remove the team marketplace."],
+                "validate": [f"Cursor lists Straddle {version} with nine straddle-* skills and the straddle-api and "
+                             "straddle-docs MCP servers."],
+            },
+        },
+    }
+
+
+# ---------------------------------------------------------------------------
+# Manifest.
+
+
+def archive_file(version):
+    return f"straddle-plugin-{version}.zip"
+
+
+def generate(root, commit, inputs):
+    check_inputs(inputs)
+    files = source_files(root, commit)
+    plugin, skills = plugin_facts(files)
+    archive = build_archive(files)
+    archive_name = archive_file(plugin["version"])
+    archive_sha = hashlib.sha256(archive).hexdigest()
+    kit = inputs["kit"]
+    release = inputs.get("plugin_release") if kit["status"] == "release" else None
+    manifest = {
+        "schema": 1,
+        "kit": {"name": "straddle-developer-kit", "version": plugin["version"], "status": kit["status"]},
+        "plugin": {
+            "name": plugin["name"],
+            "version": plugin["version"],
+            "provenance": RELEASED if release else LOCAL_CANDIDATE,
+            "repository": inputs["plugin_repository"],
+            "archive": {"file": archive_name, "format": "zip, stored entries, fixed timestamps",
+                        "sha256": archive_sha, "bytes": len(archive), "files": len(files)},
+            "release": release,
+        },
+        "skills": skills,
+        "wizard": inputs["wizard"],
+        "cli": inputs["cli"],
+        "sdks": inputs["sdks"],
+        "contract": inputs["contract"],
+        "hosted_mcp": inputs["hosted_mcp"],
+        "clients": inputs.get("clients", {}),
+        "instructions": instructions(plugin, archive_name, archive_sha, inputs),
+        "gates": inputs.get("gates", []),
+    }
+    header = (f"# Generated by scripts/kit-release generate from {INPUTS}. Do not edit.\n"
+              "# Provenance local-candidate means built locally and not published; see docs/packaging.md.\n")
+    return header + to_yaml(manifest)
+
+
+def scalar(value):
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, int):
+        return str(value)
+    return json.dumps(value, ensure_ascii=False)
+
+
+def to_yaml(value, indent=0):
+    pad = "  " * indent
+    if isinstance(value, dict):
+        if not value:
+            return " {}\n"
+        return "\n" + "".join(f"{pad}{key}:{to_yaml(item, indent + 1)}" for key, item in value.items())
+    if isinstance(value, list):
+        if not value:
+            return " []\n"
+        out = "\n"
+        for item in value:
+            if isinstance(item, dict) and item:
+                body = to_yaml(item, indent + 1)[1:]
+                out += f"{pad}- {body[len(pad) + 2:]}"
+            else:
+                out += f"{pad}-{to_yaml(item, indent + 1)}"
+        return out
+    return f" {scalar(value)}\n"
+
+
+def npm_integrity(data):
+    return "sha512-" + base64.b64encode(hashlib.sha512(data).digest()).decode()
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--root", type=Path, default=ROOT)
+    commands = parser.add_subparsers(dest="command", required=True)
+    for name, text in (("build", "write the plugin candidate and SHA256SUMS to --out"),
+                       ("generate", f"write {MANIFEST}"),
+                       ("check", f"regenerate {MANIFEST} and compare; --release demands published proof")):
+        sub = commands.add_parser(name, help=text)
+        sub.add_argument("--commit", default="HEAD", help="source commit (default HEAD)")
+        if name == "build":
+            sub.add_argument("--out", type=Path, default=ROOT / "dist")
+        if name == "check":
+            sub.add_argument("--release", action="store_true", help="validate as a published release")
+            sub.add_argument("--wizard-tarball", type=Path, help="verify these bytes against wizard.artifact")
+    args = parser.parse_args(argv)
+    root = args.root.resolve()
+    try:
+        commit = git(root, "rev-parse", "--verify", f"{args.commit}^{{commit}}").decode().strip()
+        if args.command == "build":
+            files = source_files(root, commit)
+            archive = build_archive(files)
+            archive_name = archive_file(plugin_facts(files)[0]["version"])
+            digest = hashlib.sha256(archive).hexdigest()
+            args.out.mkdir(parents=True, exist_ok=True)
+            (args.out / archive_name).write_bytes(archive)
+            (args.out / "SHA256SUMS").write_text(f"{digest}  {archive_name}\n")
+            print(f"{args.out / archive_name}: sha256 {digest}, {len(archive)} bytes, {len(files)} files, "
+                  f"from {commit}, provenance {LOCAL_CANDIDATE}")
+            return 0
+        inputs = json.loads((root / INPUTS).read_text())
+        text = generate(root, commit, inputs)
+        if args.command == "generate":
+            (root / MANIFEST).write_text(text)
+            print(f"{MANIFEST}: generated from {commit}")
+            return 0
+        problems = []
+        committed = root / MANIFEST
+        if not committed.is_file() or committed.read_text() != text:
+            problems.append(f"{MANIFEST} does not match plugin source at {commit} and {INPUTS}; "
+                            "run scripts/kit-release generate")
+        artifact = inputs["wizard"].get("artifact") or {}
+        if args.wizard_tarball:
+            data = args.wizard_tarball.read_bytes()
+            if hashlib.sha256(data).hexdigest() != artifact.get("sha256"):
+                problems.append(f"{args.wizard_tarball}: sha256 does not match wizard.artifact.sha256")
+            if npm_integrity(data) != artifact.get("integrity"):
+                problems.append(f"{args.wizard_tarball}: integrity does not match wizard.artifact.integrity")
+        if args.release:
+            problems += release_problems(inputs, json.loads(git(root, "show", f"{commit}:plugin.json"))["version"],
+                                         root, commit)
+    except (KitError, OSError, json.JSONDecodeError, KeyError) as error:
+        print(f"kit-release: {error}", file=sys.stderr)
+        return 1
+    for problem in problems:
+        print(f"kit-release: {problem}")
+    mode = "published release" if args.release else "local candidate"
+    verdict = "FAIL" if problems else "ok"
+    print(f"kit-release check ({mode}) at {commit}: {verdict}", file=sys.stderr)
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

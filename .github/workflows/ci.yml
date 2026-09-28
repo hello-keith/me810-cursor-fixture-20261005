@@ -26,6 +26,9 @@ jobs:
       - name: Validate package, skills and links
         run: scripts/validate-package
 
+      - name: Check kit manifest
+        run: scripts/kit-release check
+
       - uses: actions/setup-node@v5
         with:
           node-version: 22

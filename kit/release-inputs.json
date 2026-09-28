@@ -1,0 +1,237 @@
+{
+  "kit": {
+    "status": "candidate"
+  },
+  "plugin_repository": "straddle-build/skills",
+  "plugin_release": null,
+  "cli": {
+    "package": "@straddlecom/cli",
+    "version": "1.0.3",
+    "minimum_version": "1.0.3",
+    "provenance": "released",
+    "repository": "https://github.com/straddle-build/straddle-cli",
+    "release_tag": "v1.0.3",
+    "commit": "ab45e54ddde6b60055a4559618a449b18e07e5d4",
+    "published_at": "2026-09-28T01:40:37Z",
+    "evidence": {
+      "url": "https://github.com/straddle-build/straddle-cli/releases/tag/v1.0.3",
+      "digest": {
+        "algorithm": "sha256",
+        "value": "8160e66592d0053aa237eeda57669958682243b7e16ec44373e00d77bb0c5d7f",
+        "of": "checksums.txt, which lists the sha256 of every platform archive"
+      }
+    },
+    "artifacts": [
+      {
+        "file": "checksums.txt",
+        "url": "https://github.com/straddle-build/straddle-cli/releases/download/v1.0.3/checksums.txt",
+        "sha256": "8160e66592d0053aa237eeda57669958682243b7e16ec44373e00d77bb0c5d7f"
+      },
+      {
+        "file": "straddle_1.0.3_darwin_arm64.tar.gz",
+        "url": "https://github.com/straddle-build/straddle-cli/releases/download/v1.0.3/straddle_1.0.3_darwin_arm64.tar.gz",
+        "sha256": "4f21f4c9fb82801365bf932fb872f3ce6f2354608944fc6009038502b4868201"
+      },
+      {
+        "file": "straddle_1.0.3_darwin_amd64.tar.gz",
+        "url": "https://github.com/straddle-build/straddle-cli/releases/download/v1.0.3/straddle_1.0.3_darwin_amd64.tar.gz",
+        "sha256": "f28ea4cb0f9cc105b87f53d06971157b721b132472f4e1d50ee1eff840edf53e"
+      },
+      {
+        "file": "straddle_1.0.3_linux_arm64.tar.gz",
+        "url": "https://github.com/straddle-build/straddle-cli/releases/download/v1.0.3/straddle_1.0.3_linux_arm64.tar.gz",
+        "sha256": "db1f810f3bc3cf252eaef2e15860f5475fbe7a245aaa80a33ddfdc96fa0083fc"
+      },
+      {
+        "file": "straddle_1.0.3_linux_amd64.tar.gz",
+        "url": "https://github.com/straddle-build/straddle-cli/releases/download/v1.0.3/straddle_1.0.3_linux_amd64.tar.gz",
+        "sha256": "eae3eda0d91b9c55fdfb7ce42d8b24cbb8c109c3fc43e3de790130ab8840b9b5"
+      },
+      {
+        "file": "straddle_1.0.3_windows_arm64.zip",
+        "url": "https://github.com/straddle-build/straddle-cli/releases/download/v1.0.3/straddle_1.0.3_windows_arm64.zip",
+        "sha256": "1c35a62e38f6d9b7ae8e596226f01b4a1df20e852bae6fbb88d5adcbb7d0f087"
+      },
+      {
+        "file": "straddle_1.0.3_windows_amd64.zip",
+        "url": "https://github.com/straddle-build/straddle-cli/releases/download/v1.0.3/straddle_1.0.3_windows_amd64.zip",
+        "sha256": "fd27a8f039bd9421ca4ff9e8eea558deb6c15e630102024f60b3166fde9eeedf"
+      },
+      {
+        "file": "cli-1.0.3.tgz",
+        "url": "https://registry.npmjs.org/@straddlecom/cli/-/cli-1.0.3.tgz",
+        "integrity": "sha512-Ra9Tr53pMa/uXaBVEGvgbE0Z09HYn9SpwnOpCUzVOywVrAQ+JpmsDB9qKTAMRj0Flduv3yOGOWsWQi8ON97g9w=="
+      }
+    ]
+  },
+  "sdks": {
+    "typescript": {
+      "package": "@straddlecom/straddle",
+      "registry": "npm",
+      "version": "1.0.4",
+      "minimum_version": "1.0.4",
+      "provenance": "released",
+      "repository": "https://github.com/straddle-build/straddle-typescript",
+      "release_tag": "v1.0.4",
+      "commit": "db5e4b9f0d074edb186ad2856f266d24cd2ba0b9",
+      "published_at": "2026-09-13T00:28:05.265Z",
+      "evidence": {
+        "url": "https://registry.npmjs.org/@straddlecom/straddle/1.0.4",
+        "digest": {
+          "algorithm": "sha512",
+          "value": "sha512-PpOJ4aFaF9Yt2AEpd7W/Iv4+FcOLfjZg5SkXTnisMiYAVJTcSryPlLS2AcuTtsSuLNDGAqCnUpgTYvNy3Q1z6Q==",
+          "of": "straddle-1.0.4.tgz (npm dist.integrity)"
+        }
+      }
+    },
+    "python": {
+      "package": "straddle",
+      "registry": "PyPI",
+      "version": "1.0.5",
+      "minimum_version": "1.0.5",
+      "provenance": "released",
+      "repository": "https://github.com/straddle-build/straddle-python",
+      "release_tag": "v1.0.5",
+      "commit": "9ee7b9eaa7d715fe649cdae167344a8c9ca3d2af",
+      "published_at": "2026-09-27T23:42:28.894704Z",
+      "evidence": {
+        "url": "https://pypi.org/project/straddle/1.0.5/",
+        "digest": {
+          "algorithm": "sha256",
+          "value": "8c350f095e54ede4e8e62cbc601db2c3c678d7c567a35d2bb13b4eef29cd0c92",
+          "of": "straddle-1.0.5-py3-none-any.whl"
+        }
+      },
+      "artifacts": [
+        {
+          "file": "straddle-1.0.5.tar.gz",
+          "sha256": "5558995e0bdd1dae383d33d5929f99c20fdbd1aa208a9b5fc9caa6b5ae2595d3"
+        }
+      ]
+    },
+    "ruby": {
+      "package": "straddle",
+      "registry": "RubyGems",
+      "version": "1.0.4",
+      "minimum_version": "1.0.4",
+      "provenance": "released",
+      "repository": "https://github.com/straddle-build/straddle-ruby",
+      "release_tag": "v1.0.4",
+      "commit": "8b291aae4c0353bf1858cb701c0b19489e5dc00a",
+      "published_at": "2026-09-13T00:28:17.302Z",
+      "evidence": {
+        "url": "https://rubygems.org/gems/straddle/versions/1.0.4",
+        "digest": {
+          "algorithm": "sha256",
+          "value": "73c3a3d8a142fa45bd46ab905f4fbfc197a9aa589b66e539d49c6a10dea1f3d7",
+          "of": "straddle-1.0.4.gem"
+        }
+      }
+    },
+    "dotnet": {
+      "package": "Straddle",
+      "registry": "NuGet",
+      "version": "1.0.4",
+      "minimum_version": "1.0.4",
+      "provenance": "released",
+      "repository": "https://github.com/straddle-build/straddle-dotnet",
+      "release_tag": "v1.0.4",
+      "commit": "b9aa0e03022f8690159fce2c17d5afeb12933fb9",
+      "published_at": "2026-09-13T00:48:03.187Z",
+      "evidence": {
+        "url": "https://www.nuget.org/packages/Straddle/1.0.4",
+        "digest": {
+          "algorithm": "sha512",
+          "value": "Ii8gPrsENQajLxQ3wHYJW35bhBbnhqzAb8baZAVuyFYLAOiY2kOF4jfYik8Y2to+N7tmRLKWSw/ZsMRLhaq54w==",
+          "of": "straddle.1.0.4.nupkg (base64, NuGet packageHash)"
+        }
+      }
+    },
+    "go": {
+      "package": "github.com/straddle-build/straddle-go",
+      "registry": "Go module proxy",
+      "version": "1.0.4",
+      "minimum_version": "1.0.4",
+      "provenance": "released",
+      "repository": "https://github.com/straddle-build/straddle-go",
+      "release_tag": "v1.0.4",
+      "commit": "27fb22ab338f1c0cdf2a74006c468dbac9f19f73",
+      "published_at": "2026-09-13T00:26:52Z",
+      "evidence": {
+        "url": "https://sum.golang.org/lookup/github.com/straddle-build/straddle-go@v1.0.4",
+        "digest": {
+          "algorithm": "go-h1",
+          "value": "h1:wq5Nz52bQZvRrIoP2BSeGXiy7slk4hXMKkwM4p7vitc=",
+          "of": "module tree hash recorded in the Go checksum database"
+        }
+      }
+    }
+  },
+  "contract": {
+    "version": "1.0.4",
+    "registry_ref": "@straddle/straddle-api@1.0.4",
+    "provenance": "released",
+    "repository": "https://github.com/straddleio/straddle-api-contracts",
+    "release_tag": "contract-v1.0.4",
+    "commit": "bb4dfd4df6b249f3bef7b232155cb7e77f26ca3b",
+    "evidence": {
+      "url": "https://github.com/straddle-build/straddle-cli/blob/v1.0.3/spec.yaml",
+      "digest": {
+        "algorithm": "sha256",
+        "value": "fd41c2a50f8bf45bb402297b1b0ac633671707b348222eba6c37759ec2e77130",
+        "of": "the published Registry contract bytes, spec.yaml in CLI 1.0.3, recorded as published_sha256 in its contract.lock.json; the authored YAML in straddle-api-contracts differs by design"
+      }
+    }
+  },
+  "hosted_mcp": {
+    "provenance": "released",
+    "api_url": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd",
+    "docs_url": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp",
+    "server_version_reported": "latest",
+    "contract_version_served": "1.0.4",
+    "evidence": {
+      "observed": "summarize-openapi-specs summary info.version on the API MCP; serverInfo.version is latest, so the pin is the served contract version, not a content digest",
+      "observed_at": "2026-09-27T21:15:47Z"
+    }
+  },
+  "clients": {
+    "claude-code": {
+      "observed_version": "2.1.283",
+      "observed": "marketplace install from GitHub main f713fc6 in a scratch profile, 2026-09-28; not a tagged release"
+    },
+    "codex": {
+      "observed_version": "0.157.1",
+      "observed": "marketplace install from GitHub main f713fc6 in a scratch profile, 2026-09-28; not a tagged release"
+    },
+    "cursor": {
+      "observed_version": null,
+      "observed": "not tested; team marketplace import and the STRADDLE_API_KEY prompt are unobserved"
+    }
+  },
+  "gates": [
+    {
+      "id": "walkthrough-approval",
+      "requirement": "Keith's explicit yes on the source and client walkthrough before publication (ME-666, ME-668, ME-669, ME-670, ME-815)",
+      "status": "open",
+      "evidence": null
+    },
+    {
+      "id": "wizard-npm-publication",
+      "requirement": "@straddlecom/wizard installs from npm with provenance, built from straddle-build/wizard (ME-667)",
+      "status": "open",
+      "evidence": null
+    },
+    {
+      "id": "plugin-release-tag",
+      "requirement": "Separately approved tag under the version-tag immutability ruleset, with the plugin checksum published (ME-810)",
+      "status": "open",
+      "evidence": null
+    },
+    {
+      "id": "clean-client-acceptance",
+      "requirement": "Manifest-generated install, update and remove instructions pass in clean Claude Code, Codex and Cursor environments (ME-810, ME-659)",
+      "status": "open",
+      "evidence": null
+    }
+  ]
+}
