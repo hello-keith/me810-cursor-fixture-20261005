@@ -88,7 +88,7 @@ The lint matches patterns and doesn't understand prose. Writers should know thes
 
 Cases live in `evals/<skill>-<case>/` with `prompt.md` and `graders/*.md`. Mocks go in `evals/mocks/<server>/<tool>.md` or a case's own `mocks/`, where `<server>` is `straddle-api` or `straddle-docs`. The validator requires at least one case per present skill and rejects mocks for unknown servers. `evals/results/` is ignored by Git. `evals/.markdownlint.jsonc` turns off only MD041 (first-line heading) for these files, because prompts, graders and mocks are literal model input and output.
 
-The gate run needs model credentials, so it isn't in CI yet. The approved model and judge are both `claude-opus-5-5`, confirmed by a native Claude Code preflight. The command keeps real MCP servers off, and reports stay local:
+Model evals run on the existing exe.dev VM with the Claude Code login already approved there, not in GitHub CI, which stays deterministic. The approved model and judge are both `claude-opus-5-5`. The command keeps real MCP servers off, and reports stay local:
 
 ```sh
 claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-without --threshold 1.0 \
