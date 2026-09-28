@@ -4,7 +4,7 @@ Two different integrations hide behind "Plaid": **Auth/Link with a processor** (
 
 ## Find it
 
-- Packages: npm `plaid`, `react-plaid-link`; PyPI `plaid-python`; gem `plaid`; Go `github.com/plaid/plaid-go/vNN/plaid`; Maven `com.plaid:plaid-java`. There is no official NuGet package.
+- Packages: npm `plaid`, `react-plaid-link`; PyPI `plaid-python`; gem `plaid`; Go `github.com/plaid/plaid-go/vNN/plaid`; Maven `com.plaid:plaid-java`. No official NuGet package was found.
 - Strings: `linkTokenCreate`, `itemPublicTokenExchange`, `processorTokenCreate`, `authGet`, `transferAuthorizationCreate`, `transferCreate`, `transferEventSync`, `TRANSFER_EVENTS_UPDATE`, `Plaid-Verification`, `PLAID_CLIENT_ID`, `PLAID_SECRET`, `PLAID_ENV`, `cdn.plaid.com/link`.
 
 ## Auth/Link with a processor
@@ -35,7 +35,7 @@ Status mapping ([reading transfers](https://plaid.com/docs/api/products/transfer
 | `returned` | `failed` or `reversed` depending on whether the payment had reached `paid`, with the return code |
 | `cancelled` | `cancelled` |
 
-Plaid allows at most two retries, only for R01 and R09, marked with "Retry 1" and "Retry 2" descriptions; R10 can't be resubmitted. That convention does not port: a Straddle retry is a new charge. Plaid's Transfer docs describe no NOC object.
+Plaid allows at most two retries, only for R01 and R09, marked with "Retry 1" and "Retry 2" descriptions; R10 can't be resubmitted. That convention does not port: on Straddle, a retry creates a new Straddle charge, either through resubmit (`POST /v1/charges/{id}/resubmit`, which copies a failed, reversed, or cancelled charge and takes an idempotency key) or a fresh create. The Plaid Transfer docs reviewed describe no NOC object.
 
 ## Consent
 

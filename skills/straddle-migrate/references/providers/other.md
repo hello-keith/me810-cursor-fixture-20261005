@@ -25,4 +25,4 @@ Stored bank details, generated files, and payment history.
 ## Pitfalls
 
 - Hand-rolled return parsing often keys on R-codes and file positions; Straddle delivers returns as events with return codes on the payment.
-- Balanced files (offsetting entries) have no Straddle equivalent; Straddle handles settlement.
+- Balanced files (offsetting entries) belong to file-based origination. Straddle payments settle through funding events, so the plan drops the offset logic for Straddle-path payments only after confirming this in the Straddle docs.

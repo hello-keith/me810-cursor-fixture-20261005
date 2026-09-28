@@ -28,16 +28,16 @@ Every provider status the application stores or reacts to, mapped to a Straddle 
 ## Returns, corrections, and retries
 
 - Returns before `paid` (`failed`) and after `paid` (`reversed`): how the application reacts to each, keyed on the Straddle return code.
-- Notifications of change: who handles corrections that the provider used to apply automatically.
-- Retries: which return codes may be re-presented, and that each retry is a new charge with its own idempotency key.
-- Accounts to stop debiting after fatal returns: how the application blocks them now that the provider's automatic blocking no longer applies.
+- Notifications of change: what Straddle does with corrections (with the source), and what the application must still handle.
+- Retries: which return codes may be re-presented, and how: Straddle resubmit or a fresh create, each with its own idempotency key.
+- Accounts to stop debiting after fatal returns: what Straddle does (with the source), and what the application must still do.
 
 ## Consent
 
 - Existing authorization wording and whose name it carries: `<quote or summary>`
 - Decision: re-authorize on the Straddle path | reuse existing authorizations | `Unresolved`
 - Decided by: `<person or role>`
-- `consent_type` per flow (`internet` or `signed`), and flows with no equivalent (for example TEL).
+- `consent_type` per flow (`internet` or `signed`), and flows with no matching `consent_type` value (for example TEL).
 
 ## Bank accounts on the Straddle path
 

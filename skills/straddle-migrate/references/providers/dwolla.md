@@ -13,14 +13,14 @@ Covers the Dwolla Balance API. Dwolla Connect (payments through your own bank to
 | --- | --- |
 | Main Account and its bank | the Straddle account; settlement becomes funding events |
 | Verified personal or business Customer | customer (individual or business) |
-| Unverified and receive-only Customers | customer; Dwolla's lighter tiers have no direct analog |
+| Unverified and receive-only Customers | customer (proposal; check how Straddle's identity review applies to these lighter tiers) |
 | `correlationId` | `external_id` |
 | Bank funding source | paykey, re-linked through Bridge |
 | Transfer from a Customer's bank to the merchant | charge |
 | Transfer from the merchant to a Customer's bank; mass payment item | payout, each with its own idempotency key |
 | Customer-to-Customer transfer | charge plus payout (marketplace) |
 
-Dwolla has no connected accounts and no account-selecting header. A merchant collecting from and paying its own Customers suggests a direct account; Customer-to-Customer flows suggest a marketplace.
+The Dwolla docs reviewed describe no connected accounts and no account-selecting header. A merchant collecting from and paying its own Customers suggests a direct account; Customer-to-Customer flows suggest a marketplace.
 
 ## Status mapping
 
@@ -36,7 +36,7 @@ Dwolla's integration guide says `processed` is not necessarily final: a processe
 
 ## Returns and corrections
 
-Return details come from the transfer's `failure` link. After returns Dwolla may unverify or remove the funding source and suspend or deactivate the Customer, each with its own webhook. Code listening for those reactions gets no trigger for Straddle-path payments. Dwolla has no NOC object; it applies corrections and fires `customer_funding_source_updated`.
+Return details come from the transfer's `failure` link. After returns Dwolla may unverify or remove the funding source and suspend or deactivate the Customer, each with its own webhook. Code that listens for those Dwolla webhooks gets them only for Dwolla payments. The plan records what Straddle does after returns (with the source) and what the application must handle. The Dwolla docs reviewed describe no NOC object; Dwolla applies corrections and fires `customer_funding_source_updated`.
 
 ## Bank accounts and portability
 
@@ -62,5 +62,5 @@ Customer PII and KYC documents, funding sources, processor or exchange tokens, o
 
 - Stored HAL URLs used as identifiers.
 - Duplicate per-party webhooks and linked transfer legs break one-to-one reconciliation.
-- Dwolla balance, `clearing`, `fees`, RTP, FedNow, wire, and push-to-debit have no equivalent here; list them as not migrated.
+- Dwolla balance, `clearing`, `fees`, RTP, FedNow, wire, and push-to-debit are outside this mapping. Check the Straddle docs for any equivalent before planning them; otherwise list them as not migrated.
 - Drain Dwolla balances to the bank before customers move.

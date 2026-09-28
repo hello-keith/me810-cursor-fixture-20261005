@@ -15,7 +15,7 @@
 | Payment order, `direction: credit` to an external account | payout |
 | `effective_date` | `payment_date` |
 | `subtype` WEB | `consent_type: internet`; PPD and CCD with a written agreement: `signed`; TEL needs a decision |
-| Internal account per customer or legal entity | embedded account (judgment: SaaS when each customer is the merchant, marketplace when the platform is) |
+| Internal account per customer or legal entity | embedded account (proposal: SaaS when each customer is the merchant, marketplace when the platform is) |
 | Bank transactions and balance reports | funding events |
 
 One `direction` field splits into two Straddle operations with different account-scope rules; the plan lists both.
@@ -24,22 +24,22 @@ One `direction` field splits into two Straddle operations with different account
 
 | Modern Treasury payment order | Straddle |
 | --- | --- |
-| `needs_approval`, `approved` | no Straddle equivalent; approval stays in the application before the charge is created |
+| `needs_approval`, `approved` | none (proposal: keep approval in the application, before the charge is created) |
 | `processing`, `sent` | `pending` |
 | `completed` | `paid` |
 | `failed` | `failed` |
 | `returned` before completion | `failed`, with the return code |
 | `returned` after completion | `reversed`, with the return code |
 | `denied`, `cancelled` | `cancelled` |
-| `held` | `on_hold` (judgment) |
-| `reversed` | no equivalent: Modern Treasury's `reversed` is an originator-initiated NACHA reversal, not a return |
+| `held` | `on_hold` (proposal) |
+| `reversed` | not Straddle `reversed`: Modern Treasury's `reversed` is an originator-initiated NACHA reversal, while Straddle `reversed` is a return after `paid`. Check the Straddle docs before mapping it (proposal) |
 
-Modern Treasury redrafts a returned order by updating the same order back to `needs_approval` ([update payment order](https://docs.moderntreasury.com/platform/reference/update-payment-order)), so one ID can carry several attempts. On Straddle each attempt is a new charge with its own idempotency key and external ID.
+Modern Treasury redrafts a returned order by updating the same order back to `needs_approval` ([update payment order](https://docs.moderntreasury.com/platform/reference/update-payment-order)), so one ID can carry several attempts. On Straddle, a retry creates a new Straddle charge, either through resubmit (`POST /v1/charges/{id}/resubmit`, which copies a failed, reversed, or cancelled charge and takes an idempotency key) or a fresh create.
 
 ## Returns and corrections
 
 - Returns are separate `return` objects with the R-code, linked to the payment order.
-- A NOC arrives as a zero-amount return with `type: ach_noc`, and Modern Treasury updates the external account automatically ([NOC](https://docs.moderntreasury.com/payments/docs/notification-of-change-noc)). That automatic correction stops for Straddle-path payments; the plan says how corrections are handled.
+- A NOC arrives as a zero-amount return with `type: ach_noc`, and Modern Treasury updates the external account automatically ([NOC](https://docs.moderntreasury.com/payments/docs/notification-of-change-noc)). Don't assume that carries over: the plan records what Straddle does with corrections (with the source) and what the application must handle.
 
 ## Bank accounts and portability
 
@@ -47,7 +47,7 @@ Verification is optional in Modern Treasury: unverified external accounts can be
 
 ## Consent
 
-Modern Treasury has no mandate object; the merchant holds the debit authorization. For its own payments product it records acceptance of Modern Treasury's terms, which don't carry over. Authorizations that name the merchant and still match the terms may be reusable; the plan records the compliance decision.
+The Modern Treasury docs reviewed describe no mandate object; the merchant holds the debit authorization. For its own payments product it records acceptance of Modern Treasury's terms, which don't carry over. Authorizations that name the merchant and still match the terms may be reusable; the plan records the compliance decision.
 
 ## Idempotency
 

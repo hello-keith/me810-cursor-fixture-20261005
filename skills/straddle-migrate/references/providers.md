@@ -2,7 +2,7 @@
 
 Read this file, then the one file for the provider being migrated. Each provider file tells you how to find the provider's footprint in a repository, how its objects, statuses, returns, consent and notifications map to Straddle, what never moves, and where migrations usually go wrong. It maps concepts and mechanisms, not Straddle method names: read the installed Straddle SDK and the Docs MCP for exact calls.
 
-Provider facts come from each provider's public documentation, researched on 2026-09-27. Docs change, so confirm a detail against the linked source before code depends on it. Statements marked "judgment" are mapping decisions, not provider facts, and belong in the plan as proposals the developer confirms.
+Provider facts come from each provider's public documentation, researched on 2026-09-27. Docs change, so confirm a detail against the linked source before code depends on it. When a file says a provider has no feature, it means the feature was not documented in the sources reviewed, not that it cannot exist. Every mapping table is a proposal for the plan, and the developer confirms it. Rows marked "proposal" are the least certain, because the provider's model has no direct counterpart.
 
 | Provider | File |
 | --- | --- |
@@ -34,4 +34,4 @@ These come from the public Straddle API contract. Use them exactly; do not inven
 4. **In-flight payments finish where they started.** Payments already submitted, scheduled, or future-dated on the old provider stay there; returns and refunds for them keep flowing through the old provider for weeks (unauthorized returns can arrive up to 60 days later).
 5. **Webhook handlers are rewritten, not ported.** Each provider signs differently (or not at all). The Straddle handler is a new route using Standard Webhooks; the old handler stays for in-flight payments.
 6. **Polling becomes a notification endpoint.** Several providers encourage or require status polling or report queries. On Straddle that becomes a webhook, FIFO, or polling endpoint consumer, never a loop on `GET /v1/charges/{id}`.
-7. **Provider-side automation disappears.** Automatic NOC corrections, automatic account blocking after returns, and provider-sent customer emails stop for Straddle-path payments. The plan names who handles each.
+7. **Provider-side automation must not be assumed to carry over.** Automatic NOC corrections, account blocking after returns, and provider-sent customer emails belong to the old provider. For each one the application relies on, check what Straddle does from the Straddle docs and contract, and write the result in the plan: covered by Straddle (with the source), or an application responsibility with a named owner.

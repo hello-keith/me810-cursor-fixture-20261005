@@ -33,18 +33,18 @@ Connect charge types hint at the model: direct charges on the connected account 
 | `succeeded`, then a dispute from a late return | `reversed`, with the return code |
 | `canceled` | `cancelled` |
 
-A PaymentIntent that fails returns to `requires_payment_method` and can be retried in place ([lifecycle](https://docs.stripe.com/payments/paymentintents/lifecycle)). Straddle charges don't work that way: a retry is a new charge with its own idempotency key, and only for return codes where re-presenting is allowed.
+A PaymentIntent that fails returns to `requires_payment_method` and can be retried in place ([lifecycle](https://docs.stripe.com/payments/paymentintents/lifecycle)). On Straddle, a retry creates a new Straddle charge, either through resubmit (`POST /v1/charges/{id}/resubmit`, which copies a failed, reversed, or cancelled charge and takes an idempotency key) or a fresh create, and only for return codes where re-presenting is allowed.
 
 ## Returns and corrections
 
 - Stripe maps R-codes to failure codes, for example R01/R09 to `insufficient_funds`, R02 to `bank_account_closed`, R05/R07/R10 to `debit_not_authorized` ([network codes](https://docs.stripe.com/declines/network-codes)). Code that branches on Stripe failure codes must branch on Straddle return codes instead.
 - A return that arrives after `succeeded` surfaces as a dispute, not a failed charge ([ACH Direct Debit](https://docs.stripe.com/payments/ach-direct-debit)). On Straddle it is `reversed`.
-- Stripe blocks bank accounts after non-NSF returns and inactivates mandates after unauthorized disputes. That automation does not follow the customer to Straddle; the plan says how the application stops debiting a paykey after a fatal return.
-- Stripe publishes no NOC documentation; its closest surface is `payment_method.automatically_updated`.
+- Stripe blocks bank accounts after non-NSF returns and inactivates mandates after unauthorized disputes. Don't assume that carries over: the plan records what Straddle does after a fatal return (with the source) and what the application must do.
+- The Stripe docs reviewed describe no NOC handling. The closest surface is `payment_method.automatically_updated`.
 
 ## Bank accounts and portability
 
-- The API never returns full account numbers. Stripe's migrations team can export ACH bank accounts as a CSV with routing and account numbers on request ([export formats](https://docs.stripe.com/get-started/data-migrations/export-file-formats)). Importing that file into Straddle is customer-data transfer and outside this skill.
+- The PaymentMethod API returns only the last four digits. Stripe's migrations team can export ACH bank accounts as a CSV with routing and account numbers on request ([export formats](https://docs.stripe.com/get-started/data-migrations/export-file-formats)). Importing that file into Straddle is customer-data transfer and outside this skill.
 - Tokenized account numbers from Chase, PNC, and US Bank can be revoked or expire.
 - If the app used Plaid with Stripe's processor token, the app still holds Plaid access tokens; see the Plaid file.
 
@@ -69,5 +69,5 @@ Stripe IDs and tokens (`pm_`, `ba_`, `btok_`, `fca_`, `mandate_`, `seti_`), clie
 - Late returns arrive as disputes, not failed charges.
 - Blocked accounts and inactive mandates must not become usable paykeys.
 - Separate charges and transfers do not reverse transfers automatically when an ACH payment fails.
-- Stripe's automatic mandate and microdeposit emails stop at cutover.
+- Stripe sends mandate and microdeposit emails for Stripe payments. For Straddle-path customers, the plan records who sends any required notices.
 - The statement descriptor changes, which raises unrecognized-debit risk; tell customers.

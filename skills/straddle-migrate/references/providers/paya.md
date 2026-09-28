@@ -4,7 +4,7 @@ Public documentation is thinner here than for the other providers; unknowns are 
 
 ## Find it
 
-- There are no official SDK packages; integrations call REST directly or copy GitHub samples.
+- No official SDK packages were found; integrations call REST directly or copy GitHub samples.
 - Strings: `api.payaconnect.com`, `api.sandbox.payaconnect.com`, `/v2/transactions`, `/v2/accountvaults`, `/v2/contacts`, `/v2/postbackconfigs`, `developer-id`, `user-id`, `user-api-key`, `hash-key`, `ach_sec_code`, `product_transaction_id`, `account_vault_id`, `transaction_api_id`, `status_id`. Legacy Paya Services use SOAP (`ProcessSingleCheck`) or `api-cert.paya.com/ach/v1`.
 
 ## Map
@@ -18,7 +18,7 @@ Public documentation is thinner here than for the other providers; unknowns are 
 | `action: credit`, `action: refund` | payout |
 | `effective_date` | `payment_date` |
 | `ach_sec_code` WEB | `consent_type: internet`; PPD and CCD written: `signed`; TEL and POP need a decision |
-| Location (multi-location integrator) | embedded account (judgment: SaaS); a single merchant suggests a direct account |
+| Location (multi-location integrator) | embedded account (proposal: SaaS); a single merchant suggests a direct account |
 
 ## Status mapping
 
@@ -32,7 +32,7 @@ Public documentation is thinner here than for the other providers; unknowns are 
 | 331 Charged Back after 134 | `reversed`, with the return code |
 | 135 Reserved | undefined in Paya's docs; review manually |
 
-Status codes are from Paya's transactions reference ([transactions](https://docs.payaconnect.com/developers/api/endpoints/transactions)). An HTTP success does not mean approval; the code checks `status_id`. Return reason IDs are numeric (2101 is R01); NOC reason codes exist (2201 and up) but Paya documents no NOC payload.
+Status codes are from Paya's transactions reference ([transactions](https://docs.payaconnect.com/developers/api/endpoints/transactions)). An HTTP success does not mean approval; the code checks `status_id`. Return reason IDs are numeric (2101 is R01); NOC reason codes exist (2201 and up), but the Paya docs reviewed describe no NOC payload.
 
 ## Bank accounts and portability
 
@@ -44,7 +44,7 @@ Paya stores only the SEC code. The merchant keeps the authorization, and Paya's 
 
 ## Idempotency
 
-There is no idempotency header. Paya's guidance after a timeout or server error is to check whether the request succeeded before retrying. On Straddle, every create sends an idempotency key.
+The Paya docs reviewed document no idempotency header. Paya's guidance after a timeout or server error is to check whether the request succeeded before retrying. On Straddle, every create sends an idempotency key.
 
 ## Notifications
 
@@ -57,5 +57,5 @@ Account vault tokens, credentials, postback configurations, transaction history,
 ## Pitfalls
 
 - Paya WEB partial refunds appear approved and are rejected days later; don't carry refund assumptions over.
-- Credits need a separate CCD service in Paya; Straddle payouts don't.
+- Credits need a separate CCD service in Paya; don't carry that setup into the Straddle payout code.
 - Carry forward any blocks the app keeps for accounts with fatal returns.

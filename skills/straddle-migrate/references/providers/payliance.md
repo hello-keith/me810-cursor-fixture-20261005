@@ -4,22 +4,22 @@ Public documentation consists of a developer page, API reference PDFs, and an Op
 
 ## Find it
 
-- There are no official SDKs. Unofficial clients exist (a PHP bundle, a .NET client).
+- No official SDKs were found. Unofficial clients exist (a PHP bundle, a .NET client).
 - Strings: `api.payliance.com`, `staging.api.payliance.com`, `sandbox.api.payliance.com`, `transfer.payliance.com` (SFTP), `api/v1/echeck/`, `echecktoken/`, `tokenizeddebit`, `queryreturns`, `querysettlements`, `UniqueTranId`, `AuthorizationId`, `CheckAmount`, `SecCode`, `WebType`, `BankAccountId`, `ValidationCode`, `_Settle.csv`, `_Return.csv`.
 
 ## Map
 
 | Payliance | Straddle |
 | --- | --- |
-| Name and address sent on each transaction | customer (Payliance has no ACH customer object) |
+| Name and address sent on each transaction | customer (the Payliance ACH docs reviewed describe no customer object) |
 | `BankAccountId` token or raw routing and account | paykey, re-linked through Bridge |
 | `echeck/debit`, `tokenizeddebit` | charge |
 | `echeck/credit`, `tokenizedcredit` | payout |
-| `refund` (full amount of the original debit) | payout (judgment) |
+| `refund` (full amount of the original debit) | payout (proposal) |
 | `UniqueTranId` | `external_id`, and the source of a stable idempotency key |
 | `FutureDate` | `payment_date` |
-| `SecCode` WEB | `consent_type: internet`; PPD and CCD written: `signed`; TEL, check conversion, and RCC codes have no equivalent |
-| Merchant location key | embedded account (judgment); one location suggests a direct account |
+| `SecCode` WEB | `consent_type: internet`; PPD and CCD written: `signed`; TEL has no matching `consent_type` value; check conversion and RCC codes are outside this mapping |
+| Merchant location key | embedded account (proposal); one location suggests a direct account |
 | `querysettlements`, settlement files | funding events |
 
 ## Status mapping
@@ -38,7 +38,7 @@ Statuses are from Payliance's ACH API reference (linked from the [developer page
 
 ## Returns and corrections
 
-`queryreturns` reports `ReturnReason` (the R-code) and a status distinguishing returns after settlement, returns before settlement, and NOCs; a NOC has a zero `ReturnAmount` and carries the corrected value in `Addenda`. Returns are final only after the morning cutoff Payliance documents. Payliance's own blocks (prior unauthorized or fatal returns) don't follow customers; export return history into the application's own blocklist if it relies on them.
+`queryreturns` reports `ReturnReason` (the R-code) and a status distinguishing returns after settlement, returns before settlement, and NOCs; a NOC has a zero `ReturnAmount` and carries the corrected value in `Addenda`. Returns are final only after the morning cutoff Payliance documents. Payliance blocks accounts with prior unauthorized or fatal returns. Don't assume those blocks carry over: the plan records what Straddle does (with the source) and whether the application keeps its own blocklist from Payliance return history.
 
 ## Bank accounts and portability
 
@@ -50,11 +50,11 @@ Payliance stores the SEC code, web type, and authorization date. Its authorizati
 
 ## Idempotency
 
-There is no idempotency header. `UniqueTranId` is required and a duplicate is rejected rather than replayed; the documented safe retry is `retrieve` by `UniqueTranId`. On Straddle, derive the idempotency key and external ID from the same stable ID.
+The Payliance docs reviewed document no idempotency header. `UniqueTranId` is required and a duplicate is rejected rather than replayed; the documented safe retry is `retrieve` by `UniqueTranId`. On Straddle, derive the idempotency key and external ID from the same stable ID.
 
 ## Notifications
 
-Payliance has no webhooks. Integrations poll `retrieve`, `queryreturns`, `querysettlements`, or read SFTP return and settlement files. On Straddle all of that becomes a notification endpoint consumer; keep the old polling only for payments still on Payliance.
+No webhook, callback, or signature mechanism is documented in the sources reviewed: the developer page, the API reference PDFs, and the OpenAPI file. Integrations poll `retrieve`, `queryreturns`, `querysettlements`, or read SFTP return and settlement files. On Straddle all of that becomes a notification endpoint consumer; keep the old polling only for payments still on Payliance.
 
 ## Never moves
 
