@@ -37,7 +37,7 @@ Stripe, Plaid, Moov, Modern Treasury, Dwolla, Paya, Payliance, and Other. [refer
 
 ## Markers
 
-Print each marker on its own line exactly as shown. The JSON stays on one line.
+Print each marker on its own line, exactly as shown, with one-line JSON. Open one step file at a time, in order, even when the request already answers the step's questions or the step needs no tools. Read the step file, then print its `STRADDLE_PROGRESS` marker immediately, before any other tool call, including reading a reference or the next step file. Do the step's work, and only then open the next step file. Do not read ahead, read several step files in one call or command, save markers up, or print them after the work or in the final report.
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-migrate","step":"04-plan"}

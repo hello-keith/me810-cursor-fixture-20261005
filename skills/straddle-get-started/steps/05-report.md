@@ -38,6 +38,8 @@ Status: routed | needs_input | blocked
 ## Open questions
 ```
 
+Under Open questions, list only choices whose source is `open`. A choice the developer stated is not an open question. Don't re-offer it with alternatives or ask the developer to confirm it, unless repository evidence contradicts it.
+
 End with the checklist below. Leave every box unchecked. The checklist is for the developer to tick after checking, not a record of what the skill verified.
 
 ```markdown
