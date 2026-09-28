@@ -1,14 +1,14 @@
 # Step 1: Begin
 
-- **Needs:** the developer's request.
-- **Tools:** Read. No shell commands, no writes.
-- **Next:** [02-inventory.md](02-inventory.md).
-
-Print:
+Print this marker once now, before any tool call, including reading straddle-best-practices or the next step file:
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-migrate","step":"01-begin"}
 ```
+
+- **Needs:** the developer's request.
+- **Tools:** Read. No shell commands, no writes.
+- **Next:** [02-inventory.md](02-inventory.md).
 
 Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and keep its rules in force.
 

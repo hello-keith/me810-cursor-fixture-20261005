@@ -24,7 +24,7 @@ Do not list a file with `delete`, `rename`, or `replace`; those are outside this
 The plan must also fill, from the step 2 behavior list and step 3 answers:
 
 - **Status mapping**: one row per provider status or event the code uses, mapped to a Straddle status and the application's own state. Use only the Straddle statuses listed in the template.
-- **Returns, corrections, and retries**: `failed` vs `reversed` handling, who handles notifications of change, which codes may be retried, and how fatal-return accounts are blocked.
+- **Returns, corrections, and retries**: `failed` vs `reversed` handling, who handles notifications of change, which codes may be retried, and how fatal-return accounts are blocked. For each idempotency key formula (create, resubmit, or retry), record its derivation and resulting length, prefix included; each must be 10 to 40 characters.
 - **Consent**: the existing wording, the decision and who made it (or `Unresolved`), and `consent_type` per flow.
 - **Bank accounts on the Straddle path** and **In-flight payments**, as the template states them.
 - **Not moved**, in its own section: customer records, bank accounts, provider tokens, mandates and authorizations, and payment history.
