@@ -1,7 +1,7 @@
 # Step 2: Inventory
 
 - **Needs:** step 1 summary.
-- **Tools:** Read, Glob, Grep. Bash only for `git status --porcelain` and `git rev-parse --show-toplevel`. No writes. Never open `.env*`, private keys, credential stores, or CLI config files.
+- **Tools:** Read, Glob, Grep preferred. Bash only for bounded read-only local inspection: `git status --porcelain`, `git rev-parse --show-toplevel`, other read-only `git` commands, directory listings, reading repository source, and installed tool-version checks such as `node --version`. No network requests, installs, project-script or test execution, or writes. Never open `.env*`, private keys, credential stores, or CLI config files.
 - **Next:** [03-choices.md](03-choices.md).
 
 Print:

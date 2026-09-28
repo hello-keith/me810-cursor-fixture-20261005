@@ -101,3 +101,7 @@ Pass no `--trust-plugin`, `--allow-real-servers` or `--allow-tools` grant unless
 ### Progress markers
 
 The `STRADDLE_PROGRESS` lines a skill prints when it enters a step are best-effort in native clients, and no repository check or release gate depends on them. They show roughly where a run went, but they aren't evidence that a step finished, that the developer approved anything, or that a run passed. Deterministic progress is the Wizard's job (ME-667), which reports it from client events. Where a client doesn't expose those events, report progress there as unsupported or unverified rather than inferring it from markers. Content, safety, approval, abort handling, a truthful final handoff, native-client verification, and the walkthrough and publication approval all remain release requirements.
+
+### Inventory shell reads (ME-669)
+
+During `straddle-migrate` step 2, Bash is limited to the bounded read-only local inspection listed in the Tools line of [`skills/straddle-migrate/steps/02-inventory.md`](../skills/straddle-migrate/steps/02-inventory.md). Credentials, network calls, installs and writes stay prohibited there; other steps keep their own tool lines.
