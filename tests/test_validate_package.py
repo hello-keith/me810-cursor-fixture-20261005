@@ -12,6 +12,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 SCRIPT = REPO / "scripts" / "validate-package"
 FIXTURES = REPO / "tests" / "fixtures" / "policy"
+# Stored as <skill-name>.md, not SKILL.md, so recursive skill installers never list them as skills.
+SKILL_FIXTURES = REPO / "tests" / "fixtures" / "skill-frontmatter"
 validator = SourceFileLoader("validate_package", str(SCRIPT)).load_module()
 
 PACKAGE_FILES = ("plugin.json", "mcp.json", ".claude-plugin", ".codex-plugin", ".cursor-plugin", "assets")
@@ -31,6 +33,16 @@ def lint(path, **kwargs):
 def run_cli(*args, cwd=REPO):
     result = subprocess.run([sys.executable, str(SCRIPT), *args], cwd=cwd, capture_output=True, text=True)
     return result.returncode, result.stdout.splitlines()
+
+
+def materialize_skill(test, stored):
+    """Copy a stored fixture to <temp>/<skill-name>/SKILL.md and return (temp root, SKILL.md path)."""
+    root = Path(tempfile.mkdtemp())
+    test.addCleanup(shutil.rmtree, root)
+    skill = root / Path(stored).stem / "SKILL.md"
+    skill.parent.mkdir()
+    shutil.copy(SKILL_FIXTURES / stored, skill)
+    return root, skill
 
 
 class PolicyLintTest(unittest.TestCase):
@@ -54,7 +66,6 @@ class PolicyLintTest(unittest.TestCase):
             "links.md": [(3, "links"), (3, "links"), (5, "links")],
             "negative-framing-ends.md": [(9, "resource-polling")],
             "table-rows.md": [(5, "resource-polling"), (6, "excluded-operation")],
-            "SKILL.md": [(1, "frontmatter"), (1, "frontmatter")],
         }
         actual = {path.name: lint(path) for path in (FIXTURES / "fail").rglob("*.md")}
         self.assertEqual(actual, expected)
@@ -67,6 +78,19 @@ class PolicyLintTest(unittest.TestCase):
                       lines)
         code, lines = run_cli("--offline", *map(str, sorted((FIXTURES / "pass").rglob("*.md"))))
         self.assertEqual((code, lines), (0, []))
+
+    def test_skill_frontmatter_is_checked_on_materialized_skill_files(self):
+        _, valid = materialize_skill(self, "straddle-example.md")
+        self.assertEqual(lint(valid), [])
+        self.assertEqual(run_cli("--offline", str(valid)), (0, []))
+        root, invalid = materialize_skill(self, "straddle-mismatch.md")
+        found = validator.lint_file(invalid, "straddle-mismatch/SKILL.md", remote=offline)
+        self.assertEqual(sorted((d.path, d.line, d.rule) for d in found),
+                         [("straddle-mismatch/SKILL.md", 1, "frontmatter")] * 2)
+        code, lines = run_cli("--offline", str(invalid), cwd=root)
+        self.assertEqual(code, 1)
+        self.assertEqual([line.split(": ")[:2] for line in lines],
+                         [["straddle-mismatch/SKILL.md:1", "frontmatter"]] * 2)
 
     def test_webhook_guidance_passes_in_every_distribution_path(self):
         guides = [REPO / "references" / "receiving-webhooks.md",
