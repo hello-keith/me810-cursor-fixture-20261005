@@ -10,7 +10,7 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-integrate","step":"05-execute"}
 ```
 
-Check configuration again before the first request, using the step 1 checks, and confirm the target (Straddle Sandbox, or the exact offline synthetic localhost URL) still matches the approved preview. When the key or a Sandbox environment is now missing, print `STRADDLE_ABORT` with `configuration error: <what is missing>`, send nothing, and continue at step 6, handing off with `blocked`.
+Check configuration again before the first request, using the step 1 checks, and confirm the target (Straddle Sandbox, or the exact offline synthetic localhost URL) still matches the approved preview. For the offline synthetic target, also confirm that every condition in [offline-synthetic-target.md](../references/offline-synthetic-target.md) still holds, including the sandboxed, session-local localhost-only session. If the sandbox status is disabled or unknown, send nothing. When the key or a Sandbox environment is now missing, print `STRADDLE_ABORT` with `configuration error: <what is missing>`, send nothing, and continue at step 6, handing off with `blocked`.
 
 Run the approved rows in order, exactly as previewed.
 

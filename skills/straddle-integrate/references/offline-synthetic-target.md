@@ -9,8 +9,9 @@ Accept it only when all of these hold. If any does not, treat the run as a confi
 - `STRADDLE_ENVIRONMENT=sandbox` is set explicitly. A default or resolved value does not count.
 - `STRADDLE_BASE_URL` is `http://127.0.0.1:<port>` or `http://localhost:<port>`. Any other host, including private network addresses, is not a localhost target.
 - In this conversation, before the preview, the developer explicitly declares two things: that this base URL is a synthetic local upstream for offline proof, and that the configured key is a synthetic value, not a Straddle key. Do not infer either from the URL or the key's shape, and never read or print the key.
+- The developer also confirms that this client session runs with its command sandbox enabled, with network access limited to binding and reaching localhost, through settings scoped to this session (for example a task-local file passed with `--settings`), and with no global, user, or managed policy change. If the sandbox is disabled, bypassed, or unknown, or localhost access came from a global or user settings change, the target is not accepted. A synthetic run must not leave the machine through an unsandboxed shell.
 
-Do not change client, sandbox, or network settings to reach the target. When the local upstream cannot be reached, report that and stop.
+Do not change client, sandbox, or network settings yourself to reach the target, and do not ask the developer to loosen them beyond that session-local localhost binding. When the local upstream cannot be reached, report that and stop.
 
 ## What changes
 
