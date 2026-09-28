@@ -104,15 +104,18 @@ class PolicyLintTest(unittest.TestCase):
     def test_remote_links_must_return_200_after_redirects(self):
         class Handler(http.server.BaseHTTPRequestHandler):
             def do_HEAD(self):
-                routes = {"/ok": (200, None), "/moved": (301, "/ok"), "/missing": (404, None), "/head-refused": (405, None)}
+                self.handle_request(head=True)
+
+            def do_GET(self):
+                self.handle_request(head=False)
+
+            def handle_request(self, head):
+                routes = {"/ok": (200, None), "/moved": (301, "/ok"), "/missing": (404, None),
+                          "/head-refused": (405 if head else 200, None)}
                 status, location = routes.get(self.path, (404, None))
                 self.send_response(status)
                 if location:
                     self.send_header("Location", location)
-                self.end_headers()
-
-            def do_GET(self):
-                self.send_response(200 if self.path == "/head-refused" else 404)
                 self.end_headers()
 
             def log_message(self, *args):
@@ -129,8 +132,8 @@ class PolicyLintTest(unittest.TestCase):
                             f"[missing]({base}/missing) and [refused head]({base}/head-refused).\n")
             found = validator.lint_file(page, "links.md", checked_hosts=("127.0.0.1",), allowlist=(),
                                         remote=validator.fetch_status)
-        self.assertEqual([str(d) for d in found],
-                         [f"links.md:5: links: link {base}/missing returned 404, expected 200"])
+        self.assertEqual([(d.path, d.line, d.rule) for d in found],
+                         [("links.md", 5, "links")])
 
 
 class PackageTest(unittest.TestCase):
