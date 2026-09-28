@@ -30,7 +30,7 @@ Run the steps in order. Each step file lists what it needs, the tools it may use
 
 ## Markers
 
-Print each marker on its own line, exactly as shown, so the Straddle Wizard can parse it. The JSON is one line.
+Print each marker on its own line, exactly as shown, so the Straddle Wizard can parse it. The JSON is one line. Print every step's `STRADDLE_PROGRESS` marker, in order, when that step starts, even when several steps finish before you reply.
 
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-setup","step":"02-repository"}
