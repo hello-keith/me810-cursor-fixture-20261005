@@ -1,0 +1,24 @@
+Offline eval fixture.
+
+- createOrganization: POST /v1/organizations
+- listOrganizations: GET /v1/organizations (external_id filter)
+- createAccount: POST /v1/accounts
+- listAccounts: GET /v1/accounts (external_id filter)
+- getAccount: GET /v1/accounts/{account_id}
+- createCustomer: POST /v1/customers
+- listCustomers: GET /v1/customers (external_id filter)
+- deleteCustomer: DELETE /v1/customers/{id}
+- getUnmaskedCustomer: GET /v1/customers/{id}/unmasked
+- createBankAccountPaykey: POST /v1/bridge/bank_account
+- createPlaidPaykey: POST /v1/bridge/plaid
+- createQuilttPaykey: POST /v1/bridge/quiltt
+- getUnmaskedPaykey: GET /v1/paykeys/{id}/unmasked
+- revealPaykey: GET /v1/paykeys/{id}/reveal
+- createCharge: POST /v1/charges
+- getCharge: GET /v1/charges/{id}
+- getUnmaskedCharge: GET /v1/charges/{id}/unmask
+- createPayout: POST /v1/payouts
+- getUnmaskedPayout: GET /v1/payouts/{id}/unmask
+- listPayments: GET /v1/payments (external_id filter)
+- getUnmaskedRepresentative: GET /v1/representatives/{representative_id}/unmask
+- getUnmaskedLinkedBankAccount: GET /v1/linked_bank_accounts/{linked_bank_account_id}/unmask

@@ -1,0 +1,12 @@
+# Hosts of intentional external links in skills and references.
+# Links to Straddle docs and GitHub are always fetched and must return HTTP 200.
+# Any other https host must be listed here.
+www.standardwebhooks.com
+# Migration provider references in skills/straddle-migrate/references/providers.md (ME-669).
+docs.stripe.com
+plaid.com
+docs.moov.io
+docs.moderntreasury.com
+developers.dwolla.com
+docs.payaconnect.com
+payliance.com

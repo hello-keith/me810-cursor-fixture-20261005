@@ -1,0 +1,33 @@
+{
+  "name": "straddle",
+  "version": "0.1.0",
+  "description": "Straddle Developer Kit skills plus the hosted Straddle API and Docs MCP servers, for building and verifying a Straddle integration.",
+  "author": {
+    "name": "Straddle"
+  },
+  "homepage": "https://straddle-build-straddle-openapi.apidocumentation.com/introduction",
+  "repository": "https://github.com/straddle-build/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "straddle",
+    "payments",
+    "pay-by-bank",
+    "mcp",
+    "sdk"
+  ],
+  "logo": "assets/logo.svg",
+  "mcpServers": "./mcp.json",
+  "variables": {
+    "type": "object",
+    "properties": {
+      "STRADDLE_API_KEY": {
+        "type": "string",
+        "title": "Straddle API key",
+        "description": "Your Sandbox or Production Straddle API key for the hosted Straddle API MCP server."
+      }
+    },
+    "required": [
+      "STRADDLE_API_KEY"
+    ]
+  }
+}

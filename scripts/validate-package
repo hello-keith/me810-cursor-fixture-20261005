@@ -1,0 +1,869 @@
+#!/usr/bin/env python3
+"""Validate the Straddle Agent Plugin package and lint its skill content.
+
+Package checks cover the Agent Plugins 1.0.0 root manifest and mcp.json, the
+Claude Code, Codex and Cursor manifests, skills/ and the claude plugin eval
+layout. Policy checks (ME-816) cover resource polling, execute-request use for
+excluded operations, credential handling, links and skill frontmatter. See
+docs/packaging.md for the rule coverage and its limits.
+"""
+
+import argparse
+import json
+import re
+import struct
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from dataclasses import dataclass
+from pathlib import Path
+
+SCRIPTS_DIR = Path(__file__).resolve().parent
+SCHEMA_DIR = SCRIPTS_DIR / "schemas" / "agent-plugins" / "1.0.0"
+LINK_ALLOWLIST = SCRIPTS_DIR / "link-allowlist.txt"
+
+AGENT_PLUGIN_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
+AGENT_MCP_SCHEMA = "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json"
+MCP_SERVERS = {
+    "straddle-api": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd",
+    "straddle-docs": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp",
+}
+REQUIRED_SKILLS = (
+    "straddle-setup",
+    "straddle-plan",
+    "straddle-integrate",
+    "straddle-test",
+    "straddle-get-started",
+    "straddle-migrate",
+    "straddle-go-live",
+    "straddle-audit",
+    "straddle-best-practices",
+)
+NATIVE_MANIFESTS = (".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json")
+# Claude Code sends no Authorization to a plugin server unless the manifest
+# declares one, and the shared Agent Plugins mcp.json must not, so the Claude
+# manifest redeclares only straddle-api, reading the caller's key from the
+# environment. Codex and Cursor keep the shared declaration.
+SHARED_MCP_SERVERS = "./mcp.json"
+CLAUDE_MCP_SERVERS = [SHARED_MCP_SERVERS, {"straddle-api": {
+    "type": "http",
+    "url": MCP_SERVERS["straddle-api"],
+    "headers": {"Authorization": "Bearer ${STRADDLE_API_KEY}"},
+}}]
+MANIFEST_MCP_SERVERS = {
+    ".claude-plugin/plugin.json": (CLAUDE_MCP_SERVERS, f"mcpServers must be {json.dumps(CLAUDE_MCP_SERVERS)}: Claude "
+                                   "Code sends the caller's key only through this override of the shared declaration"),
+    ".codex-plugin/plugin.json": (SHARED_MCP_SERVERS, 'mcpServers must be "./mcp.json", the shared declaration'),
+    ".cursor-plugin/plugin.json": (SHARED_MCP_SERVERS, 'mcpServers must be "./mcp.json", the shared declaration'),
+}
+CODEX_INTERFACE_FIELDS = (
+    "displayName",
+    "shortDescription",
+    "longDescription",
+    "developerName",
+    "category",
+    "capabilities",
+    "websiteURL",
+    "privacyPolicyURL",
+    "termsOfServiceURL",
+    "logo",
+    "composerIcon",
+)
+CURSOR_VARIABLE_KEYWORDS = {
+    "type", "title", "description", "default", "enum", "const", "properties", "required", "items",
+    "minLength", "maxLength", "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum", "minItems", "maxItems",
+}
+
+# The fourteen operations the kit routes through the SDK or CLI, never execute-request (build plan section 5).
+# Source: straddle-api-contracts openapi/straddle.openapi.yaml at bb4dfd4.
+EXCLUDED_OPERATIONS = (
+    ("createCharge", "POST", "/v1/charges"),
+    ("createPayout", "POST", "/v1/payouts"),
+    ("createCustomer", "POST", "/v1/customers"),
+    ("createBankAccountPaykey", "POST", "/v1/bridge/bank_account"),
+    ("createPlaidPaykey", "POST", "/v1/bridge/plaid"),
+    ("createQuilttPaykey", "POST", "/v1/bridge/quiltt"),
+    ("deleteCustomer", "DELETE", "/v1/customers/{id}"),
+    ("getUnmaskedCustomer", "GET", "/v1/customers/{id}/unmasked"),
+    ("getUnmaskedPaykey", "GET", "/v1/paykeys/{id}/unmasked"),
+    ("revealPaykey", "GET", "/v1/paykeys/{id}/reveal"),
+    ("getUnmaskedCharge", "GET", "/v1/charges/{id}/unmask"),
+    ("getUnmaskedPayout", "GET", "/v1/payouts/{id}/unmask"),
+    ("getUnmaskedRepresentative", "GET", "/v1/representatives/{representative_id}/unmask"),
+    ("getUnmaskedLinkedBankAccount", "GET", "/v1/linked_bank_accounts/{linked_bank_account_id}/unmask"),
+)
+# First path segments of the canonical contract, used to recognize SDK and CLI resource reads.
+CONTRACT_RESOURCES = (
+    "account_settings", "accounts", "bridge", "charges", "customers", "funding_event_payments", "funding_events",
+    "linked_bank_accounts", "organizations", "paykeys", "payments", "payouts", "representatives",
+)
+CHECKED_LINK_HOSTS = ("github.com", "raw.githubusercontent.com", "straddle.com", "straddle.io",
+                      "straddle-build-straddle-openapi.apidocumentation.com")
+
+
+@dataclass(frozen=True, order=True)
+class Diagnostic:
+    path: str
+    line: int
+    rule: str
+    message: str
+
+    def __str__(self):
+        return f"{self.path}:{self.line}: {self.rule}: {self.message}"
+
+
+# ---------------------------------------------------------------------------
+# JSON Schema subset used by the vendored Agent Plugins 1.0.0 schemas.
+
+
+def schema_errors(value, schema, root, where="$"):
+    if "$ref" in schema:
+        target = root
+        for part in schema["$ref"].removeprefix("#/").split("/"):
+            target = target[part]
+        return schema_errors(value, target, root, where)
+    errors = []
+    if "const" in schema and value != schema["const"]:
+        return [f"{where} must be {json.dumps(schema['const'])}"]
+    if "enum" in schema and value not in schema["enum"]:
+        errors.append(f"{where} must be one of {schema['enum']}")
+    expected = schema.get("type")
+    types = {"object": dict, "array": list, "string": str, "boolean": bool}
+    if expected and not isinstance(value, types[expected]):
+        return [f"{where} must be a JSON {expected}"]
+    if "oneOf" in schema:
+        matches = [s for s in schema["oneOf"] if not schema_errors(value, s, root, where)]
+        if len(matches) != 1:
+            branch_errors = [schema_errors(value, s, root, where) for s in schema["oneOf"]]
+            closest = min(branch_errors, key=len)
+            errors.append(f"{where} matches no allowed form ({'; '.join(closest)})")
+    if "not" in schema and not schema_errors(value, schema["not"], root, where):
+        errors.append(f"{where} is not allowed")
+    if isinstance(value, str):
+        if len(value) < schema.get("minLength", 0):
+            errors.append(f"{where} must not be empty")
+        if "maxLength" in schema and len(value) > schema["maxLength"]:
+            errors.append(f"{where} must be at most {schema['maxLength']} characters")
+        if "pattern" in schema and not re.search(schema["pattern"], value):
+            errors.append(f"{where} does not match {schema['pattern']}")
+    if isinstance(value, list) and "items" in schema:
+        for index, item in enumerate(value):
+            errors += schema_errors(item, schema["items"], root, f"{where}[{index}]")
+    if isinstance(value, dict):
+        for key in schema.get("required", []):
+            if key not in value:
+                errors.append(f"{where}.{key} is required")
+        properties = schema.get("properties", {})
+        for key, item in value.items():
+            if "propertyNames" in schema:
+                errors += schema_errors(key, schema["propertyNames"], root, f"{where} key {key!r}")
+            if key in properties:
+                errors += schema_errors(item, properties[key], root, f"{where}.{key}")
+            elif schema.get("additionalProperties") is False:
+                errors.append(f"{where}.{key} is not allowed")
+            elif isinstance(schema.get("additionalProperties"), dict):
+                errors += schema_errors(item, schema["additionalProperties"], root, f"{where}.{key}")
+    return errors
+
+
+# ---------------------------------------------------------------------------
+# Package structure.
+
+
+class Package:
+    def __init__(self, root, remote):
+        self.root = root
+        self.remote = remote
+        self.diagnostics = []
+
+    def report(self, rel, rule, message, line=1):
+        self.diagnostics.append(Diagnostic(rel, line, rule, message))
+
+    def load_json(self, rel):
+        path = self.root / rel
+        if not path.is_file():
+            self.report(rel, "package", "file is missing")
+            return None
+        try:
+            value = json.loads(path.read_text())
+        except json.JSONDecodeError as error:
+            self.report(rel, "package", f"invalid JSON: {error.msg}", error.lineno)
+            return None
+        if not isinstance(value, dict):
+            self.report(rel, "package", "must contain a JSON object")
+            return None
+        return value
+
+    def check_schema(self, rel, value, schema_name):
+        schema = json.loads((SCHEMA_DIR / schema_name).read_text())
+        for error in schema_errors(value, schema, schema):
+            self.report(rel, "agent-plugins", error)
+
+    def check(self):
+        plugin = self.load_json("plugin.json")
+        mcp = self.load_json("mcp.json")
+        if plugin is not None:
+            self.check_schema("plugin.json", plugin, "plugin.schema.json")
+        if mcp is not None:
+            self.check_schema("mcp.json", mcp, "mcp.schema.json")
+            self.check_mcp(mcp)
+        name = plugin.get("name") if plugin else None
+        version = plugin.get("version") if plugin else None
+        if plugin is not None and not version:
+            self.report("plugin.json", "version", "version must be pinned")
+        manifests = {rel: self.load_json(rel) for rel in NATIVE_MANIFESTS}
+        for rel, manifest in manifests.items():
+            if manifest is None:
+                continue
+            if manifest.get("name") != name:
+                self.report(rel, "package", f"name must match plugin.json name {name!r}")
+            if manifest.get("version") != version:
+                self.report(rel, "version", f"version must match plugin.json version {version!r}")
+            expected, message = MANIFEST_MCP_SERVERS[rel]
+            if manifest.get("mcpServers") != expected:
+                self.report(rel, "package", message)
+        self.check_claude_marketplace(name, version)
+        if manifests[".codex-plugin/plugin.json"] is not None:
+            self.check_codex(manifests[".codex-plugin/plugin.json"])
+        if manifests[".cursor-plugin/plugin.json"] is not None:
+            self.check_cursor(manifests[".cursor-plugin/plugin.json"], mcp)
+        skills = self.check_skills()
+        self.check_evals(skills)
+
+    def check_mcp(self, mcp):
+        servers = mcp.get("mcpServers")
+        if not isinstance(servers, dict):
+            return
+        for server, url in MCP_SERVERS.items():
+            config = servers.get(server)
+            if not isinstance(config, dict):
+                self.report("mcp.json", "mcp", f"missing server {server!r}")
+                continue
+            if config.get("url") != url:
+                self.report("mcp.json", "mcp", f"{server} url must be {url}")
+            if "headers" in config:
+                self.report("mcp.json", "mcp", f"{server} must not declare headers: Agent Plugins header values are "
+                            "literal package data and credentials are client-managed (spec section 7.2.1)")
+        for server in servers.keys() - MCP_SERVERS.keys():
+            self.report("mcp.json", "mcp", f"unexpected server {server!r}")
+
+    def check_claude_marketplace(self, name, version):
+        rel = ".claude-plugin/marketplace.json"
+        marketplace = self.load_json(rel)
+        if marketplace is None:
+            return
+        if marketplace.get("metadata", {}).get("version") != version:
+            self.report(rel, "version", f"metadata.version must match plugin.json version {version!r}")
+        entries = [entry for entry in marketplace.get("plugins", []) if entry.get("name") == name]
+        if len(entries) != 1:
+            self.report(rel, "package", f"must list plugin {name!r} exactly once")
+            return
+        if entries[0].get("source") != "./":
+            self.report(rel, "package", 'plugin source must be "./", the repository root')
+        if entries[0].get("version", version) != version:
+            self.report(rel, "version", f"plugin entry version must match plugin.json version {version!r}")
+
+    def check_codex(self, manifest):
+        rel = ".codex-plugin/plugin.json"
+        interface = manifest.get("interface")
+        if not isinstance(interface, dict):
+            self.report(rel, "codex", "interface block is required")
+            return
+        for field in CODEX_INTERFACE_FIELDS:
+            if not interface.get(field):
+                self.report(rel, "codex", f"interface.{field} is required")
+        for field in ("logo", "composerIcon"):
+            if interface.get(field):
+                self.check_png(rel, f"interface.{field}", interface[field])
+        for field in ("websiteURL", "privacyPolicyURL", "termsOfServiceURL"):
+            url = interface.get(field)
+            if not url:
+                continue
+            if not url.startswith("https://"):
+                self.report(rel, "codex", f"interface.{field} must use https")
+                continue
+            status = self.remote(url)
+            if status != 200:
+                self.report(rel, "links", f"interface.{field} {url} returned {status}, expected 200")
+
+    def check_png(self, rel, field, value):
+        if not value.startswith("./assets/") or not value.endswith(".png"):
+            self.report(rel, "asset", f"{field} must be a PNG under ./assets/")
+            return
+        path = self.root / value
+        if not path.is_file():
+            self.report(rel, "asset", f"{field} file {value} is missing")
+            return
+        header = path.read_bytes()[:24]
+        if header[:8] != b"\x89PNG\r\n\x1a\n":
+            self.report(rel, "asset", f"{field} file {value} is not a PNG")
+            return
+        width, height = struct.unpack(">II", header[16:24])
+        if width != height:
+            self.report(rel, "asset", f"{field} file {value} must be square, found {width}x{height}")
+
+    def check_cursor(self, manifest, mcp):
+        rel = ".cursor-plugin/plugin.json"
+        logo = manifest.get("logo")
+        if not logo or not (self.root / logo).is_file():
+            self.report(rel, "asset", "logo must name a committed file")
+        variables = manifest.get("variables")
+        if not isinstance(variables, dict) or variables.get("type") != "object" \
+                or not isinstance(variables.get("properties"), dict):
+            self.report(rel, "cursor", 'variables must be {"type": "object", "properties": {...}}')
+            return
+        for key in self.unsupported_keywords(variables):
+            self.report(rel, "cursor", f"variables uses unsupported JSON Schema keyword {key!r}")
+        if "STRADDLE_API_KEY" not in variables["properties"]:
+            self.report(rel, "cursor", "variables must declare STRADDLE_API_KEY")
+        placeholders = set(re.findall(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}", json.dumps(mcp or {})))
+        for missing in sorted(placeholders - variables["properties"].keys()):
+            self.report(rel, "cursor", f"mcp.json placeholder ${{{missing}}} is not declared in variables")
+
+    def unsupported_keywords(self, schema):
+        found = set(schema) - CURSOR_VARIABLE_KEYWORDS
+        for child in schema.get("properties", {}).values():
+            found |= self.unsupported_keywords(child)
+        if isinstance(schema.get("items"), dict):
+            found |= self.unsupported_keywords(schema["items"])
+        return found
+
+    def check_skills(self):
+        skills_dir = self.root / "skills"
+        present = sorted(p.name for p in skills_dir.iterdir() if p.is_dir()) if skills_dir.is_dir() else []
+        for skill in present:
+            if not (skills_dir / skill / "SKILL.md").is_file():
+                self.report(f"skills/{skill}", "skill", "skill directory has no SKILL.md")
+        for skill in REQUIRED_SKILLS:
+            if skill not in present:
+                self.report(f"skills/{skill}", "skill", "required skill is missing")
+        return [skill for skill in present if (skills_dir / skill / "SKILL.md").is_file()]
+
+    def check_evals(self, skills):
+        evals = self.root / "evals"
+        cases = eval_cases(evals) if evals.is_dir() else []
+        for case in cases:
+            rel = case.relative_to(self.root).as_posix()
+            prompt = case / "prompt.md"
+            if prompt.is_file() and not split_frontmatter(prompt.read_text())[1].strip():
+                self.report(f"{rel}/prompt.md", "eval", "prompt body is empty")
+            graders = list((case / "graders").glob("*.md")) if (case / "graders").is_dir() else []
+            if not graders and not (case / "case.yaml").is_file():
+                self.report(rel, "eval", "case has no graders/*.md")
+        mock_roots = [evals / "mocks"] + [case / "mocks" for case in cases]
+        for mock_root in mock_roots:
+            if not mock_root.is_dir():
+                continue
+            for server in sorted(p for p in mock_root.iterdir() if p.is_dir() and not p.name.startswith(".")):
+                if server.name not in MCP_SERVERS:
+                    self.report(server.relative_to(self.root).as_posix(), "eval",
+                                f"mock server must be one of {sorted(MCP_SERVERS)}")
+        case_names = [case.name for case in cases]
+        for skill in skills:
+            if not any(name == skill or name.startswith(f"{skill}-") for name in case_names):
+                self.report(f"skills/{skill}", "eval", f"no eval case named {skill}-* under evals/")
+
+
+def eval_cases(evals):
+    cases = []
+    for path in sorted(evals.rglob("*")):
+        if not path.is_dir() or path.name in ("mocks", "results", "graders"):
+            continue
+        relative_parts = path.relative_to(evals).parts
+        if relative_parts[0] in ("mocks", "results") or any(path.is_relative_to(case) for case in cases):
+            continue
+        if (path / "prompt.md").is_file() or (path / "case.yaml").is_file():
+            cases.append(path)
+    return cases
+
+
+# ---------------------------------------------------------------------------
+# Frontmatter: the YAML subset skills use (scalars, quoted scalars, block scalars, one nested map, lists).
+
+
+def split_frontmatter(text):
+    lines = text.split("\n")
+    if lines[0].strip() != "---":
+        return None, text
+    for index in range(1, len(lines)):
+        if lines[index].strip() == "---":
+            return lines[1:index], "\n".join(lines[index + 1:])
+    return None, text
+
+
+def parse_scalar(raw):
+    raw = raw.strip()
+    if len(raw) >= 2 and raw[0] == raw[-1] and raw[0] in "'\"":
+        return raw[1:-1]
+    return raw
+
+
+def parse_frontmatter(lines):
+    """Return (mapping, error) for the frontmatter lines."""
+    data, index = {}, 0
+    while index < len(lines):
+        line = lines[index]
+        if not line.strip() or line.lstrip().startswith("#"):
+            index += 1
+            continue
+        match = re.match(r"^([A-Za-z0-9_-]+):(?:\s+(.*))?$", line)
+        if not match:
+            return data, (index, f"unsupported frontmatter syntax: {line.strip()!r}")
+        key, value = match.group(1), (match.group(2) or "").strip()
+        index += 1
+        block = []
+        while index < len(lines) and (not lines[index].strip() or lines[index].startswith((" ", "\t"))):
+            block.append(lines[index])
+            index += 1
+        if value in ("|", "|-", ">", ">-"):
+            parts = [b.strip() for b in block]
+            data[key] = ("\n" if value.startswith("|") else " ").join(parts).strip()
+        elif value:
+            data[key] = parse_scalar(value)
+        elif block and block[0].strip().startswith("- "):
+            data[key] = [parse_scalar(b.strip()[2:]) for b in block if b.strip()]
+        else:
+            nested = {}
+            for child in (b for b in block if b.strip()):
+                child_match = re.match(r"^\s+([A-Za-z0-9_.-]+):\s+(.*)$", child)
+                if not child_match:
+                    return data, (index, f"unsupported nested frontmatter syntax: {child.strip()!r}")
+                nested[child_match.group(1)] = parse_scalar(child_match.group(2))
+            data[key] = nested
+    return data, None
+
+
+def check_frontmatter(rel, text, skill_dir):
+    lines, _ = split_frontmatter(text)
+    if lines is None:
+        return [Diagnostic(rel, 1, "frontmatter", "SKILL.md must start with YAML frontmatter")]
+    data, error = parse_frontmatter(lines)
+    if error:
+        return [Diagnostic(rel, error[0] + 2, "frontmatter", error[1])]
+    found = []
+    name = data.get("name")
+    if not isinstance(name, str) or not name:
+        found.append("name is required")
+    else:
+        if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name) or len(name) > 64:
+            found.append(f"name {name!r} must be 1-64 lowercase letters, digits and single hyphens")
+        if name != skill_dir:
+            found.append(f"name {name!r} must match its directory {skill_dir!r}")
+    description = data.get("description")
+    if not isinstance(description, str) or not description:
+        found.append("description is required")
+    elif len(description) > 1024:
+        found.append("description must be at most 1024 characters")
+    metadata = data.get("metadata")
+    version = metadata.get("version") if isinstance(metadata, dict) else None
+    if not version:
+        found.append("metadata.version is required")
+    elif not re.fullmatch(r"\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?", version):
+        found.append(f"metadata.version {version!r} must be a semantic version")
+    return [Diagnostic(rel, 1, "frontmatter", message) for message in found]
+
+
+# ---------------------------------------------------------------------------
+# Markdown units: prose paragraphs split into clauses, and fenced code blocks.
+
+
+@dataclass
+class Clause:
+    text: str
+    start: int
+    line_starts: list
+
+    def line_of(self, offset):
+        line = self.line_starts[0][1]
+        for position, number in self.line_starts:
+            if position <= offset:
+                line = number
+        return line
+
+
+def markdown_units(text):
+    """Yield ("prose", [Clause, ...]) per paragraph and ("code", Clause) per fenced block."""
+    lines = text.split("\n")
+    buffer, fence, fence_start = [], None, 0
+
+    def flush():
+        if buffer:
+            yield "prose", paragraph_clauses(buffer)
+            buffer.clear()
+
+    for number, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if fence:
+            if stripped.startswith(fence):
+                yield "code", make_clause(lines[fence_start:number - 1], fence_start + 1)
+                fence = None
+            continue
+        opener = re.match(r"^(```+|~~~+)", stripped)
+        if opener:
+            yield from flush()
+            fence, fence_start = opener.group(1), number
+            continue
+        # List items, headings and table rows each start a unit, so every table row is linted on its own.
+        if not stripped or re.match(r"^(?:[-*+]|\d+\.)\s", stripped) or stripped.startswith(("#", "|")):
+            yield from flush()
+        if stripped:
+            buffer.append((number, line))
+    if fence:
+        yield "code", make_clause(lines[fence_start:], fence_start + 1)
+    yield from flush()
+
+
+def make_clause(lines, first_line):
+    text, starts = "", []
+    for offset, line in enumerate(lines):
+        starts.append((len(text), first_line + offset))
+        text += line + "\n"
+    return Clause(text, 0, starts or [(0, first_line)])
+
+
+def paragraph_clauses(numbered_lines):
+    whole = make_clause([line for _, line in numbered_lines], numbered_lines[0][0])
+    clauses, start = [], 0
+    for match in re.finditer(r"[.!?;](?=\s)|\n\s*\n", whole.text):
+        clauses.append(Clause(whole.text[start:match.end()], start, whole.line_starts))
+        start = match.end()
+    if whole.text[start:].strip():
+        clauses.append(Clause(whole.text[start:], start, whole.line_starts))
+    return clauses
+
+
+NEGATION = re.compile(
+    r"\b(?:never|not|no|don't|doesn't|do not|does not|must not|mustn't|avoid|without|instead of|rather than|"
+    r"forbid\w*|prohibit\w*|refuse\w*|reject\w*)\b", re.IGNORECASE)
+
+
+def negated_before(clause, position):
+    return NEGATION.search(clause.text, 0, position) is not None
+
+
+# A frame is an explicit prohibition: a heading, or a lead-in ending in ':', that starts with a prohibitive phrase.
+PROHIBITION_FRAME = re.compile(
+    r"^[\s#>*_-]*(?:never\b|do not\b|don't\b|avoid\b|forbidden\b|prohibited\b|anti-?patterns?\b|what (?:is|are) not\b)",
+    re.IGNORECASE)
+FRAME_TOPICS = {
+    "resource-polling": re.compile(r"poll|notification|status|loop|tail", re.IGNORECASE),
+    "excluded-operation": re.compile(r"execute-request|excluded|operation|creat|delet|unmask|reveal", re.IGNORECASE),
+    "credentials": re.compile(r"\.env|credential|secret|\bkeys?\b|token|print|echo", re.IGNORECASE),
+}
+GENERIC_LEAD_IN = re.compile(r"\b(?:the following|these|any of)\b", re.IGNORECASE)
+LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s|^\s*\|")
+
+
+def unframed_units(units, rule):
+    """Units that no prohibition frame covers for this rule.
+
+    A prohibition heading that names the rule's topic frames its section. A prohibition lead-in ending in ':' frames
+    the list items and code right after it when it names the topic or says "the following". Headings stay in the
+    result so their own text is checked.
+    """
+    topic = FRAME_TOPICS[rule]
+    kept, section_framed, lead_in_framed = [], False, False
+    for kind, unit in units:
+        whole = unit.text if kind == "code" else "".join(clause.text for clause in unit)
+        if kind == "prose" and whole.lstrip().startswith("#"):
+            section_framed = bool(PROHIBITION_FRAME.search(whole) and topic.search(whole))
+            lead_in_framed = False
+            kept.append((kind, unit))
+            continue
+        is_list_item = kind == "prose" and LIST_ITEM.match(whole) is not None
+        if not (section_framed or (lead_in_framed and (is_list_item or kind == "code"))):
+            kept.append((kind, unit))
+        if kind == "prose" and not is_list_item:
+            lead_in_framed = whole.rstrip().endswith(":") and PROHIBITION_FRAME.search(whole) is not None \
+                and (topic.search(whole) or GENERIC_LEAD_IN.search(whole)) is not None
+    return kept
+
+
+def unnegated(clause, pattern):
+    """First match of pattern in the clause that no negation precedes."""
+    for match in pattern.finditer(clause.text):
+        if not negated_before(clause, match.start()):
+            return match
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Policy rules.
+
+RESOURCES = "|".join(CONTRACT_RESOURCES)
+RESOURCES_CAMEL = "|".join(re.sub(r"_(\w)", lambda m: m.group(1).upper(), r) for r in CONTRACT_RESOURCES)
+RESOURCE_READ = re.compile(
+    r"(?:(?<!\S)|(?<=[`'\"(=]))(?<!POST )(?<!PUT )(?<!PATCH )(?<!DELETE )(?:GET\s+)?"
+    r"(?:https?://[A-Za-z0-9.-]+|\$\{[^}\s]+\}|\{[^}\s]+\}|\$[A-Za-z_]+)?/v1/(?:" + RESOURCES + r")\b"
+    r"|\.(?:" + RESOURCES + "|" + RESOURCES_CAMEL + r")\.(?:get|retrieve|list|search|find|fetch)\w*\s*\("
+    r"|\bstraddle\s+(?:" + RESOURCES.replace("_", "[-_]") + r")\s+(?:get|list|search)\b",
+    re.IGNORECASE)
+POLL_PROSE = re.compile(
+    r"\bpoll(?:s|ed|ing)?\b|\bevery\s+\d+\s*(?:ms|milliseconds?|s|secs?|seconds?|m|mins?|minutes?)\b|"
+    r"\brepeatedly\b|\bin a loop\b|\bloop(?:s|ing)?\b|\bsleep\w*|\bre-?check\w*|"
+    r"\bkeep (?:checking|calling|fetching|querying|reading)\b|\buntil\b[^.;]*\bstatus\b", re.IGNORECASE)
+POLL_CODE = re.compile(
+    r"\bsleep\b|\bsetTimeout\b|\bsetInterval\b|\btime\.Sleep\b|\bThread\.sleep\b|\bTask\.Delay\b|"
+    r"\basyncio\.sleep\b|\bpoll\w*|\bwatch\s+-n\b", re.IGNORECASE)
+# A clause that names the polling endpoint and reads no ordinary resource describes the supported notification path.
+POLLING_ENDPOINT = re.compile(r"\bpolling endpoint|\bpoller\b", re.IGNORECASE)
+# `straddle tail` polls ordinary API reads at an interval (CLI v1.0.3 help), so any instruction to run it is polling.
+# Reading its help does not poll.
+STRADDLE_TAIL = re.compile(r"\bstraddle\s+tail\b(?!\s+(?:--help|-h)\b)")
+TAIL_MESSAGE = "`straddle tail` polls ordinary API reads; use a webhook, FIFO or polling endpoint for status changes"
+
+EXECUTE_REQUEST = re.compile(r"\bexecute[-_]request\b|\bexecuteRequest\b")
+EXCLUDED_OPERATION = re.compile(
+    r"\b(?:" + "|".join(op for op, _, _ in EXCLUDED_OPERATIONS) + r")\b"
+    r"|\bPOST\s+/v1/(?:charges|payouts|customers|bridge/(?:bank_account|plaid|quiltt))\b(?!/)"
+    r"|\bDELETE\b|/unmask(?:ed)?\b|/reveal\b|\bunmask\w*|\breveal\w*"
+    r"|\bcreat\w*\s+(?:(?:a|an|the|new|its|their|sandbox|test)\s+)*(?:charges?|payouts?|customers?|paykeys?)\b"
+    r"|\bdelet\w*", re.IGNORECASE)
+EXCLUDED_CALL_CODE = re.compile(
+    r"[\"']?method[\"']?\s*[:=]\s*[\"']DELETE[\"']|\bDELETE\s+/v1/"
+    r"|/unmask(?:ed)?\b|/reveal\b|\b(?:" + "|".join(op for op, _, _ in EXCLUDED_OPERATIONS) + r")\b", re.IGNORECASE)
+CREATION_PATH_CODE = re.compile(r"/v1/(?:charges|payouts|customers|bridge/(?:bank_account|plaid|quiltt))(?![\w/{$])")
+POST_METHOD_CODE = re.compile(r"[\"']?method[\"']?\s*[:=]\s*[\"']POST[\"']|\bPOST\s+/v1/", re.IGNORECASE)
+
+ENV_FILE = re.compile(r"(?<![\w$])\.env(?:\.[a-z][a-z0-9_-]*)*\b(?!\s*=)")
+DOTENV = re.compile(r"\b(?:dotenv|load_dotenv|godotenv|DotNetEnv)\b")
+READ_VERB = re.compile(
+    r"\b(?:read|reads|reading|open|opens|opening|load|loads|loading|source|sources|cat|print|prints|display|show|"
+    r"echo|dump|copy|paste|parse|parses|inspect|view|grep|include|includes)\b", re.IGNORECASE)
+READ_CODE = re.compile(
+    r"\b(?:cat|less|more|head|tail|source|grep|bat|type|open|readFile\w*|read_text|ReadFile|ReadAllText|"
+    r"File\.read|IO\.read|config)\b|^\s*\.\s", re.IGNORECASE)
+SECRET_REFERENCE = re.compile(
+    r"\$\{?[A-Z0-9_]*(?:API_KEY|SECRET|TOKEN)\b"
+    r"|process\.env(?:\.|\[[\"'])[A-Z0-9_]*(?:API_KEY|SECRET|TOKEN)"
+    r"|os\.(?:environ(?:\.get)?[\[(]|getenv\()[\"'][A-Z0-9_]*(?:API_KEY|SECRET|TOKEN)"
+    r"|os\.Getenv\(\"[A-Z0-9_]*(?:API_KEY|SECRET|TOKEN)"
+    r"|ENV\[[\"'][A-Z0-9_]*(?:API_KEY|SECRET|TOKEN)"
+    r"|Environment\.GetEnvironmentVariable\(\"[A-Z0-9_]*(?:API_KEY|SECRET|TOKEN)")
+SECRET_IDENTIFIER = re.compile(r"\b(?:apiKey|api_key|webhookSecret|webhook_secret|secretKey|secret_key)\b")
+PRINT_CODE = re.compile(
+    r"\b(?:echo|printf|print|println|puts|pp|console\.(?:log|info|warn|error|debug)|fmt\.Print\w*|"
+    r"Console\.Write\w*|logger\.\w+|log\.\w+)\b")
+# `printenv NAME` prints one variable; with no name, or with `env`/`set`, the whole environment is printed.
+PRINTENV = re.compile(r"\bprintenv\b((?:[ \t]+[A-Za-z_][A-Za-z0-9_]*)*)")
+DUMP_ENV = re.compile(r"^\s*(?:env|set)\s*(?:$|\|)|\benv\s*\|\s*grep\b")
+SECRET_NAME = re.compile(r"KEY|SECRET|TOKEN|PASSWORD", re.IGNORECASE)
+PRINT_PROSE = re.compile(
+    r"\b(?:print|echo|log|display|show|output|paste|reveal)\w*\s+(?:the\s+|your\s+|its\s+|their\s+)?"
+    r"(?:(?:full|raw|actual|straddle|sandbox|production|webhook)\s+)*(?:api\s+)?(?:key|secret|token|credential)s?\b"
+    r"(?!\s+(?:is|was|exists|prefix|name|presence|variable))", re.IGNORECASE)
+STRING_LITERAL = re.compile(r"\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'")
+
+
+def lint_polling(rel, units):
+    found = []
+    for kind, unit in units:
+        if kind == "code":
+            tail = STRADDLE_TAIL.search(unit.text)
+            read = RESOURCE_READ.search(unit.text)
+            if tail:
+                found.append(Diagnostic(rel, unit.line_of(tail.start()), "resource-polling", TAIL_MESSAGE))
+            elif read and POLL_CODE.search(unit.text):
+                found.append(Diagnostic(rel, unit.line_of(read.start()), "resource-polling",
+                                        "code repeatedly reads an ordinary API resource with a delay; use a webhook, "
+                                        "FIFO or polling endpoint for status changes"))
+            continue
+        tails = [(c, m) for c in unit for m in [unnegated(c, STRADDLE_TAIL)] if m]
+        reads = [(c, m) for c in unit for m in [unnegated(c, RESOURCE_READ)] if m]
+        read_clauses = {id(c) for c, _ in reads}
+        polls = [(c, m) for c in unit if id(c) in read_clauses or not POLLING_ENDPOINT.search(c.text)
+                 for m in [unnegated(c, POLL_PROSE)] if m]
+        if tails:
+            clause, match = tails[0]
+            found.append(Diagnostic(rel, clause.line_of(clause.start + match.start()), "resource-polling", TAIL_MESSAGE))
+        elif reads and polls:
+            clause, match = reads[0]
+            found.append(Diagnostic(rel, clause.line_of(clause.start + match.start()), "resource-polling",
+                                    f"polls an ordinary API read ({match.group(0).strip()!r} with "
+                                    f"{polls[0][1].group(0)!r}); use a webhook, FIFO or polling endpoint"))
+    return found
+
+
+def lint_excluded_operations(rel, units):
+    found = []
+    for kind, unit in units:
+        if kind == "code":
+            if EXECUTE_REQUEST.search(unit.text):
+                op = EXCLUDED_CALL_CODE.search(unit.text) \
+                    or (POST_METHOD_CODE.search(unit.text) and CREATION_PATH_CODE.search(unit.text))
+                if op:
+                    found.append(Diagnostic(rel, unit.line_of(op.start()), "excluded-operation",
+                                            "execute-request targets an operation reserved for the SDK or CLI"))
+            continue
+        for clause in unit:
+            call = EXECUTE_REQUEST.search(clause.text)
+            op = EXCLUDED_OPERATION.search(clause.text)
+            if call and op and not negated_before(clause, call.start()) and not negated_before(clause, op.start()):
+                found.append(Diagnostic(rel, clause.line_of(clause.start + op.start()), "excluded-operation",
+                                        f"execute-request used for {op.group(0).strip()!r}; creation, delete, "
+                                        "unmask and reveal operations go through the SDK or CLI"))
+    return found
+
+
+def credential_code_line(line):
+    code_only = STRING_LITERAL.sub('""', line)
+    if (ENV_FILE.search(line) and READ_CODE.search(line)) or DOTENV.search(line):
+        return "reads a .env file"
+    printenv = PRINTENV.search(line)
+    if printenv and (not printenv.group(1).split() or any(SECRET_NAME.search(n) for n in printenv.group(1).split())):
+        return "prints environment variables"
+    if DUMP_ENV.search(line):
+        return "prints environment variables"
+    if PRINT_CODE.search(code_only) and (SECRET_REFERENCE.search(line) or SECRET_IDENTIFIER.search(code_only)):
+        return "prints a credential"
+    return None
+
+
+def lint_credentials(rel, units):
+    found = []
+    for kind, unit in units:
+        if kind == "code":
+            for offset, number in unit.line_starts:
+                line = unit.text[offset:].split("\n", 1)[0]
+                reason = credential_code_line(line)
+                if reason:
+                    found.append(Diagnostic(rel, number, "credentials", f"code {reason}"))
+            continue
+        for clause in unit:
+            env_file, verb = ENV_FILE.search(clause.text) or DOTENV.search(clause.text), READ_VERB.search(clause.text)
+            printed = unnegated(clause, PRINT_PROSE)
+            inline = next((m for m in re.finditer(r"`([^`]+)`", clause.text)
+                           if credential_code_line(m.group(1)) and not negated_before(clause, m.start())), None)
+            if env_file and verb and not negated_before(clause, min(verb.start(), env_file.start())):
+                found.append(Diagnostic(rel, clause.line_of(clause.start + env_file.start()), "credentials",
+                                        "instructs reading a .env file; read credentials from the environment"))
+            elif printed:
+                found.append(Diagnostic(rel, clause.line_of(clause.start + printed.start()), "credentials",
+                                        f"instructs exposing a credential ({printed.group(0)!r})"))
+            elif inline:
+                found.append(Diagnostic(rel, clause.line_of(clause.start + inline.start()), "credentials",
+                                        f"inline command {credential_code_line(inline.group(1))}"))
+    return found
+
+
+LINK = re.compile(r"\[[^\]]*\]\(<?([^)\s>]+)>?\)|<(https?://[^>\s]+)>|(?<![(<\w])(https?://[^\s)<>`\"']+)")
+
+
+def extract_links(rel, units):
+    links = []
+    for kind, unit in units:
+        if kind == "code":
+            continue
+        for clause in unit:
+            text = re.sub(r"`[^`]*`", lambda m: " " * len(m.group(0)), clause.text)
+            for match in LINK.finditer(text):
+                target = (match.group(1) or match.group(2) or match.group(3)).rstrip(".,;:")
+                links.append((clause.line_of(clause.start + match.start()), target))
+    return sorted(set(links))
+
+
+def host_matches(host, patterns):
+    return any(host == p or host.endswith("." + p) for p in patterns)
+
+
+def lint_links(rel, path, units, checked_hosts, allowlist, remote):
+    found, remote_links = [], []
+    for line, target in extract_links(rel, units):
+        if target.startswith(("mailto:", "#")):
+            continue
+        parsed = urllib.parse.urlparse(target)
+        if not parsed.scheme:
+            local = (path.parent / urllib.parse.unquote(parsed.path)).resolve()
+            if parsed.path and not local.exists():
+                found.append(Diagnostic(rel, line, "links", f"relative link {target} does not resolve to a file"))
+            continue
+        host = parsed.hostname or ""
+        if parsed.scheme != "https" and host not in ("127.0.0.1", "localhost"):
+            found.append(Diagnostic(rel, line, "links", f"link {target} must use https"))
+        elif host_matches(host, checked_hosts):
+            remote_links.append((line, target))
+        elif not host_matches(host, allowlist):
+            found.append(Diagnostic(rel, line, "links", f"external link host {host} is not in "
+                                    f"{LINK_ALLOWLIST.relative_to(SCRIPTS_DIR.parent)}"))
+    for line, target in remote_links:
+        status = remote(target)
+        if status != 200:
+            found.append(Diagnostic(rel, line, "links", f"link {target} returned {status}, expected 200"))
+    return found
+
+
+def fetch_status(url, timeout=20):
+    """Final HTTP status after redirects: HEAD first, GET when HEAD is refused. One retry for network errors."""
+    last = "network error"
+    for method in ("HEAD", "GET", "GET"):
+        request = urllib.request.Request(url, method=method, headers={"User-Agent": "straddle-validate-package"})
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return response.status
+        except urllib.error.HTTPError as error:
+            last = error.code
+            error.close()
+            if error.code not in (403, 405, 429) and method == "GET":
+                return error.code
+        except (urllib.error.URLError, TimeoutError) as error:
+            last = f"network error ({getattr(error, 'reason', error)})"
+    return last
+
+
+def lint_file(path, rel, checked_hosts=CHECKED_LINK_HOSTS, allowlist=None, remote=fetch_status):
+    text = path.read_text()
+    units = list(markdown_units(text))
+    found = lint_polling(rel, unframed_units(units, "resource-polling")) \
+        + lint_excluded_operations(rel, unframed_units(units, "excluded-operation")) \
+        + lint_credentials(rel, unframed_units(units, "credentials"))
+    if allowlist is None:
+        allowlist = read_allowlist()
+    found += lint_links(rel, path, units, checked_hosts, allowlist, remote)
+    if path.name == "SKILL.md":
+        found += check_frontmatter(rel, text, path.parent.name)
+    return found
+
+
+def read_allowlist():
+    lines = LINK_ALLOWLIST.read_text().splitlines() if LINK_ALLOWLIST.is_file() else []
+    return tuple(line.strip() for line in lines if line.strip() and not line.startswith("#"))
+
+
+def lint_scope(root):
+    return sorted(p for folder in ("skills", "references") if (root / folder).is_dir()
+                  for p in (root / folder).rglob("*.md"))
+
+
+# ---------------------------------------------------------------------------
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--root", type=Path, default=Path.cwd(), help="package root (default: current directory)")
+    parser.add_argument("--offline", action="store_true", help="skip HTTP status checks for remote links")
+    parser.add_argument("files", nargs="*", type=Path, help="lint only these Markdown files, without package checks")
+    args = parser.parse_args(argv)
+    root = args.root.resolve()
+    remote = (lambda url: 200) if args.offline else fetch_status
+    diagnostics = []
+    if args.files:
+        targets = [path.resolve() for path in args.files]
+    else:
+        package = Package(root, remote)
+        package.check()
+        diagnostics += package.diagnostics
+        targets = lint_scope(root)
+    for path in targets:
+        rel = path.relative_to(root).as_posix() if path.is_relative_to(root) else path.as_posix()
+        diagnostics += lint_file(path, rel, remote=remote)
+    for diagnostic in sorted(set(diagnostics)):
+        print(diagnostic)
+    note = " (remote link status not checked: --offline)" if args.offline else ""
+    print(f"validate-package: {len(set(diagnostics))} problem(s) in {len(targets)} linted file(s){note}",
+          file=sys.stderr)
+    return 1 if diagnostics else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

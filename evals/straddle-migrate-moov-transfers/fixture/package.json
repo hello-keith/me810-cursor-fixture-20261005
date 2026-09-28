@@ -1,0 +1,6 @@
+{
+  "name": "studiobook",
+  "private": true,
+  "scripts": { "test": "node --test test/" },
+  "dependencies": { "@moovio/sdk": "^1.0.0", "express": "^4.19.2" }
+}
