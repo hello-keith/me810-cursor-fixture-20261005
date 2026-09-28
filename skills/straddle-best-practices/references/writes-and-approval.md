@@ -42,7 +42,8 @@ Proceed only after an explicit yes. A changed environment, account, operation, o
 
 - Send an idempotency key on every create. Derive it from something stable for that intent, such as the external ID plus the operation, so a retry of the same intent reuses it.
 - Give every created resource a stable, non-sensitive external ID.
-- Use the IDs returned by successful create responses in the next step. Do not rediscover them with list calls.
+- Use IDs returned by successful create responses in the next step's ID fields. Do not rediscover them with list calls.
+- A charge's or payout's `paykey` field takes the full paykey token. It does not take the paykey `id`, or the masked `paykey` that `bank_account` and `plaid` creates return. Get the full token from `revealPaykey` or `getUnmaskedPaykey`, which are among the fourteen, so use the SDK or CLI after their own approval, or from a `quiltt` create response. Use it within one SDK process or one CLI command without printing it. Never write it to a plan, preview, log, report, test, evidence, or commit. Follow the contract field, not the value's shape.
 - If a create result is unknown (timeout, dropped connection), retry with the same idempotency key or look up the exact external ID. Never loop on fresh creates.
 
 ## CLI writes
