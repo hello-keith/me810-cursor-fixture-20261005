@@ -1,16 +1,20 @@
 # Routing
 
-Map the developer's answers to what to use next. Versions change; confirm the installed or latest published package before naming a method.
+Map the developer's answers to what to use next.
 
 ## SDK by language
 
-| Language in the repository | SDK | Install |
-| --- | --- | --- |
-| TypeScript or JavaScript | `@straddlecom/straddle` | `npm install @straddlecom/straddle` |
-| Go | `github.com/straddle-build/straddle-go` | `go get github.com/straddle-build/straddle-go` |
-| Ruby | `straddle` gem | `bundle add straddle` |
-| C# / .NET | `Straddle` | `dotnet add package Straddle` |
-| Python | None published yet | Blocked. PyPI `straddle` is the retired 0.5.x package. |
+The released package and version for each language are in the Current versions table of [straddle-best-practices](../../straddle-best-practices/SKILL.md), the one source for SDK versions. Recommend the row that matches the language of the service that will call Straddle, and confirm the installed or latest published version against that table before naming a method.
+
+| Language in the repository | Install command |
+| --- | --- |
+| TypeScript or JavaScript | `npm install @straddlecom/straddle` |
+| Python | `pip install straddle` |
+| Go | `go get github.com/straddle-build/straddle-go` |
+| Ruby | `bundle add straddle` |
+| C# / .NET | `dotnet add package Straddle` |
+
+A lockfile that resolves to a release older than the table's (for example Python `straddle` 0.x or `github.com/straddleio/straddle-go`) is a retired SDK: say so and route to the current release.
 
 A repository with several languages gets the SDK for the service that will call Straddle, which the developer names. Browser code never holds the API key; it talks to the developer's server.
 
@@ -43,4 +47,4 @@ Organization and account-management operations omit the header for every model. 
 | Existing provider code (Stripe, Plaid, Moov, Modern Treasury, Dwolla, Paya, Payliance, or Other) to replace or run beside | [straddle-migrate](../../straddle-migrate/SKILL.md) |
 | Straddle code already present and the developer reports a problem or wants a review | [straddle-audit](../../straddle-audit/SKILL.md) |
 | Straddle integration tested in Sandbox and heading to production | [straddle-go-live](../../straddle-go-live/SKILL.md) |
-| A choice is still open or the only language is Python | No skill yet. Answer the open choice first. |
+| A choice is still open | No skill yet. Answer the open choice first. |
