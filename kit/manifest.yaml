@@ -440,7 +440,7 @@ instructions:
         (
           set -eu
           codex plugin list --json | python3 -c 'import json,sys; p={x["pluginId"]: x for x in json.load(sys.stdin)["installed"]}["straddle@straddle"]; assert p["version"]=="0.1.0" and p["enabled"], p'
-          codex mcp list --json | python3 -c 'import json,sys; s={x["name"]: x.get("transport") or {} for x in json.load(sys.stdin) if x.get("enabled")}; assert all(s.get(k, {}).get("url")==v for k, v in {"straddle-api": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd", "straddle-docs": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"}.items()) and s["straddle-api"].get("bearer_token_env_var")=="STRADDLE_API_KEY", s'
+          codex mcp list --json | python3 -c 'import json,sys; t={x["name"]: x.get("transport") or {} for x in json.load(sys.stdin) if x.get("enabled")}; s={k: t.get(k, {}).get("url")==v for k, v in {"straddle-api": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd", "straddle-docs": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"}.items()}; s["straddle-api bearer_token_env_var is STRADDLE_API_KEY"]=t.get("straddle-api", {}).get("bearer_token_env_var")=="STRADDLE_API_KEY"; all(s.values()) or sys.exit("Codex Straddle MCP configuration does not match: " + json.dumps(s))'
         )
     release:
       install: |-
@@ -499,7 +499,7 @@ instructions:
         (
           set -eu
           codex plugin list --json | python3 -c 'import json,sys; p={x["pluginId"]: x for x in json.load(sys.stdin)["installed"]}["straddle@straddle"]; assert p["version"]=="0.1.0" and p["enabled"], p'
-          codex mcp list --json | python3 -c 'import json,sys; s={x["name"]: x.get("transport") or {} for x in json.load(sys.stdin) if x.get("enabled")}; assert all(s.get(k, {}).get("url")==v for k, v in {"straddle-api": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd", "straddle-docs": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"}.items()) and s["straddle-api"].get("bearer_token_env_var")=="STRADDLE_API_KEY", s'
+          codex mcp list --json | python3 -c 'import json,sys; t={x["name"]: x.get("transport") or {} for x in json.load(sys.stdin) if x.get("enabled")}; s={k: t.get(k, {}).get("url")==v for k, v in {"straddle-api": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd", "straddle-docs": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"}.items()}; s["straddle-api bearer_token_env_var is STRADDLE_API_KEY"]=t.get("straddle-api", {}).get("bearer_token_env_var")=="STRADDLE_API_KEY"; all(s.values()) or sys.exit("Codex Straddle MCP configuration does not match: " + json.dumps(s))'
         )
   cursor:
     manual: true

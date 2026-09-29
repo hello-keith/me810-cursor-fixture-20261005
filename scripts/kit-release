@@ -325,9 +325,11 @@ def instructions(plugin, archive_name, archive_sha, content_sha256, skill_count,
     codex_validate = [
         f"codex plugin list --json | python3 -c 'import json,sys; p={{x[\"pluginId\"]: x for x in "
         f"json.load(sys.stdin)[\"installed\"]}}[\"{market}\"]; assert p[\"version\"]==\"{version}\" and p[\"enabled\"], p'",
-        f"codex mcp list --json | python3 -c 'import json,sys; s={{x[\"name\"]: x.get(\"transport\") or {{}} for x in "
-        f"json.load(sys.stdin) if x.get(\"enabled\")}}; assert all(s.get(k, {{}}).get(\"url\")==v for k, v in "
-        f"{servers}.items()) and s[\"straddle-api\"].get(\"bearer_token_env_var\")==\"STRADDLE_API_KEY\", s'",
+        f"codex mcp list --json | python3 -c 'import json,sys; t={{x[\"name\"]: x.get(\"transport\") or {{}} for x in "
+        f"json.load(sys.stdin) if x.get(\"enabled\")}}; s={{k: t.get(k, {{}}).get(\"url\")==v for k, v in "
+        f"{servers}.items()}}; s[\"straddle-api bearer_token_env_var is STRADDLE_API_KEY\"]="
+        f"t.get(\"straddle-api\", {{}}).get(\"bearer_token_env_var\")==\"STRADDLE_API_KEY\"; all(s.values()) or "
+        f"sys.exit(\"Codex Straddle MCP configuration does not match: \" + json.dumps(s))'",
     ]
 
     def claude(acquire):
@@ -494,12 +496,18 @@ else { const r = loadBundle(process.argv[2]); console.log(JSON.stringify({ ok: r
 
 
 def wizard_problems(root, commit, wizard, tarball):
-    """The tarball is the recorded artifact, and its Wizard accepts this plugin as both an archive and a checkout."""
+    """The tarball is the recorded artifact, and its Wizard accepts this plugin as both an archive and a checkout.
+
+    Importing bundle.js runs the pack's code, so nothing is extracted until the bytes match the recorded digests, and
+    nothing is imported until package.json matches the recorded identity.
+    """
     data, artifact, problems = tarball.read_bytes(), wizard.get("artifact") or {}, []
     if hashlib.sha256(data).hexdigest() != artifact.get("sha256"):
         problems.append(f"{tarball}: sha256 does not match wizard.artifact.sha256")
     if npm_integrity(data) != artifact.get("integrity"):
         problems.append(f"{tarball}: integrity does not match wizard.artifact.integrity")
+    if problems:
+        return problems
     with tempfile.TemporaryDirectory() as scratch:
         scratch = Path(scratch)
         with tarfile.open(fileobj=io.BytesIO(data)) as pack:
@@ -507,7 +515,7 @@ def wizard_problems(root, commit, wizard, tarball):
         package = json.loads((scratch / "wizard" / "package" / "package.json").read_text())
         if package.get("name") != wizard["package"] or package.get("version") != wizard["version"] \
                 or wizard["bin"] not in (package.get("bin") or {}):
-            problems.append(f"{tarball}: package.json name, version or bin differs from wizard in {INPUTS}")
+            return [f"{tarball}: package.json name, version or bin differs from wizard in {INPUTS}"]
         zipfile.ZipFile(io.BytesIO(build_archive(source_files(root, commit)))).extractall(scratch / "archive")
         with tarfile.open(fileobj=io.BytesIO(git(root, "archive", "--format=tar", commit))) as tree:
             tree.extractall(scratch / "checkout", filter="data")

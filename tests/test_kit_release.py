@@ -3,6 +3,7 @@ import gzip
 import hashlib
 import io
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -19,8 +20,9 @@ PLUGIN_PATHS = ("plugin.json", "mcp.json", ".claude-plugin", ".codex-plugin", ".
                 "references", "third_party", "LICENSE", "README.md")
 # A stand-in Wizard pack: its loadBundle accepts any directory with plugin.json, and optionally rejects one that also
 # holds kit/, the way a Wizard that only knows the stripped archive layout would.
-BUNDLE_JS = """import { existsSync } from 'node:fs';
+BUNDLE_JS = """import { appendFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+if (process.env.KIT_TEST_MARKER) appendFileSync(process.env.KIT_TEST_MARKER, 'imported\\n');
 export function loadBundle(dir) {
   if (REJECT_KIT && existsSync(join(dir, 'kit'))) return { ok: false, reason: 'unexpected kit/' };
   return { ok: existsSync(join(dir, 'plugin.json')), reason: null };
@@ -45,13 +47,13 @@ def git(root, *args):
                           check=True, capture_output=True, text=True).stdout.strip()
 
 
-def wizard_pack(reject_kit=False):
+def wizard_pack(reject_kit=False, name="@straddlecom/wizard"):
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w") as pack:
-        for name, text in (("package/package.json", json.dumps({"name": "@straddlecom/wizard", "version": "0.1.0",
+        for path, text in (("package/package.json", json.dumps({"name": name, "version": "0.1.0",
                                                                  "bin": {"wizard": "dist/cli.js"}})),
                            ("package/dist/bundle.js", BUNDLE_JS.replace("REJECT_KIT", json.dumps(reject_kit)))):
-            info = tarfile.TarInfo(name)
+            info = tarfile.TarInfo(path)
             info.size = len(text.encode())
             pack.addfile(info, io.BytesIO(text.encode()))
     return gzip.compress(buffer.getvalue(), mtime=0)
@@ -90,9 +92,9 @@ class KitReleaseTest(unittest.TestCase):
     def inputs(self):
         return json.loads((self.root / "kit" / "release-inputs.json").read_text())
 
-    def run_kit(self, *args):
+    def run_kit(self, *args, env=None):
         result = subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root), *args],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, env={**os.environ, **(env or {})})
         return result.returncode, result.stdout + result.stderr
 
     def build(self):
@@ -139,6 +141,7 @@ class KitReleaseTest(unittest.TestCase):
         if fail:
             env["STUB_FAIL"] = fail
         result = subprocess.run(["bash", "-c", operation], env=env, capture_output=True, text=True)
+        self.last_output = result.stdout + result.stderr
         log = (stubs / "log").read_text().splitlines() if (stubs / "log").exists() else []
         (stubs / "log").unlink(missing_ok=True)
         return result.returncode, log
@@ -310,6 +313,32 @@ class KitReleaseTest(unittest.TestCase):
         self.assertIn("the Wizard rejects the full repository checkout", output)
         self.assertNotIn("rejects the plugin archive", output)
 
+    def test_wizard_tarball_code_runs_only_after_bytes_and_identity_verify(self):
+        self.assertEqual(self.run_kit("generate")[0], 0)
+        self.commit_all("manifest")
+        marker = self.scratch() / "imported"
+        env = {"KIT_TEST_MARKER": str(marker)}
+        tarball = self.scratch() / "straddlecom-wizard-0.1.0.tgz"
+        tarball.write_bytes(wizard_pack(name="@straddlecom/wizard-other"))
+        code, output = self.run_kit("check", "--wizard-tarball", str(tarball), env=env)
+        self.assertEqual((code, marker.exists()), (1, False))
+        self.assertIn("sha256 does not match wizard.artifact.sha256", output)
+        inputs = self.inputs()
+        inputs["wizard"] = {**wizard_input(tarball.read_bytes()), "package": "@straddlecom/wizard"}
+        self.write_inputs(inputs)
+        self.assertEqual(self.run_kit("generate")[0], 0)
+        self.commit_all("recorded digests of a pack with another package name")
+        code, output = self.run_kit("check", "--wizard-tarball", str(tarball), env=env)
+        self.assertEqual((code, marker.exists()), (1, False))
+        self.assertIn("package.json name, version or bin differs", output)
+        inputs["wizard"] = wizard_input(wizard_pack())
+        self.write_inputs(inputs)
+        self.assertEqual(self.run_kit("generate")[0], 0)
+        self.commit_all("verified pack")
+        tarball.write_bytes(wizard_pack())
+        self.assertEqual(self.run_kit("check", "--wizard-tarball", str(tarball), env=env)[0], 0)
+        self.assertEqual(marker.read_text(), "imported\nimported\n")
+
     def test_candidate_install_changes_nothing_without_a_verified_archive(self):
         archive, _ = self.build()
         operations = self.model()["instructions"]
@@ -426,17 +455,24 @@ class KitReleaseTest(unittest.TestCase):
                 result = subprocess.run(["bash", "-c", check], cwd=scratch, capture_output=True, text=True)
                 self.assertEqual((result.returncode == 0, (scratch / "stage").exists()), (extra is None,) * 2)
 
-    def test_codex_validate_requires_the_bearer_variable_name(self):
+    def test_codex_validate_requires_the_bearer_variable_name_without_echoing_other_servers(self):
         validate = self.model()["instructions"]["codex"]["candidate"]["validate"]
         plugins = {"installed": [{"pluginId": "straddle@straddle", "version": "0.1.0", "enabled": True}]}
         other = {"name": "stdio-tool", "enabled": True, "transport": {"type": "stdio", "command": "run"}}
+        secret = "Bearer " + "synthetic-unrelated-credential"
+        unrelated = {"name": "other-mcp", "enabled": True,
+                     "transport": {"url": "https://example.invalid/mcp", "http_headers": {"Authorization": secret}}}
         docs = {"name": "straddle-docs", "enabled": True, "transport": {"url": DOCS}}
         for bearer, expected in (("STRADDLE_API_KEY", 0), (None, 1), ("OTHER_KEY", 1)):
             with self.subTest(bearer=bearer):
                 api = {"name": "straddle-api", "enabled": True, "transport": {"url": API, "bearer_token_env_var": bearer}}
-                stubs = self.stub_clients({"codex": plugins}, {"codex": [other, api, docs]})
+                stubs = self.stub_clients({"codex": plugins}, {"codex": [other, unrelated, api, docs]})
                 code, _ = self.run_operation(validate, stubs, None)
                 self.assertEqual(code != 0, bool(expected))
+                self.assertNotIn("synthetic-unrelated-credential", self.last_output)
+                self.assertNotIn("example.invalid", self.last_output)
+                if expected:
+                    self.assertIn('"straddle-api bearer_token_env_var is STRADDLE_API_KEY": false', self.last_output)
 
 
 if __name__ == "__main__":
