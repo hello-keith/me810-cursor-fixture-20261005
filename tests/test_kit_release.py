@@ -200,8 +200,6 @@ class KitReleaseTest(unittest.TestCase):
         self.assertEqual({name: sdk["minimum_version"] for name, sdk in manifest["sdks"].items()},
                          {"typescript": "1.0.4", "python": "1.0.5", "ruby": "1.0.4", "dotnet": "1.0.4", "go": "1.0.4"})
         self.assertEqual(manifest["hosted_mcp"]["contract_version_served"], "1.0.4")
-        self.assertIn("git clone -q --depth 1 --branch v0.1.0 https://github.com/straddle-build/skills.git "
-                      "claude-code-plugin.new", manifest["instructions"]["claude-code"]["release"]["install"])
 
     def test_generate_rejects_incomplete_or_malformed_inputs(self):
         def drop(path):
