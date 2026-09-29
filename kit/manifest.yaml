@@ -61,7 +61,11 @@ wizard:
     repository: "straddle-build/wizard"
     commit: "344f136ca988c7c439054ed1348e8d884b1b2d69"
     note: "npm pack of this commit; not published to npm, and a reviewed later commit may replace it"
-  skill_bundle: "straddle-build/skills@f713fc6201ad0fd800d23a3ec4c4102b7acee91c, a merged-source snapshot verified by plugin.content_sha256; not a tagged release"
+  skill_bundle:
+    repository: "straddle-build/skills"
+    commit: "f713fc6201ad0fd800d23a3ec4c4102b7acee91c"
+    content_sha256: "e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c"
+    note: "PINNED_BUNDLE in the pack's dist/bundle.js: a merged-source snapshot verified by content, not a tagged release"
 cli:
   package: "@straddlecom/cli"
   version: "1.0.3"
@@ -226,110 +230,270 @@ clients:
 instructions:
   wizard:
     candidate:
-      install:
-        - "(cd \"$STRADDLE_KIT_DIR\" && echo \"3a31cad903f5cb3a73cf609b752b32e354eea773a25163019dbf0f6d078d9852  straddlecom-wizard-0.1.0.tgz\" | shasum -a 256 -c -)"
-        - "npm install --global \"$STRADDLE_KIT_DIR/straddlecom-wizard-0.1.0.tgz\""
-      update:
-        - "(cd \"$STRADDLE_KIT_DIR\" && echo \"3a31cad903f5cb3a73cf609b752b32e354eea773a25163019dbf0f6d078d9852  straddlecom-wizard-0.1.0.tgz\" | shasum -a 256 -c -)"
-        - "npm install --global \"$STRADDLE_KIT_DIR/straddlecom-wizard-0.1.0.tgz\""
-      remove:
-        - "npm uninstall --global @straddlecom/wizard"
-      validate:
-        - "test \"$(wizard --version)\" = \"0.1.0\""
+      install: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          echo "3a31cad903f5cb3a73cf609b752b32e354eea773a25163019dbf0f6d078d9852  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
+          npm install --global "$PWD/straddlecom-wizard-0.1.0.tgz"
+        )
+      update: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          echo "3a31cad903f5cb3a73cf609b752b32e354eea773a25163019dbf0f6d078d9852  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
+          npm install --global "$PWD/straddlecom-wizard-0.1.0.tgz"
+        )
+      remove: |-
+        (
+          set -eu
+          npm uninstall --global @straddlecom/wizard
+        )
+      validate: |-
+        (
+          set -eu
+          test "$(wizard --version)" = "0.1.0"
+        )
     release:
-      install:
-        - "npm install --global @straddlecom/wizard@0.1.0"
-      update:
-        - "npm install --global @straddlecom/wizard@0.1.0"
-      remove:
-        - "npm uninstall --global @straddlecom/wizard"
-      validate:
-        - "test \"$(wizard --version)\" = \"0.1.0\""
+      install: |-
+        (
+          set -eu
+          npm install --global @straddlecom/wizard@0.1.0
+        )
+      update: |-
+        (
+          set -eu
+          npm install --global @straddlecom/wizard@0.1.0
+        )
+      remove: |-
+        (
+          set -eu
+          npm uninstall --global @straddlecom/wizard
+        )
+      validate: |-
+        (
+          set -eu
+          test "$(wizard --version)" = "0.1.0"
+        )
   claude-code:
+    notes:
+      - "Start Claude Code from a shell where STRADDLE_API_KEY is set; the plugin sends it as the straddle-api bearer token."
     candidate:
-      install:
-        - "(cd \"$STRADDLE_KIT_DIR\" && echo \"13811c998e992b08b191dcb1ddc1c0dfa89e01fbcc3ed749b3d26bdfd58a1e93  straddle-plugin-0.1.0.zip\" | shasum -a 256 -c -)"
-        - "rm -rf \"$STRADDLE_KIT_DIR/straddle-plugin\" && unzip -q \"$STRADDLE_KIT_DIR/straddle-plugin-0.1.0.zip\" -d \"$STRADDLE_KIT_DIR/straddle-plugin\""
-        - "claude plugin marketplace add \"$STRADDLE_KIT_DIR/straddle-plugin\""
-        - "claude plugin install straddle@straddle"
-      configure:
-        - "Start Claude Code from a shell where STRADDLE_API_KEY is set."
-      update:
-        - "(cd \"$STRADDLE_KIT_DIR\" && echo \"13811c998e992b08b191dcb1ddc1c0dfa89e01fbcc3ed749b3d26bdfd58a1e93  straddle-plugin-0.1.0.zip\" | shasum -a 256 -c -)"
-        - "rm -rf \"$STRADDLE_KIT_DIR/straddle-plugin\" && unzip -q \"$STRADDLE_KIT_DIR/straddle-plugin-0.1.0.zip\" -d \"$STRADDLE_KIT_DIR/straddle-plugin\""
-        - "claude plugin marketplace update straddle"
-        - "claude plugin update straddle@straddle"
-      remove:
-        - "claude plugin uninstall straddle@straddle"
-        - "claude plugin marketplace remove straddle"
-      validate:
-        - "claude plugin list --json | python3 -c 'import json,sys; p={x[\"id\"]: x for x in json.load(sys.stdin)}[\"straddle@straddle\"]; assert p[\"version\"]==\"0.1.0\" and p[\"enabled\"] and {k: v[\"url\"] for k, v in p[\"mcpServers\"].items()}=={\"straddle-api\": \"https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd\", \"straddle-docs\": \"https://straddle-build-straddle-openapi.apidocumentation.com/mcp\"}, p'"
+      install: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          rm -rf claude-code-plugin.new
+          echo "13811c998e992b08b191dcb1ddc1c0dfa89e01fbcc3ed749b3d26bdfd58a1e93  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
+          unzip -q straddle-plugin-0.1.0.zip -d claude-code-plugin.new
+          rm -rf claude-code-plugin
+          mv claude-code-plugin.new claude-code-plugin
+          claude plugin marketplace add "$PWD/claude-code-plugin"
+          claude plugin install straddle@straddle
+        )
+      update: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          test -d claude-code-plugin || { echo "no installed plugin directory $PWD/claude-code-plugin; run install" >&2; exit 1; }
+          rm -rf claude-code-plugin.new claude-code-plugin.old
+          echo "13811c998e992b08b191dcb1ddc1c0dfa89e01fbcc3ed749b3d26bdfd58a1e93  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
+          unzip -q straddle-plugin-0.1.0.zip -d claude-code-plugin.new
+          mv claude-code-plugin claude-code-plugin.old
+          mv claude-code-plugin.new claude-code-plugin
+          if claude plugin marketplace update straddle && claude plugin update straddle@straddle; then
+            rm -rf claude-code-plugin.old
+          else
+            echo "update failed; restoring the previous plugin" >&2
+            rm -rf claude-code-plugin
+            mv claude-code-plugin.old claude-code-plugin
+            claude plugin marketplace update straddle && claude plugin update straddle@straddle || true
+            exit 1
+          fi
+        )
+      remove: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          claude plugin uninstall straddle@straddle
+          claude plugin marketplace remove straddle
+          rm -rf "$STRADDLE_KIT_DIR/claude-code-plugin"
+        )
+      validate: |-
+        (
+          set -eu
+          claude plugin list --json | python3 -c 'import json,sys; p={x["id"]: x for x in json.load(sys.stdin)}["straddle@straddle"]; assert p["version"]=="0.1.0" and p["enabled"] and {k: v["url"] for k, v in p["mcpServers"].items()}=={"straddle-api": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd", "straddle-docs": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"}, p'
+        )
     release:
-      install:
-        - "claude plugin marketplace add https://github.com/straddle-build/skills.git#v0.1.0"
-        - "claude plugin install straddle@straddle"
-      configure:
-        - "Start Claude Code from a shell where STRADDLE_API_KEY is set."
-      update:
-        - "claude plugin marketplace remove straddle"
-        - "claude plugin marketplace add https://github.com/straddle-build/skills.git#v0.1.0"
-        - "claude plugin install straddle@straddle"
-      remove:
-        - "claude plugin uninstall straddle@straddle"
-        - "claude plugin marketplace remove straddle"
-      validate:
-        - "claude plugin list --json | python3 -c 'import json,sys; p={x[\"id\"]: x for x in json.load(sys.stdin)}[\"straddle@straddle\"]; assert p[\"version\"]==\"0.1.0\" and p[\"enabled\"] and {k: v[\"url\"] for k, v in p[\"mcpServers\"].items()}=={\"straddle-api\": \"https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd\", \"straddle-docs\": \"https://straddle-build-straddle-openapi.apidocumentation.com/mcp\"}, p'"
+      install: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          rm -rf claude-code-plugin.new
+          git clone -q --depth 1 --branch v0.1.0 https://github.com/straddle-build/skills.git claude-code-plugin.new
+          test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c" || { echo "claude-code-plugin.new does not match plugin.content_sha256 e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c" >&2; rm -rf claude-code-plugin.new; exit 1; }
+          rm -rf claude-code-plugin
+          mv claude-code-plugin.new claude-code-plugin
+          claude plugin marketplace add "$PWD/claude-code-plugin"
+          claude plugin install straddle@straddle
+        )
+      update: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          test -d claude-code-plugin || { echo "no installed plugin directory $PWD/claude-code-plugin; run install" >&2; exit 1; }
+          rm -rf claude-code-plugin.new claude-code-plugin.old
+          git clone -q --depth 1 --branch v0.1.0 https://github.com/straddle-build/skills.git claude-code-plugin.new
+          test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c" || { echo "claude-code-plugin.new does not match plugin.content_sha256 e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c" >&2; rm -rf claude-code-plugin.new; exit 1; }
+          mv claude-code-plugin claude-code-plugin.old
+          mv claude-code-plugin.new claude-code-plugin
+          if claude plugin marketplace update straddle && claude plugin update straddle@straddle; then
+            rm -rf claude-code-plugin.old
+          else
+            echo "update failed; restoring the previous plugin" >&2
+            rm -rf claude-code-plugin
+            mv claude-code-plugin.old claude-code-plugin
+            claude plugin marketplace update straddle && claude plugin update straddle@straddle || true
+            exit 1
+          fi
+        )
+      remove: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          claude plugin uninstall straddle@straddle
+          claude plugin marketplace remove straddle
+          rm -rf "$STRADDLE_KIT_DIR/claude-code-plugin"
+        )
+      validate: |-
+        (
+          set -eu
+          claude plugin list --json | python3 -c 'import json,sys; p={x["id"]: x for x in json.load(sys.stdin)}["straddle@straddle"]; assert p["version"]=="0.1.0" and p["enabled"] and {k: v["url"] for k, v in p["mcpServers"].items()}=={"straddle-api": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd", "straddle-docs": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"}, p'
+        )
   codex:
+    notes:
+      - "Install adds a client-level straddle-api server that reads STRADDLE_API_KEY, because Codex drops Authorization from plugin MCP config. Validate checks the variable name, never its value."
     candidate:
-      install:
-        - "(cd \"$STRADDLE_KIT_DIR\" && echo \"13811c998e992b08b191dcb1ddc1c0dfa89e01fbcc3ed749b3d26bdfd58a1e93  straddle-plugin-0.1.0.zip\" | shasum -a 256 -c -)"
-        - "rm -rf \"$STRADDLE_KIT_DIR/straddle-plugin\" && unzip -q \"$STRADDLE_KIT_DIR/straddle-plugin-0.1.0.zip\" -d \"$STRADDLE_KIT_DIR/straddle-plugin\""
-        - "codex plugin marketplace add \"$STRADDLE_KIT_DIR/straddle-plugin\""
-        - "codex plugin add straddle@straddle"
-      configure:
-        - "codex mcp add straddle-api --url https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd --bearer-token-env-var STRADDLE_API_KEY"
-      update:
-        - "(cd \"$STRADDLE_KIT_DIR\" && echo \"13811c998e992b08b191dcb1ddc1c0dfa89e01fbcc3ed749b3d26bdfd58a1e93  straddle-plugin-0.1.0.zip\" | shasum -a 256 -c -)"
-        - "rm -rf \"$STRADDLE_KIT_DIR/straddle-plugin\" && unzip -q \"$STRADDLE_KIT_DIR/straddle-plugin-0.1.0.zip\" -d \"$STRADDLE_KIT_DIR/straddle-plugin\""
-        - "codex plugin add straddle@straddle"
-      remove:
-        - "codex plugin remove straddle@straddle"
-        - "codex plugin marketplace remove straddle"
-        - "codex mcp remove straddle-api"
-      validate:
-        - "codex plugin list --json | python3 -c 'import json,sys; p={x[\"pluginId\"]: x for x in json.load(sys.stdin)[\"installed\"]}[\"straddle@straddle\"]; assert p[\"version\"]==\"0.1.0\" and p[\"enabled\"], p'"
-        - "codex mcp list --json | python3 -c 'import json,sys; s={x[\"name\"]: (x.get(\"transport\") or {}).get(\"url\") for x in json.load(sys.stdin) if x.get(\"enabled\")}; assert all(s.get(k)==v for k, v in {\"straddle-api\": \"https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd\", \"straddle-docs\": \"https://straddle-build-straddle-openapi.apidocumentation.com/mcp\"}.items()), s'"
+      install: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          rm -rf codex-plugin.new
+          echo "13811c998e992b08b191dcb1ddc1c0dfa89e01fbcc3ed749b3d26bdfd58a1e93  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
+          unzip -q straddle-plugin-0.1.0.zip -d codex-plugin.new
+          rm -rf codex-plugin
+          mv codex-plugin.new codex-plugin
+          codex plugin marketplace add "$PWD/codex-plugin"
+          codex plugin add straddle@straddle
+          codex mcp add straddle-api --url https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd --bearer-token-env-var STRADDLE_API_KEY
+        )
+      update: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          test -d codex-plugin || { echo "no installed plugin directory $PWD/codex-plugin; run install" >&2; exit 1; }
+          rm -rf codex-plugin.new codex-plugin.old
+          echo "13811c998e992b08b191dcb1ddc1c0dfa89e01fbcc3ed749b3d26bdfd58a1e93  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
+          unzip -q straddle-plugin-0.1.0.zip -d codex-plugin.new
+          mv codex-plugin codex-plugin.old
+          mv codex-plugin.new codex-plugin
+          if codex plugin add straddle@straddle; then
+            rm -rf codex-plugin.old
+          else
+            echo "update failed; restoring the previous plugin" >&2
+            rm -rf codex-plugin
+            mv codex-plugin.old codex-plugin
+            codex plugin add straddle@straddle || true
+            exit 1
+          fi
+        )
+      remove: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          codex plugin remove straddle@straddle
+          codex plugin marketplace remove straddle
+          codex mcp remove straddle-api
+          rm -rf "$STRADDLE_KIT_DIR/codex-plugin"
+        )
+      validate: |-
+        (
+          set -eu
+          codex plugin list --json | python3 -c 'import json,sys; p={x["pluginId"]: x for x in json.load(sys.stdin)["installed"]}["straddle@straddle"]; assert p["version"]=="0.1.0" and p["enabled"], p'
+          codex mcp list --json | python3 -c 'import json,sys; s={x["name"]: x.get("transport") or {} for x in json.load(sys.stdin) if x.get("enabled")}; assert all(s.get(k, {}).get("url")==v for k, v in {"straddle-api": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd", "straddle-docs": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"}.items()) and s["straddle-api"].get("bearer_token_env_var")=="STRADDLE_API_KEY", s'
+        )
     release:
-      install:
-        - "codex plugin marketplace add straddle-build/skills --ref v0.1.0"
-        - "codex plugin add straddle@straddle"
-      configure:
-        - "codex mcp add straddle-api --url https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd --bearer-token-env-var STRADDLE_API_KEY"
-      update:
-        - "codex plugin marketplace remove straddle"
-        - "codex plugin marketplace add straddle-build/skills --ref v0.1.0"
-        - "codex plugin add straddle@straddle"
-      remove:
-        - "codex plugin remove straddle@straddle"
-        - "codex plugin marketplace remove straddle"
-        - "codex mcp remove straddle-api"
-      validate:
-        - "codex plugin list --json | python3 -c 'import json,sys; p={x[\"pluginId\"]: x for x in json.load(sys.stdin)[\"installed\"]}[\"straddle@straddle\"]; assert p[\"version\"]==\"0.1.0\" and p[\"enabled\"], p'"
-        - "codex mcp list --json | python3 -c 'import json,sys; s={x[\"name\"]: (x.get(\"transport\") or {}).get(\"url\") for x in json.load(sys.stdin) if x.get(\"enabled\")}; assert all(s.get(k)==v for k, v in {\"straddle-api\": \"https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd\", \"straddle-docs\": \"https://straddle-build-straddle-openapi.apidocumentation.com/mcp\"}.items()), s'"
+      install: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          rm -rf codex-plugin.new
+          git clone -q --depth 1 --branch v0.1.0 https://github.com/straddle-build/skills.git codex-plugin.new
+          test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c" || { echo "codex-plugin.new does not match plugin.content_sha256 e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c" >&2; rm -rf codex-plugin.new; exit 1; }
+          rm -rf codex-plugin
+          mv codex-plugin.new codex-plugin
+          codex plugin marketplace add "$PWD/codex-plugin"
+          codex plugin add straddle@straddle
+          codex mcp add straddle-api --url https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd --bearer-token-env-var STRADDLE_API_KEY
+        )
+      update: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          cd "$STRADDLE_KIT_DIR"
+          test -d codex-plugin || { echo "no installed plugin directory $PWD/codex-plugin; run install" >&2; exit 1; }
+          rm -rf codex-plugin.new codex-plugin.old
+          git clone -q --depth 1 --branch v0.1.0 https://github.com/straddle-build/skills.git codex-plugin.new
+          test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c" || { echo "codex-plugin.new does not match plugin.content_sha256 e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c" >&2; rm -rf codex-plugin.new; exit 1; }
+          mv codex-plugin codex-plugin.old
+          mv codex-plugin.new codex-plugin
+          if codex plugin add straddle@straddle; then
+            rm -rf codex-plugin.old
+          else
+            echo "update failed; restoring the previous plugin" >&2
+            rm -rf codex-plugin
+            mv codex-plugin.old codex-plugin
+            codex plugin add straddle@straddle || true
+            exit 1
+          fi
+        )
+      remove: |-
+        (
+          set -eu
+          : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
+          codex plugin remove straddle@straddle
+          codex plugin marketplace remove straddle
+          codex mcp remove straddle-api
+          rm -rf "$STRADDLE_KIT_DIR/codex-plugin"
+        )
+      validate: |-
+        (
+          set -eu
+          codex plugin list --json | python3 -c 'import json,sys; p={x["pluginId"]: x for x in json.load(sys.stdin)["installed"]}["straddle@straddle"]; assert p["version"]=="0.1.0" and p["enabled"], p'
+          codex mcp list --json | python3 -c 'import json,sys; s={x["name"]: x.get("transport") or {} for x in json.load(sys.stdin) if x.get("enabled")}; assert all(s.get(k, {}).get("url")==v for k, v in {"straddle-api": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd", "straddle-docs": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"}.items()) and s["straddle-api"].get("bearer_token_env_var")=="STRADDLE_API_KEY", s'
+        )
   cursor:
     manual: true
     candidate: "not available: Cursor imports a team marketplace from a GitHub repository, not a local archive"
     release:
       install:
         - "In the Cursor dashboard, import https://github.com/straddle-build/skills at v0.1.0 as a team marketplace, then install the Straddle plugin."
-      configure:
         - "Enter your Straddle API key when Cursor prompts for STRADDLE_API_KEY."
       update:
         - "Point the team marketplace at the new tag and update the Straddle plugin."
       remove:
         - "Uninstall the Straddle plugin, then remove the team marketplace."
       validate:
-        - "Cursor lists Straddle 0.1.0 with nine straddle-* skills and the straddle-api and straddle-docs MCP servers."
+        - "Cursor lists Straddle 0.1.0 with 9 straddle-* skills and the straddle-api and straddle-docs MCP servers."
 gates:
   - id: "walkthrough-approval"
     requirement: "Keith's explicit yes on the source and client walkthrough before publication (ME-666, ME-668, ME-669, ME-670, ME-815)"

@@ -20,7 +20,12 @@
       "commit": "344f136ca988c7c439054ed1348e8d884b1b2d69",
       "note": "npm pack of this commit; not published to npm, and a reviewed later commit may replace it"
     },
-    "skill_bundle": "straddle-build/skills@f713fc6201ad0fd800d23a3ec4c4102b7acee91c, a merged-source snapshot verified by plugin.content_sha256; not a tagged release"
+    "skill_bundle": {
+      "repository": "straddle-build/skills",
+      "commit": "f713fc6201ad0fd800d23a3ec4c4102b7acee91c",
+      "content_sha256": "e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c",
+      "note": "PINNED_BUNDLE in the pack's dist/bundle.js: a merged-source snapshot verified by content, not a tagged release"
+    }
   },
   "cli": {
     "package": "@straddlecom/cli",
