@@ -382,6 +382,52 @@ class KitReleaseTest(unittest.TestCase):
         self.assertEqual(log, ["claude plugin marketplace update straddle", "claude plugin update straddle@straddle"])
         self.assertFalse((kit_dir / "claude-code-plugin" / "previous-install").exists())
 
+    def test_release_install_hands_clients_only_the_verified_plugin_files(self):
+        operations = self.model()["instructions"]["codex"]["release"]
+        origin = self.scratch() / "skills"
+        git(self.root, "clone", "-q", str(self.root), str(origin))
+        (origin / "hooks").mkdir()
+        (origin / "hooks" / "hooks.json").write_text('{"hooks": {"SessionStart": []}}\n')
+        (origin / "kit" / "manifest.yaml").write_text("inert release metadata\n")
+        git(origin, "add", "-A")
+        git(origin, "commit", "-qm", "root hooks and kit metadata beside the plugin")
+        git(origin, "tag", "v0.1.0")
+        local = {op: text.replace("https://github.com/straddle-build/skills.git", str(origin))
+                 for op, text in operations.items()}
+        stubs = self.stub_clients()
+        kit_dir = self.scratch()
+        code, log = self.run_operation(local["install"], stubs, kit_dir)
+        self.assertEqual(code, 0)
+        self.assertTrue(log[0].startswith("codex plugin marketplace add ") and log[0].endswith("/codex-plugin"), log)
+        self.assertEqual(sorted(p.name for p in (kit_dir / "codex-plugin").iterdir()), sorted(PLUGIN_PATHS))
+        self.assertEqual(sorted(p.name for p in kit_dir.iterdir()), ["codex-plugin"])
+        (origin / "skills" / "straddle-setup" / "linked.md").symlink_to("/etc/hosts")
+        git(origin, "add", "-A")
+        git(origin, "commit", "-qm", "symlink inside a skill")
+        git(origin, "tag", "-f", "v0.1.0")
+        (kit_dir / "codex-plugin" / "previous-install").write_text("0.1.0\n")
+        code, log = self.run_operation(local["update"], stubs, kit_dir)
+        self.assertEqual((code != 0, log), (True, []))
+        self.assertEqual(sorted(p.name for p in kit_dir.iterdir()), ["codex-plugin"])
+        self.assertTrue((kit_dir / "codex-plugin" / "previous-install").is_file())
+
+    def test_content_check_rejects_extra_root_entries_and_links(self):
+        files = kit.source_files(self.root, git(self.root, "rev-parse", "HEAD"))
+        check = "( set -eu; " + kit.content_check("stage", kit.tree_digest(files)) + " )"
+        for extra in (None, "hooks", "link"):
+            with self.subTest(extra=extra):
+                scratch = self.scratch()
+                for name, _, data in files:
+                    (scratch / "stage" / name).parent.mkdir(parents=True, exist_ok=True)
+                    (scratch / "stage" / name).write_bytes(data)
+                if extra == "hooks":
+                    (scratch / "stage" / "hooks").mkdir()
+                    (scratch / "stage" / "hooks" / "hooks.json").write_text('{"hooks": {}}\n')
+                if extra == "link":
+                    (scratch / "stage" / "assets" / "logo-link.svg").symlink_to("logo.svg")
+                result = subprocess.run(["bash", "-c", check], cwd=scratch, capture_output=True, text=True)
+                self.assertEqual((result.returncode == 0, (scratch / "stage").exists()), (extra is None,) * 2)
+
     def test_codex_validate_requires_the_bearer_variable_name(self):
         validate = self.model()["instructions"]["codex"]["candidate"]["validate"]
         plugins = {"installed": [{"pluginId": "straddle@straddle", "version": "0.1.0", "enabled": True}]}

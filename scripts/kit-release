@@ -250,9 +250,10 @@ def release_problems(inputs, plugin_version, root, commit):
 # ---------------------------------------------------------------------------
 # Instructions, generated from manifest facts. Each operation is one shell script: a `set -eu` subshell, so any failed
 # step stops it, and an interrupted or pasted run cannot fall through to a later step. Plugin operations keep a
-# per-client, kit-owned marketplace directory under $STRADDLE_KIT_DIR. Install and update verify the replacement
-# (archive sha256 for a candidate, plugin.content_sha256 of a tag checkout for a release) before touching the client.
-# Update swaps directories and restores the previous one if the client refresh fails.
+# per-client, kit-owned marketplace directory under $STRADDLE_KIT_DIR. Install and update build the replacement in
+# <dir>.new from the plugin files only and require it to be exactly the verified plugin before touching the client.
+# A release materializes those files from a tag checkout, so hooks or other auto-loaded root entries in the
+# repository never reach a client. Update swaps directories and restores the previous one if the client refresh fails.
 
 KIT_DIR_GUARD = ': "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"'
 
@@ -262,10 +263,15 @@ def script(*lines):
 
 
 def content_check(directory, digest):
+    """Exactly the verified plugin: only plugin paths at the root, only regular files, and plugin.content_sha256."""
+    only_plugin_paths = (f"cd {directory} && find . -mindepth 1 -maxdepth 1 "
+                         + " ".join(f"! -name {path}" for path in PLUGIN_PATHS))
+    only_files = f"cd {directory} && find . ! -type f ! -type d"
     listing = (f"cd {directory} && find {' '.join(PLUGIN_PATHS)} -type f | LC_ALL=C sort | "
                'while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64')
-    return (f'test "$({listing})" = "{digest}" || {{ echo "{directory} does not match plugin.content_sha256 {digest}" '
-            f'>&2; rm -rf {directory}; exit 1; }}')
+    return (f'{{ test -z "$({only_plugin_paths})" && test -z "$({only_files})" && test "$({listing})" = "{digest}"; }} '
+            f'|| {{ echo "{directory} is not exactly the verified plugin (plugin.content_sha256 {digest}): unexpected '
+            f'entries, links or content" >&2; rm -rf {directory}; exit 1; }}')
 
 
 def plugin_operations(client_dir, acquire, register, refresh, unregister, validate):
@@ -299,10 +305,15 @@ def instructions(plugin, archive_name, archive_sha, content_sha256, skill_count,
     wizard = inputs["wizard"]
 
     def candidate(staged):
-        return [f'echo "{archive_sha}  {archive_name}" | shasum -a 256 -c -', f"unzip -q {archive_name} -d {staged}"]
+        return [f'echo "{archive_sha}  {archive_name}" | shasum -a 256 -c -', f"unzip -q {archive_name} -d {staged}",
+                content_check(staged, content_sha256)]
 
     def release(staged):
-        return [f"git clone -q --depth 1 --branch {tag} {git_url} {staged}", content_check(staged, content_sha256)]
+        checkout = f"{staged}.src"
+        return [f"rm -rf {checkout}", f"git clone -q --depth 1 --branch {tag} {git_url} {checkout}",
+                f"mkdir {staged}",
+                f"git -C {checkout} archive --format=tar HEAD -- {' '.join(PLUGIN_PATHS)} | tar -x -C {staged} -f -",
+                f"rm -rf {checkout}", content_check(staged, content_sha256)]
 
     claude_refresh = f"claude plugin marketplace update {name} && claude plugin update {market}"
     claude_validate = [
