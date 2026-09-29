@@ -57,7 +57,7 @@ ME-810's release cut is `kit/manifest.yaml`. `scripts/kit-release` generates it 
 scripts/kit-release build                 # dist/straddle-plugin-<version>.zip and dist/SHA256SUMS from HEAD
 scripts/kit-release generate              # rewrite kit/manifest.yaml from HEAD and the inputs
 scripts/kit-release check                 # regenerate and compare; CI runs this
-scripts/kit-release check --wizard-tarball path/to/straddlecom-wizard-<version>.tgz   # needs node
+scripts/kit-release check --wizard-tarball path/to/straddlecom-wizard-<version>.tgz   # needs node and Python 3.12+
 scripts/kit-release check --release       # fails unless every component has publication proof
 ```
 

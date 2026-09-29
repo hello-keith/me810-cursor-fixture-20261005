@@ -508,6 +508,9 @@ def wizard_problems(root, commit, wizard, tarball):
         problems.append(f"{tarball}: integrity does not match wizard.artifact.integrity")
     if problems:
         return problems
+    if not hasattr(tarfile, "data_filter"):
+        raise KitError(f"check --wizard-tarball needs Python 3.12 or later (tarfile data filter); this is "
+                       f"Python {sys.version.split()[0]}")
     with tempfile.TemporaryDirectory() as scratch:
         scratch = Path(scratch)
         with tarfile.open(fileobj=io.BytesIO(data)) as pack:
