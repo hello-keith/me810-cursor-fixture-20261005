@@ -75,7 +75,7 @@ The plugin archive holds what a client loads: the root and native manifests, `mc
 
 `instructions` has a `candidate` and a `release` channel for the Wizard, Claude Code and Codex, each with `install`, `update`, `remove` and `validate` commands, plus `configure` for the API key. Candidate commands verify and extract artifacts from `$STRADDLE_KIT_DIR` into one version-independent directory, so the marketplace registered at install reads the new version on update. Release commands pin the marketplace to tag `v<version>`, `https://github.com/straddle-build/skills.git#v<version>` for Claude Code and `--ref v<version>` for Codex, and update by re-adding the marketplace at the new tag. Cursor instructions are manual, and Cursor has no candidate channel, because it imports a team marketplace from a GitHub repository.
 
-The candidate channel for Claude Code 2.1.283 and Codex 0.157.1 was run verbatim in scratch profiles with remote network denied: install, validate, update to a second version, validate and remove. That is offline candidate evidence. It is not a clean-client release install, which needs the tag, a signed-in client, and Cursor.
+The candidate channel for the Wizard, Claude Code 2.1.284 and Codex 0.157.1 was run verbatim in scratch profiles with remote network denied: install, validate, update to a second plugin version, validate and remove. That is offline candidate evidence. It is not a clean-client release install, which needs the tag, a signed-in client, and Cursor.
 
 ## Validation
 
