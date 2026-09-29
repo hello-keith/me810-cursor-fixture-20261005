@@ -11,14 +11,14 @@
     "provenance": "local-candidate",
     "artifact": {
       "file": "straddlecom-wizard-0.1.0.tgz",
-      "bytes": 35160,
-      "sha256": "3a31cad903f5cb3a73cf609b752b32e354eea773a25163019dbf0f6d078d9852",
-      "integrity": "sha512-JSKWpqge7SgNgt6wMRLSviO1u9C1lTxcNZtJzq/qkl7khxX+zLTLMRMzjVMVfNf5KiopoR3QE2UHh3xvArRQsg=="
+      "bytes": 40479,
+      "sha256": "a8378450022cffed44452fea9abe9982670bb313e7483210fbadd4473aefcb63",
+      "integrity": "sha512-AvYMRqJmfFW+J4PUBFQfQW/bIqZFHkflxMoFhz0SEh7uYhPKQWmrMA3VvnLQSNtD6FtWhzIM32y0pnD2lULmGQ=="
     },
     "source": {
       "repository": "straddle-build/wizard",
-      "commit": "344f136ca988c7c439054ed1348e8d884b1b2d69",
-      "note": "npm pack of this commit; not published to npm, and a reviewed later commit may replace it"
+      "commit": "84c79d7cdef4bdf1e244b583ec476592a5d931f5",
+      "note": "npm pack of this commit while its source gate runs; not published to npm, and a later gated commit may replace it"
     },
     "skill_bundle": {
       "repository": "straddle-build/skills",
