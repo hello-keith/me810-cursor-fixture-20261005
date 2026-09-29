@@ -20,6 +20,88 @@ def git(root, *args):
                           check=True, capture_output=True, text=True).stdout.strip()
 
 
+def parse_yaml(text):
+    lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        lines.append((indent, stripped))
+
+    def parse_block(idx, current_indent):
+        if idx >= len(lines):
+            return None, idx
+        indent, content = lines[idx]
+        if indent < current_indent:
+            return None, idx
+        if content.startswith("- "):
+            res = []
+            while idx < len(lines):
+                ind, cont = lines[idx]
+                if ind < current_indent:
+                    break
+                if ind == current_indent and cont.startswith("- "):
+                    val_str = cont[2:].strip()
+                    if ":" in val_str and not (val_str.startswith("\"") or val_str.startswith("{") or val_str.startswith("[")):
+                        k, v = val_str.split(":", 1)
+                        k, v = k.strip(), v.strip()
+                        sub_dict = {}
+                        idx += 1
+                        if v:
+                            sub_dict[k] = json.loads(v)
+                        else:
+                            nested, idx = parse_block(idx, ind + 2)
+                            sub_dict[k] = nested
+                        while idx < len(lines):
+                            i2, c2 = lines[idx]
+                            if i2 < ind + 2 or (i2 == ind and c2.startswith("- ")):
+                                break
+                            if ":" in c2:
+                                k2, v2 = c2.split(":", 1)
+                                k2, v2 = k2.strip(), v2.strip()
+                                idx += 1
+                                if v2:
+                                    sub_dict[k2] = json.loads(v2)
+                                else:
+                                    nested, idx = parse_block(idx, i2 + 2)
+                                    sub_dict[k2] = nested
+                            else:
+                                break
+                        res.append(sub_dict)
+                    elif val_str:
+                        res.append(json.loads(val_str))
+                        idx += 1
+                    else:
+                        idx += 1
+                        nested, idx = parse_block(idx, ind + 2)
+                        res.append(nested)
+                else:
+                    break
+            return res, idx
+        else:
+            res = {}
+            while idx < len(lines):
+                ind, cont = lines[idx]
+                if ind < current_indent:
+                    break
+                if ind == current_indent:
+                    k, v = cont.split(":", 1)
+                    k, v = k.strip(), v.strip()
+                    idx += 1
+                    if v:
+                        res[k] = json.loads(v)
+                    else:
+                        nested, idx = parse_block(idx, ind + 2)
+                        res[k] = nested
+                else:
+                    break
+            return res, idx
+
+    parsed, _ = parse_block(0, 0)
+    return parsed
+
+
 class KitReleaseTest(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp())
@@ -96,16 +178,18 @@ class KitReleaseTest(unittest.TestCase):
 
     def test_manifest_records_versions_digests_and_candidate_provenance(self):
         self.assertEqual(self.run_kit("generate")[0], 0)
-        text = (self.root / "kit" / "manifest.yaml").read_text()
+        self.assertEqual(self.run_kit("check")[0], 0)
+        manifest = parse_yaml((self.root / "kit" / "manifest.yaml").read_text())
         archive, _ = self.build("m")
-        self.assertIn(f'    sha256: "{hashlib.sha256(archive).hexdigest()}"\n', text)
-        self.assertIn('  status: "candidate"\n', text)
-        self.assertIn('  provenance: "local-candidate"\n', text)
-        self.assertIn('  minimum_version: "1.0.3"\n', text)
-        self.assertIn('  contract_version_served: "1.0.4"\n', text)
-        self.assertIn('        - "claude plugin marketplace add https://github.com/straddle-build/skills.git#v0.1.0"\n',
-                      text)
-        self.assertIn('        - "codex plugin marketplace add straddle-build/skills --ref v0.1.0"\n', text)
+        self.assertEqual(manifest["plugin"]["archive"]["sha256"], hashlib.sha256(archive).hexdigest())
+        self.assertEqual(manifest["kit"]["status"], "candidate")
+        self.assertEqual(manifest["plugin"]["provenance"], "local-candidate")
+        self.assertEqual(manifest["cli"]["minimum_version"], "1.0.3")
+        self.assertEqual(manifest["hosted_mcp"]["contract_version_served"], "1.0.4")
+        self.assertIn("claude plugin marketplace add https://github.com/straddle-build/skills.git#v0.1.0",
+                      manifest["instructions"]["claude-code"]["release"]["install"])
+        self.assertIn("codex plugin marketplace add straddle-build/skills --ref v0.1.0",
+                      manifest["instructions"]["codex"]["release"]["install"])
 
     def test_release_validation_rejects_unpublished_components(self):
         self.assertEqual(self.run_kit("generate")[0], 0)
@@ -163,6 +247,37 @@ class KitReleaseTest(unittest.TestCase):
         code, output = self.run_kit("generate")
         self.assertEqual(code, 1)
         self.assertIn("hosted_mcp.contract_version_served must equal contract.version", output)
+
+    def test_codex_validate_tolerates_non_url_transports(self):
+        self.assertEqual(self.run_kit("generate")[0], 0)
+        manifest = parse_yaml((self.root / "kit" / "manifest.yaml").read_text())
+        command = manifest["instructions"]["codex"]["candidate"]["validate"][1]
+        py_code = command.split("python3 -c ")[1].strip("'")
+        servers = [
+            {"name": "stdio-tool", "enabled": True, "transport": {"type": "stdio", "command": "run"}},
+            {"name": "straddle-api", "enabled": True, "transport": {"type": "http", "url": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd"}},
+            {"name": "straddle-docs", "enabled": True, "transport": {"type": "http", "url": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"}},
+        ]
+        res = subprocess.run([sys.executable, "-c", py_code], input=json.dumps(servers), text=True, capture_output=True)
+        self.assertEqual(res.returncode, 0, res.stderr)
+
+    def test_release_validation_reports_missing_evidence_on_passed_gate(self):
+        inputs = self.inputs()
+        inputs["kit"]["status"] = "release"
+        inputs["plugin_release"] = {"tag": "v0.1.0", "checksum_url": "https://example.com/SHA256SUMS"}
+        inputs["wizard"] = {"package": "@straddlecom/wizard", "version": "0.1.0", "bin": "wizard",
+                            "provenance": "released", "evidence": {"url": "https://example.com/wizard",
+                                                                   "digest": {"algorithm": "sha512", "value": "x"}}}
+        for gate in inputs["gates"]:
+            gate.update(status="passed", evidence="test")
+        inputs["gates"][0]["evidence"] = ""
+        self.write_inputs(inputs)
+        self.assertEqual(self.run_kit("generate")[0], 0)
+        self.commit_all("gate missing evidence")
+        git(self.root, "tag", "v0.1.0")
+        code, output = self.run_kit("check", "--release")
+        self.assertEqual(code, 1)
+        self.assertIn(f"gate {inputs['gates'][0]['id']}: passed but missing evidence", output)
 
 
 if __name__ == "__main__":

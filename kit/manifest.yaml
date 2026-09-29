@@ -298,7 +298,7 @@ instructions:
         - "codex mcp remove straddle-api"
       validate:
         - "codex plugin list --json | python3 -c 'import json,sys; p={x[\"pluginId\"]: x for x in json.load(sys.stdin)[\"installed\"]}[\"straddle@straddle\"]; assert p[\"version\"]==\"0.1.0\" and p[\"enabled\"], p'"
-        - "codex mcp list --json | python3 -c 'import json,sys; s={x[\"name\"]: x[\"transport\"][\"url\"] for x in json.load(sys.stdin) if x[\"enabled\"]}; assert all(s.get(k)==v for k, v in {\"straddle-api\": \"https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd\", \"straddle-docs\": \"https://straddle-build-straddle-openapi.apidocumentation.com/mcp\"}.items()), s'"
+        - "codex mcp list --json | python3 -c 'import json,sys; s={x[\"name\"]: (x.get(\"transport\") or {}).get(\"url\") for x in json.load(sys.stdin) if x.get(\"enabled\")}; assert all(s.get(k)==v for k, v in {\"straddle-api\": \"https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd\", \"straddle-docs\": \"https://straddle-build-straddle-openapi.apidocumentation.com/mcp\"}.items()), s'"
     release:
       install:
         - "codex plugin marketplace add straddle-build/skills --ref v0.1.0"
@@ -315,7 +315,7 @@ instructions:
         - "codex mcp remove straddle-api"
       validate:
         - "codex plugin list --json | python3 -c 'import json,sys; p={x[\"pluginId\"]: x for x in json.load(sys.stdin)[\"installed\"]}[\"straddle@straddle\"]; assert p[\"version\"]==\"0.1.0\" and p[\"enabled\"], p'"
-        - "codex mcp list --json | python3 -c 'import json,sys; s={x[\"name\"]: x[\"transport\"][\"url\"] for x in json.load(sys.stdin) if x[\"enabled\"]}; assert all(s.get(k)==v for k, v in {\"straddle-api\": \"https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd\", \"straddle-docs\": \"https://straddle-build-straddle-openapi.apidocumentation.com/mcp\"}.items()), s'"
+        - "codex mcp list --json | python3 -c 'import json,sys; s={x[\"name\"]: (x.get(\"transport\") or {}).get(\"url\") for x in json.load(sys.stdin) if x.get(\"enabled\")}; assert all(s.get(k)==v for k, v in {\"straddle-api\": \"https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd\", \"straddle-docs\": \"https://straddle-build-straddle-openapi.apidocumentation.com/mcp\"}.items()), s'"
   cursor:
     manual: true
     candidate: "not available: Cursor imports a team marketplace from a GitHub repository, not a local archive"

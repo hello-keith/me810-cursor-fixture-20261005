@@ -157,8 +157,10 @@ def release_problems(inputs, plugin_version, root, commit):
         except KitError:
             problems.append(f"plugin: tag {tag} does not exist in this repository")
     for gate in inputs.get("gates", []):
-        if gate.get("status") != "passed" or not gate.get("evidence"):
+        if gate.get("status") != "passed":
             problems.append(f"gate {gate.get('id')}: {gate.get('status')}")
+        elif not gate.get("evidence"):
+            problems.append(f"gate {gate.get('id')}: passed but missing evidence")
     return problems
 
 
@@ -197,8 +199,8 @@ def instructions(plugin, archive_name, archive_sha, inputs):
     codex_validate = [
         f"codex plugin list --json | python3 -c 'import json,sys; p={{x[\"pluginId\"]: x for x in "
         f"json.load(sys.stdin)[\"installed\"]}}[\"{market}\"]; assert p[\"version\"]==\"{version}\" and p[\"enabled\"], p'",
-        f"codex mcp list --json | python3 -c 'import json,sys; s={{x[\"name\"]: x[\"transport\"][\"url\"] for x in "
-        f"json.load(sys.stdin) if x[\"enabled\"]}}; assert all(s.get(k)==v for k, v in {servers}.items()), s'",
+        f"codex mcp list --json | python3 -c 'import json,sys; s={{x[\"name\"]: (x.get(\"transport\") or {{}}).get(\"url\") for x in "
+        f"json.load(sys.stdin) if x.get(\"enabled\")}}; assert all(s.get(k)==v for k, v in {servers}.items()), s'",
     ]
     codex_key = f"codex mcp add straddle-api --url {api_url} --bearer-token-env-var STRADDLE_API_KEY"
     wizard_spec = f"{wizard['package']}@{wizard['version']}"
