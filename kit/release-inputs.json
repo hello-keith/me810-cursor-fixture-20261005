@@ -4,6 +4,24 @@
   },
   "plugin_repository": "straddle-build/skills",
   "plugin_release": null,
+  "wizard": {
+    "package": "@straddlecom/wizard",
+    "version": "0.1.0",
+    "bin": "wizard",
+    "provenance": "local-candidate",
+    "artifact": {
+      "file": "straddlecom-wizard-0.1.0.tgz",
+      "bytes": 35160,
+      "sha256": "3a31cad903f5cb3a73cf609b752b32e354eea773a25163019dbf0f6d078d9852",
+      "integrity": "sha512-JSKWpqge7SgNgt6wMRLSviO1u9C1lTxcNZtJzq/qkl7khxX+zLTLMRMzjVMVfNf5KiopoR3QE2UHh3xvArRQsg=="
+    },
+    "source": {
+      "repository": "straddle-build/wizard",
+      "commit": "344f136ca988c7c439054ed1348e8d884b1b2d69",
+      "note": "npm pack of this commit; not published to npm, and a reviewed later commit may replace it"
+    },
+    "skill_bundle": "straddle-build/skills@f713fc6201ad0fd800d23a3ec4c4102b7acee91c, a merged-source snapshot verified by plugin.content_sha256; not a tagged release"
+  },
   "cli": {
     "package": "@straddlecom/cli",
     "version": "1.0.3",
@@ -61,7 +79,7 @@
         "file": "cli-1.0.3.tgz",
         "url": "https://registry.npmjs.org/@straddlecom/cli/-/cli-1.0.3.tgz",
         "integrity": "sha512-Ra9Tr53pMa/uXaBVEGvgbE0Z09HYn9SpwnOpCUzVOywVrAQ+JpmsDB9qKTAMRj0Flduv3yOGOWsWQi8ON97g9w==",
-        "note": "npm registry dist.integrity; these tarball bytes were not rehashed for this manifest"
+        "note": "npm registry dist.integrity, matched by a SHA-512 of the downloaded tarball bytes"
       }
     ]
   },
@@ -163,9 +181,16 @@
         "digest": {
           "algorithm": "go-h1",
           "value": "h1:wq5Nz52bQZvRrIoP2BSeGXiy7slk4hXMKkwM4p7vitc=",
-          "of": "module tree hash recorded in the Go checksum database"
+          "of": "module tree hash recorded in the Go checksum database; read from sum.golang.org, not recomputed for this manifest"
         }
-      }
+      },
+      "artifacts": [
+        {
+          "file": "v1.0.4.zip",
+          "url": "https://proxy.golang.org/github.com/straddle-build/straddle-go/@v/v1.0.4.zip",
+          "sha256": "93f47f0777833efab6e1b8df651f87b1a3667a0839fb760bc94aa78c31e345bb"
+        }
+      ]
     }
   },
   "contract": {
@@ -206,7 +231,7 @@
     },
     "cursor": {
       "observed_version": null,
-      "observed": "not tested; team marketplace import and the STRADDLE_API_KEY prompt are unobserved"
+      "observed": "not tested; the restored Cursor desktop still requires login, and the team marketplace import and STRADDLE_API_KEY prompt are unobserved"
     }
   },
   "gates": [
