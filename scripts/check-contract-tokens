@@ -16,6 +16,7 @@ import hashlib
 import json
 import re
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -35,10 +36,15 @@ TOKEN = re.compile(r"(?:(?:GET|POST|PUT|PATCH|DELETE) )?(/v1/\S+|[A-Za-z][A-Za-z
 
 def pinned_contract():
     record = json.loads((ROOT / "kit" / "release-inputs.json").read_text())["contract"]["evidence"]
-    blob = re.fullmatch(r"https://github\.com/([^/]+/[^/]+)/blob/(.+)", record["url"])
+    blob = re.fullmatch(r"https://github\.com/([^/]+/[^/]+)/blob/(.+)", record.get("url", ""))
+    if not blob:
+        sys.exit(f"check-contract-tokens: contract.evidence.url is not a GitHub blob URL: {record.get('url')}")
     url = f"https://raw.githubusercontent.com/{blob.group(1)}/{blob.group(2)}"
-    with urllib.request.urlopen(url, timeout=60) as response:
-        data = response.read()
+    try:
+        with urllib.request.urlopen(url, timeout=60) as response:
+            data = response.read()
+    except (urllib.error.URLError, TimeoutError) as error:
+        sys.exit(f"check-contract-tokens: failed to download {url}: {error}")
     digest = hashlib.sha256(data).hexdigest()
     if digest != record["digest"]["value"]:
         sys.exit(f"check-contract-tokens: {url} has sha256 {digest}, but kit/release-inputs.json pins "

@@ -43,13 +43,6 @@ class ContractTokenTest(unittest.TestCase):
         ])
         self.assertEqual(checker.unknown_tokens(markdown, words), [(3, "settled"), (3, "status_details.bogus")])
 
-    def test_product_model_references_match_the_pinned_contract(self):
-        # Fetches the published contract that kit/release-inputs.json pins and verifies its sha256.
-        words = checker.vocabulary(checker.pinned_contract())
-        for name in checker.CHECKED:
-            with self.subTest(reference=name):
-                self.assertEqual(checker.unknown_tokens((checker.REFERENCES / name).read_text(), words), [])
-
 
 if __name__ == "__main__":
     unittest.main()
