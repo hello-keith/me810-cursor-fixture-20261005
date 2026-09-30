@@ -16,7 +16,7 @@ REPO = Path(__file__).resolve().parents[1]
 SCRIPT = REPO / "scripts" / "kit-release"
 kit = SourceFileLoader("kit_release", str(SCRIPT)).load_module()
 PLUGIN_PATHS = ("plugin.json", "mcp.json", ".claude-plugin", ".codex-plugin", ".cursor-plugin", "assets", "skills",
-                "references", "third_party", "LICENSE", "README.md")
+                "third_party", "LICENSE", "README.md")
 # A stand-in Wizard pack: its unpackRelease accepts an archive listed in SHA256SUMS whose version starts with ACCEPTS,
 # the way a Wizard with plugin range 0.1.x accepts 0.1.0 and a 0.2.x Wizard refuses it.
 BUNDLE_JS = """import { appendFileSync } from 'node:fs';

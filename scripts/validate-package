@@ -833,8 +833,8 @@ def read_allowlist():
 
 
 def lint_scope(root):
-    return sorted(p for folder in ("skills", "references") if (root / folder).is_dir()
-                  for p in (root / folder).rglob("*.md"))
+    skills = root / "skills"
+    return sorted(skills.rglob("*.md")) if skills.is_dir() else []
 
 
 # ---------------------------------------------------------------------------
