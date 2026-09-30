@@ -35,6 +35,8 @@ Anti-patterns to flag in notification code. Each row is something the audit dete
 | N5 | `2xx` returned before the event is persisted, or no dedupe on `webhook-id`/`event_id` | Lost or double-processed events | Handler code | Persist then acknowledge; dedupe on the ID |
 | N6 | Platform handler ignoring `account_id` | Events applied to the wrong account | Event schema in the contract | Route on `account_id`, reject unknown accounts |
 | N7 | Code or docs treating Dashboard email as the status source | Human confirmation used as a notification model | n/a | Use a notification endpoint; keep email for people |
+| N8 | FIFO handler that parses the body as one event (for example reads `event_type` from the parsed body) or reuses the webhook handler unchanged | Every batch is rejected, and the endpoint blocks every later event | [Endpoint types](../../straddle-best-practices/references/receiving-webhooks.md#endpoint-types) | Store the whole batch in order, drop duplicates by `event_id`, then `2xx` |
+| N9 | Polling consumer that never commits the last offset, or retries a `423` | Every later poll returns `423` and no new events arrive | Same | Commit the last offset after storing each batch |
 
 ## SDK drift
 

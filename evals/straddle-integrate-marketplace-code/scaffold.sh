@@ -71,7 +71,7 @@ Only these files may change.
 | src/straddle/client.mjs | new | SDK client built from STRADDLE_API_KEY and STRADDLE_ENVIRONMENT; configuration error when missing |
 | src/straddle/payments.mjs | new | buyer customer, Bridge paykey, and seller charge with idempotency keys and account scope |
 | src/orders.mjs | existing | call Straddle for method bank; card path unchanged |
-| src/webhooks/straddle-fifo.mjs | new | FIFO endpoint handler: raw-body verification, persist, duplicate-safe, prompt 2xx |
+| src/webhooks/straddle-fifo.mjs | new | FIFO endpoint handler: verify before storing, store each batch's events in order, drop duplicates by event_id, 2xx only after the whole batch commits |
 | test/straddle.test.mjs | new | offline tests with the SDK fetch option |
 
 ## Future Sandbox writes
