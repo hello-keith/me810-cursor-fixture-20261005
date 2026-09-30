@@ -21,7 +21,7 @@ Run the approved rows in order, exactly as previewed.
 - **Failures.** On a `4xx`, stop at that row. Report the status and error type without echoing request bodies that contain personal data, and do not continue with rows that depend on it.
 - **Excluded reads** (unmask and reveal) run through the SDK or CLI only. Record that they succeeded, not what they returned.
 
-Record, for every row: the operation, executing tool, acting account, external ID, idempotency key, the result status, and the returned ID. Mark each resource `created` or `reused`. For an offline synthetic target, mark every row `synthetic upstream record`, and skip the notification endpoint and independent verification sections below, because neither exists offline.
+Record, for every row: the operation, executing tool, acting account, external ID, idempotency key, the result status, the returned ID, and the approval time from step 4. Mark each resource `created` or `reused`. For an offline synthetic target, mark every row `synthetic upstream record`, and skip the notification endpoint and independent verification sections below, because neither exists offline.
 
 ## Notification endpoints
 

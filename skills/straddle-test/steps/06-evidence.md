@@ -2,7 +2,7 @@
 
 - **Needs:** every earlier summary that exists for this run.
 - **Tools:** Read and Write for `straddle-test-evidence.md` only.
-- **Next:** none. The developer reviews the evidence.
+- **Next:** the developer reviews the evidence. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, continue with the next program step in this session when the header `Status` is `complete`, and stop and wait for the developer otherwise.
 
 Print:
 
@@ -10,10 +10,20 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-test","step":"06-evidence"}
 ```
 
-Write `straddle-test-evidence.md` at the repository root with one section per run. When the file exists, read it first and keep every other run's section exactly as it is: a later run, including one that sent no Straddle request, never removes or rewrites an earlier run's evidence. Replace only a section with this run's ID, and put this run's section first, under the title. An existing file without run sections is one earlier run; keep its content as that run's section. The title appears once, and each run's section has this shape:
+Write `straddle-test-evidence.md` at the repository root with a header block and one section per run. When the file exists, read it first and keep every other run's section exactly as it is: a later run, including one that sent no Straddle request, never removes or rewrites an earlier run's evidence. Replace only a section with this run's ID, and put this run's section first, under the header block. An existing file without run sections is one earlier run; keep its content as that run's section. The title and header block appear once.
+
+The header block describes this run, so rewrite it on every run. The Straddle Wizard reads it. `Status` is `complete` when this run's status is `passed`, `partial (<n> failed)` when it is `failed`, `partial (<what didn't run>)` when it is `partial`, and `blocked (<reason>)` when it is `blocked`. `Plan hash` is step 1's plan hash. `Test charge` is this run's live-observed Sandbox charge for the success scenario, or the first live-observed charge this run created when there's no success scenario, and `none` when this run created no Sandbox charge, including on an offline synthetic target.
+
+The file has this shape, with this run's section first:
 
 ```markdown
 # Straddle test evidence
+
+Status: complete | partial (<reason>) | blocked (<reason>)
+Plan: straddle-integration-plan.md | straddle-migration-plan.md
+Plan hash: <64 hex characters> | none (plan not approved)
+Latest run: <run ID>
+Test charge: <charge ID> | none
 
 ## Run <run ID>, <date>
 
@@ -57,7 +67,7 @@ For a paykey, the resources table records its ID and status, never the token.
 
 Write "None" for empty sections. Do not describe a scenario that did not run as passed. For an offline synthetic target, the server-side resources section lists synthetic upstream records only, and notification and lifecycle scenarios such as `paid`, the `R01` return, or delivered events are `not run: offline synthetic target`.
 
-Tell the developer the status and the path, then print:
+Tell the developer the result, the path, and what's next in two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md), leading with what passed and naming what didn't run and why. Then print:
 
 ```markdown
 ## Verify before merging
@@ -68,7 +78,7 @@ Tell the developer the status and the path, then print:
 - [ ] The evidence file contains no secret or unmasked data.
 ```
 
-Then print on one line:
+Then print on one line, followed by one plain sentence that says what finished and what comes next:
 
 ```text
 STRADDLE_HANDOFF {"skill":"straddle-test","status":"<passed|failed|partial|blocked>","report":"<one-paragraph summary including straddle-test-evidence.md and the scenarios not run>"}

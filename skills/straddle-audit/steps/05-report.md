@@ -10,7 +10,7 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-audit","step":"05-report"}
 ```
 
-Write `straddle-audit-report.md` in this shape and show its summary and findings table in chat:
+Write `straddle-audit-report.md` in this shape. In chat, open with two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md), leading with the finding that matters most, then show the report's summary and findings table:
 
 ```markdown
 # Straddle audit
@@ -50,7 +50,7 @@ End the report with the checklist below. Leave every box unchecked. The checklis
 - [ ] `git status` was checked in every worktree before any commit.
 ```
 
-Ask the developer which findings, if any, to fix. If none, print the handoff:
+Ask the developer which findings, if any, to fix. If none, print the handoff, followed by one plain sentence that says what's next:
 
 ```text
 STRADDLE_HANDOFF {"skill":"straddle-audit","status":"<status>","report":"straddle-audit-report.md: <one-paragraph summary>"}

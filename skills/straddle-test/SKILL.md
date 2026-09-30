@@ -11,6 +11,8 @@ Run the verification the approved plan names, against the Straddle code that pla
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules apply to every step. Test uses the same preview, approval, and execution routes as [straddle-integrate](../straddle-integrate/SKILL.md), and cites them instead of restating them.
 
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), continue to the next program step after the handoff, as that page says.
+
 ## Boundaries
 
 - **No architecture changes.** Test does not edit application code, configuration, or dependencies. The only file it writes is `straddle-test-evidence.md`. A gap or failing check is a finding for Integrate, not something Test fixes.

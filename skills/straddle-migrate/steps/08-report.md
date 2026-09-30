@@ -2,7 +2,7 @@
 
 - **Needs:** every earlier summary.
 - **Tools:** none.
-- **Next:** [straddle-test](../../straddle-test/SKILL.md) to prove the new path in Sandbox, after the developer reviews the diff. Test reads the approved `straddle-migration-plan.md` and its Verification section directly; no `straddle-integration-plan.md` is needed, and the plan's approval authorizes no Sandbox write.
+- **Next:** [straddle-test](../../straddle-test/SKILL.md) to prove the new path in Sandbox, after the developer reviews the diff. Test reads the approved `straddle-migration-plan.md` and its Verification section directly; no `straddle-integration-plan.md` is needed, and the plan's approval authorizes no Sandbox write. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, continue with the next program step in this session when the status is `migrated`, and stop and wait for the developer otherwise.
 
 Print:
 
@@ -10,7 +10,7 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-migrate","step":"08-report"}
 ```
 
-Reply in this shape:
+Open with two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md): what changed, what didn't, and what's next. Then reply in this shape:
 
 ```markdown
 # Straddle migration report
@@ -51,7 +51,7 @@ End with the checklist below. Leave every box unchecked. The checklist is for th
 - [ ] Tests ran, and their result is stated above.
 ```
 
-Then print the handoff:
+Then print the handoff, followed by one plain sentence that says what finished and what comes next:
 
 ```text
 STRADDLE_HANDOFF {"skill":"straddle-migrate","status":"<status>","report":"<one-paragraph summary>"}

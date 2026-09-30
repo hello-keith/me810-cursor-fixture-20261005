@@ -1,6 +1,8 @@
 # Straddle migration plan
 
-Status: draft | approved
+- Plan state: Draft | Approved | Blocked
+- Approval: none | `<YYYY-MM-DD>`, "`<developer's words>`", rows `<n>`, recorded by straddle-migrate, sha256 `<64 hex characters>`
+
 Provider: `<provider>` (reference: `references/providers/<file>.md`)
 Integration model: `<direct / SaaS / marketplace / Unresolved>`
 SDK: `<package and version / Unresolved>`
@@ -79,7 +81,3 @@ Customer records, bank accounts, provider tokens, mandates and authorizations, a
 - Sandbox proof: run straddle-test after review, using `sandbox_outcome` values for `paid`, `failed_*`, and `reversed_*`.
 
 ## Unresolved
-
-## Approval
-
-`<date>`, developer's words, rows approved. Any later change to this file voids this entry.

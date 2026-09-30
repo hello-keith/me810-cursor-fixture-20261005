@@ -30,7 +30,7 @@ SOFTWARE.
 
 ## humanlayer/skills (MIT)
 
-`skills/straddle-plan/references/show-me.md` is adapted from the `show-me` skill in <https://github.com/humanlayer/skills/blob/6ab9013a10c28f5046f7f999549cd5328a0b30d7/plugins/show-me/skills/show-me/SKILL.md>. The original license, from <https://github.com/humanlayer/skills/blob/6ab9013a10c28f5046f7f999549cd5328a0b30d7/LICENSE>, follows.
+`skills/straddle-best-practices/references/show-me.md` is adapted from the `show-me` skill in <https://github.com/humanlayer/skills/blob/6ab9013a10c28f5046f7f999549cd5328a0b30d7/plugins/show-me/skills/show-me/SKILL.md>. The original license, from <https://github.com/humanlayer/skills/blob/6ab9013a10c28f5046f7f999549cd5328a0b30d7/LICENSE>, follows.
 
 ```text
 MIT License

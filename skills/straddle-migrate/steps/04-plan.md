@@ -10,7 +10,7 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-migrate","step":"04-plan"}
 ```
 
-Write `straddle-migration-plan.md` from [../references/plan-template.md](../references/plan-template.md). Replace every placeholder with evidence, a developer answer, or `Unresolved`.
+Write `straddle-migration-plan.md` from [../references/plan-template.md](../references/plan-template.md). Replace every placeholder with evidence, a developer answer, or `Unresolved`. Write `- Plan state: Draft`, or `Blocked` when an `Unresolved` item affects a listed file, and `- Approval: none`: a new or refreshed plan carries no approval until step 5 records one.
 
 The **Authorized modifications** table is the contract for step 6. List every file to create or modify, one row each, with:
 

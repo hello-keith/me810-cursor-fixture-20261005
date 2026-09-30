@@ -11,13 +11,15 @@ Decide whether the Straddle integration in the repository in the current working
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules on credentials, environments, account scope, idempotency, the fourteen SDK/CLI-only operations, notifications, and missing configuration apply to every step.
 
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), Go Live is its last step, and step 6 closes the program as that page says.
+
 ## Boundaries
 
 - **No production writes.** Go Live never creates, updates, cancels, or deletes a production resource by any route: SDK, CLI, or MCP. It does not authorize the developer's agent or scripts to do so either. A request such as "send a $1 live charge to test it" is declined; the first live transaction is a human decision made outside this skill.
 - **The API MCP is not read-only.** The hosted `straddle-api` server's `execute-request` can reach write operations, including in production when it holds a production key, and Scalar does not enforce its execution exclusions. The no-write rule here is this skill's workflow rule, not a server guarantee. Never describe the server as read-only.
 - **Configuration first, offline.** Before anything that can reach Straddle, including `straddle doctor` (which sends a request to the API host before it checks credentials), confirm offline that a credential is present (`straddle auth status --json` or the developer) and that the developer has stated the environment. When either is missing, stop that check with a configuration error naming what is missing. Never report a check as passed that did not run.
 - **Production reads only on request.** Go Live sends no production request by default. If the developer asks to confirm the production key works, show the exact read, the host it resolves to, and the account scope, and run it only after an explicit yes. Writes are never offered.
-- **Local writes.** None, unless the developer asks for the report as a file.
+- **Local writes.** Only the report, `straddle-go-live-report.md` at the repository root, in step 6.
 
 ## Steps
 

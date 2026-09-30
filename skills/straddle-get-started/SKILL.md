@@ -11,6 +11,8 @@ Orient a developer in the repository in the current working directory: what the 
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules on credentials, environments, account scope, tools, notifications, and missing configuration apply to every step and are not repeated here.
 
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values.
+
 ## Boundaries
 
 - Read-only. Get Started writes no file, installs nothing, changes no client or MCP configuration, and sends no Straddle API request. Docs MCP search needs no credential and is allowed.

@@ -25,7 +25,7 @@ If there is no plan, or it is not approved, stop and hand off to [straddle-plan]
 
 ### Recorded approval
 
-Every step runs in a fresh session, so an approval lasts only when it is written into the plan. The Status section records it in two lines:
+A later step may run in a new session, so an approval lasts only when it is written into the plan. The Status section records it in two lines:
 
 ```markdown
 - Plan state: Approved
@@ -41,6 +41,8 @@ grep -v -e '^- Plan state:' -e '^- Approval:' straddle-integration-plan.md | { s
 - **Accept** a recorded approval, including one from an earlier session, only when the state is `Approved` and the command prints the recorded hash.
 - **Reject** `Approved` with no `Approval` line or with a different hash. The plan changed after approval, or the approval was never recorded. Say so, and treat the plan as unapproved until the developer approves the current file.
 - **Record** an approval when the plan has no valid one and the developer approves the current plan in this conversation, in their own words. Before step 2, set `Plan state: Approved`, run the command, and write the `Approval` line with today's date, their words, `recorded by straddle-integrate`, and the hash. Change nothing else in the plan.
+
+Keep the hash the command printed as this run's plan hash. Step 7 writes it into `straddle-integration-report.md`, and Test and the Straddle Wizard use it to tell which plan a report belongs to. When no approval was accepted or recorded, the plan hash is `none (plan not approved)`.
 
 ## Configuration, offline first
 
@@ -71,4 +73,4 @@ A configuration error does not stop code changes to approved files, because thos
 
 For a SaaS or marketplace plan, also record the acting accounts the plan names (A and B), or that they do not exist yet.
 
-**Summary for step 2:** plan state, integration type, SDK, notification path, the approved file list, the planned Sandbox writes, the configuration result, and the acting accounts.
+**Summary for step 2:** plan state and plan hash, integration type, SDK, notification path, the approved file list, the planned Sandbox writes, the configuration result, and the acting accounts.

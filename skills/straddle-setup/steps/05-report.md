@@ -1,8 +1,8 @@
 # Step 5: Report
 
 - **Needs:** summaries from steps 2 to 4.
-- **Tools:** none. Do not write a file unless the developer asks for one.
-- **Next:** hand off to [straddle-plan](../../straddle-plan/SKILL.md) when the status is not `blocked`. When it is `blocked`, the run ends at the handoff and waits for the developer.
+- **Tools:** Write for `straddle-setup.md` at the repository root only.
+- **Next:** hand off to [straddle-plan](../../straddle-plan/SKILL.md) when the status is not `blocked`. When it is `blocked`, the run ends at the handoff and waits for the developer. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, a status other than `blocked` means you continue with the next program step in this session.
 
 Print:
 
@@ -31,12 +31,20 @@ The status is `ready_with_warnings` when nothing blocks but something is incompl
 
 ## Report
 
-Write the report in this shape:
+Write the report to `straddle-setup.md` at the repository root, replacing an earlier one, and give the same report in your reply. Open the reply with two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md): whether the project is ready, the one thing that matters most, and what happens next. A blocking configuration failure keeps its exact wording in the report, and the sentences around it name what the developer sets and where. When the client doesn't allow the write, give the report in the reply and say `straddle-setup.md` wasn't written.
+
+The header block comes first, because the Straddle Wizard reads it. `Status` is `complete` when the classification above is `ready` or `ready_with_warnings`, and `blocked (<each blocking check>)` when it is `blocked`. The `API key present` line says `yes` or `no` and never holds a value.
 
 ```markdown
 # Straddle Setup report
 
-Status: ready | ready_with_warnings | blocked
+Status: complete | blocked (<each blocking check, comma-separated>)
+Environment: <base URL>, explicitly selected (env var / developer-confirmed) | <base URL>, resolved default only | unknown
+Integration type: account | saas | marketplace | unknown
+API key present: yes (env var / saved CLI credentials), not verified | no
+SDK: <package> <version> | not installed, add <package> <version> | unknown
+Acting account: <id> | none | not required
+Setup result: ready | ready_with_warnings | blocked
 
 | Check | Result | Evidence |
 | --- | --- | --- |
@@ -76,13 +84,13 @@ End with:
 - [ ] No API key, token, or `.env` content appears in this report or the conversation.
 - [ ] Authenticated checks marked passed were actually executed in this run.
 - [ ] The environment is Sandbox.
-- [ ] Nothing was installed, configured, or created by Setup.
+- [ ] Setup created or changed nothing except `straddle-setup.md`.
 ```
 
-Then print the handoff on one line:
+Then print the handoff on one line, followed by one plain sentence that says the result and the next step, for example "Setup's done, so next I'll plan the integration with you." or "I need a Sandbox API key before I call Straddle. Set `STRADDLE_API_KEY` in the shell you start your agent from, then run Setup again.":
 
 ```text
 STRADDLE_HANDOFF {"skill":"straddle-setup","status":"<status>","report":"<one-paragraph summary of the table and blockers>"}
 ```
 
-The handoff ends Setup's turn. Don't continue into the developer's original request after it, whether with more tool calls or by asking for values that would let the request run as asked.
+The handoff ends Setup's turn. Don't continue into the developer's original request after it, whether with more tool calls or by asking for values that would let the request run as asked. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, starting the next program step after a status other than `blocked` isn't that request: continue as that page says.

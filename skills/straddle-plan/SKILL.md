@@ -11,6 +11,8 @@ Write or refresh `straddle-integration-plan.md` in the application repository. T
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules on credentials, account scope, idempotency, the fourteen excluded operations, notifications, and tools apply to the plan and are cited there rather than copied.
 
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), Plan finishes when step 6 records the approval, and the next program step starts from there, as that page says.
+
 ## Boundaries
 
 - Plan writes only `straddle-integration-plan.md`, plus, in step 6 and only after the developer approves the plan, the plan's approval record and at most one companion view, `straddle-plan-visual.html`, at the repository root. It does not edit application code, install packages, or change configuration.
@@ -24,8 +26,8 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 2. [steps/02-sources.md](steps/02-sources.md): read the repository, the installed SDK source, and the current Straddle docs.
 3. [steps/03-write-plan.md](steps/03-write-plan.md): write the plan from [references/plan-template.md](references/plan-template.md).
 4. [steps/04-review.md](steps/04-review.md): check the plan file against the rules and fix it.
-5. [steps/05-handoff.md](steps/05-handoff.md): summarize, print the handoff marker, and leave the plan for the developer's review.
-6. [steps/06-show-me.md](steps/06-show-me.md): only after a `draft` handoff and the developer's explicit approval of the current plan, record that approval in the plan and show it visually with [references/show-me.md](references/show-me.md).
+5. [steps/05-handoff.md](steps/05-handoff.md): summarize and show the integration shape and the files to change with [show-me.md](../straddle-best-practices/references/show-me.md), print the handoff marker, and leave the plan for the developer's review.
+6. [steps/06-show-me.md](steps/06-show-me.md): only after a `draft` handoff and the developer's explicit approval of the current plan, record that approval in the plan and show it visually with [show-me.md](../straddle-best-practices/references/show-me.md).
 
 Each step file lists what it needs, its allowed tools, the next step, and its summary and marker.
 
