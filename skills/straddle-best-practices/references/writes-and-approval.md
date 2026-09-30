@@ -47,6 +47,14 @@ Ask for one-time approval: a yes covers this preview's calls and nothing later. 
 - Use IDs returned by successful create responses in the next step's ID fields. Do not rediscover them with list calls.
 - A charge's or payout's `paykey` field takes the full paykey token. It does not take the paykey `id`, or the masked `paykey` that `bank_account` and `plaid` creates return. Get the full token from `revealPaykey` or `getUnmaskedPaykey`, which are among the fourteen, so use the SDK or CLI after their own approval, or from a `quiltt` create response. Use it within one SDK process or one CLI command without printing it. Never write it to a plan, preview, log, report, test, evidence, or commit. Follow the contract field, not the value's shape.
 - If a create result is unknown (timeout, dropped connection), retry with the same idempotency key or look up the exact external ID. Never loop on fresh creates.
+- After a validation `400`, send the corrected request with a new idempotency key. The rejected request still used up its key, so resending that key, even with the fixed payload, returns `409`. The API does this by design. Derive the new key from the corrected attempt, for example the hash of `<external ID>:fix-1`, and show the corrected request in a new preview for approval.
+
+## Payment dates
+
+- `payment_date` on a charge or payout is a calendar date (`YYYY-MM-DD`) in US Eastern time (`America/New_York`). Compute it in that zone, never from the UTC date or the machine's local zone.
+- Today's Eastern date originates immediately. A later date holds the payment as `scheduled` until that date. An earlier date is rejected with `422`.
+- Between midnight UTC and midnight Eastern, the UTC date is already tomorrow's Eastern date. A `payment_date` taken from UTC then holds the payment for a day instead of originating it.
+- Timestamps in API responses, such as `created_at` and `status_details.changed_at`, are UTC. Compare them in UTC, and convert to Eastern only to derive a `payment_date`.
 
 ## CLI writes
 

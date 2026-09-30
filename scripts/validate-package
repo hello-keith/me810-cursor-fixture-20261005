@@ -41,20 +41,19 @@ REQUIRED_SKILLS = (
     "straddle-best-practices",
 )
 NATIVE_MANIFESTS = (".claude-plugin/plugin.json", ".codex-plugin/plugin.json", ".cursor-plugin/plugin.json")
-# Claude Code sends no Authorization to a plugin server unless the manifest
-# declares one, and the shared Agent Plugins mcp.json must not, so the Claude
-# manifest redeclares only straddle-api, reading the caller's key from the
-# environment. Codex and Cursor keep the shared declaration.
+# mcp.json sends the caller's key to straddle-api for Claude Code and Cursor, which expand ${STRADDLE_API_KEY}
+# from the environment or the Cursor variable. Codex strips Authorization from Agent Plugins config, so its
+# manifest declares both servers in Codex's own form, reading the bearer token from the same variable (ME-882).
 SHARED_MCP_SERVERS = "./mcp.json"
-CLAUDE_MCP_SERVERS = [SHARED_MCP_SERVERS, {"straddle-api": {
-    "type": "http",
-    "url": MCP_SERVERS["straddle-api"],
-    "headers": {"Authorization": "Bearer ${STRADDLE_API_KEY}"},
-}}]
+MCP_HEADERS = {"straddle-api": {"Authorization": "Bearer ${STRADDLE_API_KEY}"}}
+CODEX_MCP_SERVERS = {
+    "straddle-api": {"type": "http", "url": MCP_SERVERS["straddle-api"], "bearer_token_env_var": "STRADDLE_API_KEY"},
+    "straddle-docs": {"type": "http", "url": MCP_SERVERS["straddle-docs"]},
+}
 MANIFEST_MCP_SERVERS = {
-    ".claude-plugin/plugin.json": (CLAUDE_MCP_SERVERS, f"mcpServers must be {json.dumps(CLAUDE_MCP_SERVERS)}: Claude "
-                                   "Code sends the caller's key only through this override of the shared declaration"),
-    ".codex-plugin/plugin.json": (SHARED_MCP_SERVERS, 'mcpServers must be "./mcp.json", the shared declaration'),
+    ".claude-plugin/plugin.json": (SHARED_MCP_SERVERS, 'mcpServers must be "./mcp.json", the shared declaration'),
+    ".codex-plugin/plugin.json": (CODEX_MCP_SERVERS, f"mcpServers must be {json.dumps(CODEX_MCP_SERVERS)}: Codex "
+                                  "sends the caller's key only through bearer_token_env_var"),
     ".cursor-plugin/plugin.json": (SHARED_MCP_SERVERS, 'mcpServers must be "./mcp.json", the shared declaration'),
 }
 CODEX_INTERFACE_FIELDS = (
@@ -204,7 +203,11 @@ class Package:
         plugin = self.load_json("plugin.json")
         mcp = self.load_json("mcp.json")
         if plugin is not None:
-            self.check_schema("plugin.json", plugin, "plugin.schema.json")
+            if "$schema" in plugin:
+                self.report("plugin.json", "codex", "must not declare $schema: Codex then reads the package as an "
+                            "Agent Plugins manifest, ignores .codex-plugin/plugin.json and strips the straddle-api key")
+            # The Agent Plugins 1.0.0 metadata fields still apply; only the $schema marker is left out.
+            self.check_schema("plugin.json", {**plugin, "$schema": AGENT_PLUGIN_SCHEMA}, "plugin.schema.json")
         if mcp is not None:
             self.check_schema("mcp.json", mcp, "mcp.schema.json")
             self.check_mcp(mcp)
@@ -242,9 +245,8 @@ class Package:
                 continue
             if config.get("url") != url:
                 self.report("mcp.json", "mcp", f"{server} url must be {url}")
-            if "headers" in config:
-                self.report("mcp.json", "mcp", f"{server} must not declare headers: Agent Plugins header values are "
-                            "literal package data and credentials are client-managed (spec section 7.2.1)")
+            if config.get("headers") != MCP_HEADERS.get(server):
+                self.report("mcp.json", "mcp", f"{server} headers must be {json.dumps(MCP_HEADERS.get(server))}")
         for server in servers.keys() - MCP_SERVERS.keys():
             self.report("mcp.json", "mcp", f"unexpected server {server!r}")
 

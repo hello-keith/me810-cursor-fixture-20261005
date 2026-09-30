@@ -1,3 +1,3 @@
-getCharge  GET /v1/charges/{id}  Retrieve a charge.
-createCharge  POST /v1/charges  Create a charge. Excluded from execute-request; use the SDK or CLI.
-listAccounts  GET /v1/accounts  List embedded accounts.
+Offline eval fixture: synthetic IDs, not the hosted server's.
+
+{"specs":[{"servers":[{"url":"https://{environment}.straddle.com","description":"Straddle API server","variables":{"environment":{"default":"sandbox","enum":["production","sandbox"]}}}],"x-scalar-document-version-id":"5ca1ab1e-0000-4000-8000-000000000001","paths":{"/v1/charges/{id}":{"get":{"operationId":"getCharge","summary":"Retrieve a charge."},"x-scalar-operation-id":"5ca1ab1e-0000-4000-9000-000000000001"},"/v1/charges":{"post":{"operationId":"createCharge","summary":"Create a charge.","description":"Excluded from execute-request; use the SDK or CLI."},"x-scalar-operation-id":"5ca1ab1e-0000-4000-9000-000000000002"},"/v1/accounts":{"get":{"operationId":"listAccounts","summary":"List embedded accounts."},"x-scalar-operation-id":"5ca1ab1e-0000-4000-9000-000000000003"}}}]}

@@ -27,6 +27,8 @@ Wait at most ten minutes for transitions. Do not poll `GET /v1/charges/{id}`, pa
 
 ## Funding sweep for the return
 
+Everything in this section was observed in Sandbox and is not a documented API contract. It is a Sandbox test recipe: never carry the sweep, its timing or its account-wide effect into production code or guidance.
+
 In Sandbox, a `reversed_insufficient_funds` charge reaches `paid` only when a funding sweep runs after its funds are released and before its return. Without one it goes `pending`, then `failed` with no `paid`, on SaaS and marketplace alike.
 
 - **Timing.** Send the approved sweep row 70 to 90 seconds after the charge's first `pending` transition, by that event's delivered `changed_at`. Observed in Sandbox: sweeps about 65 and 80 seconds after `pending` gave `paid`, then `reversed` with `R01`; one 47 seconds after gave `failed` with no `paid`. The return came about five minutes after `pending`. Straddle doesn't document this window.

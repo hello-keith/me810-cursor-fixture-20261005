@@ -320,7 +320,6 @@ def instructions(plugin, archive_name, archive_sha, content_sha256, skill_count,
         f"[\"{market}\"]; assert p[\"version\"]==\"{version}\" and p[\"enabled\"] and "
         f"{{k: v[\"url\"] for k, v in p[\"mcpServers\"].items()}}=={servers}, p'",
     ]
-    codex_key = f"codex mcp add straddle-api --url {api_url} --bearer-token-env-var STRADDLE_API_KEY"
     codex_validate = [
         f"codex plugin list --json | python3 -c 'import json,sys; p={{x[\"pluginId\"]: x for x in "
         f"json.load(sys.stdin)[\"installed\"]}}[\"{market}\"]; assert p[\"version\"]==\"{version}\" and p[\"enabled\"], p'",
@@ -341,9 +340,9 @@ def instructions(plugin, archive_name, archive_sha, content_sha256, skill_count,
     def codex(acquire):
         return plugin_operations(
             "codex-plugin", acquire,
-            lambda path: [f"codex plugin marketplace add {path}", f"codex plugin add {market}", codex_key],
+            lambda path: [f"codex plugin marketplace add {path}", f"codex plugin add {market}"],
             f"codex plugin add {market}",
-            [f"codex plugin remove {market}", f"codex plugin marketplace remove {name}", "codex mcp remove straddle-api"],
+            [f"codex plugin remove {market}", f"codex plugin marketplace remove {name}"],
             codex_validate)
 
     wizard_spec = f"{wizard['package']}@{wizard['version']}"
@@ -377,8 +376,10 @@ def instructions(plugin, archive_name, archive_sha, content_sha256, skill_count,
             "release": claude(release),
         },
         "codex": {
-            "notes": ["Install adds a client-level straddle-api server that reads STRADDLE_API_KEY, because Codex "
-                      "drops Authorization from plugin MCP config. Validate checks the variable name, never its value."],
+            "notes": ["Start Codex from a shell where STRADDLE_API_KEY is set; the plugin's straddle-api server reads "
+                      "its bearer token from that variable. Validate checks the variable name, never its value.",
+                      "A client-level straddle-api server from an older install is left developer-managed "
+                      "(remove with 'codex mcp remove straddle-api')."],
             "candidate": codex(candidate),
             "release": codex(release),
         },

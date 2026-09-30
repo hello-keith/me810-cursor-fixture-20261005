@@ -18,7 +18,7 @@ Straddle signs every webhook and FIFO delivery with the [Standard Webhooks](http
 
 Each endpoint has its own signing secret, prefixed `whsec_`. It is not your API key. Read it from the environment on the server, never from a client bundle or source control.
 
-Event payloads carry `event_type` (for example `charge.event.v1`), a unique `event_id`, `account_id` (platform deliveries only), and the full resource under `data`. The event catalog is the `webhooks` section of the Straddle API contract.
+Event payloads carry `event_type` (for example `charge.event.v1`), a unique `event_id`, `account_id` on platform deliveries (see [Routing events on a platform](#routing-events-on-a-platform) for direct accounts), and the full resource under `data`. The event catalog is the `webhooks` section of the Straddle API contract.
 
 ## Endpoint types
 
@@ -67,7 +67,7 @@ The endpoint is a [Svix polling endpoint](https://docs.svix.com/advanced-destina
 The handler:
 
 1. **Chooses its own consumer ID.** Each consumer keeps its own position. Give each independent reader its own ID, and never reuse another tool's.
-2. **Expects a replay on a new consumer.** From `earliest`, a new consumer replays the endpoint's whole retained history, for every account on the platform, not only this run's resources. The first batch of 50 in the observed run had 32 events from 3 other accounts. Route by `account_id` as [Routing events on a platform](#routing-events-on-a-platform) says, and project only events for resources your application created; store or skip the rest. Starting from `latest` or from a timestamp would avoid the replay, but neither has been tried on a Straddle endpoint.
+2. **Expects a replay on a new consumer.** Observed in Sandbox, not a documented API contract: from `earliest`, a new consumer replayed the endpoint's whole retained history, for every account on the platform, not only this run's resources. The first batch of 50 in the observed run had 32 events from 3 other accounts. Route by `account_id` as [Routing events on a platform](#routing-events-on-a-platform) says, and project only events for resources your application created; store or skip the rest. Starting from `latest` or from a timestamp would avoid the replay, but neither has been tried on a Straddle endpoint.
 3. **Stores every event in order**, dropping duplicates by `event_id`.
 4. **Commits the last offset** after the batch is stored: `POST` `{"offset": N}`, where `N` is the last item's `offset`. It keeps polling while `done` is `false`.
 
@@ -77,13 +77,13 @@ A `423` means a missing commit, not a transient error to retry.
 
 Deliveries can arrive out of order ([Sandbox Pay by Bank troubleshooting](https://docs.straddle.com/guides/resources/sandbox-paybybank)). Order a resource's transitions by `data.status_details.changed_at`, the contract's time the status changed, not by arrival time or the `webhook-timestamp` or `svix-timestamp` header, which is the send time.
 
-Two transitions can share a `changed_at`: Sandbox emitted `paid` and `reversed` for one charge with the identical value `04:13:41.3663282Z`. On a tie, the event later in delivery order is the later transition: the higher polling offset, or the later position in a FIFO batch, with later batches after earlier ones. A webhook endpoint has no delivery order, so there a tie can't be settled from the deliveries. Keep both transitions in the history and don't infer an order from arrival.
+Two transitions can share a `changed_at`. Sandbox emitted `paid` and `reversed` for one charge with the identical value `04:13:41.3663282Z`. That was observed in Sandbox and is not a documented API contract, so handle a tie whether or not production produces one. On a tie, the event later in delivery order is the later transition: the higher polling offset, or the later position in a FIFO batch, with later batches after earlier ones. A webhook endpoint has no delivery order, so there a tie can't be settled from the deliveries. Keep both transitions in the history and don't infer an order from arrival.
 
-When projecting status, an event whose `changed_at` is older than the current status's, or equal but earlier in delivery order, never replaces it. The same status can be delivered again under a new `event_id`, for example after a Sandbox funding sweep, and must change nothing.
+When projecting status, an event whose `changed_at` is older than the current status's, or equal but earlier in delivery order, never replaces it. The same status can be delivered again under a new `event_id`, for example after a funding sweep (observed in Sandbox, not a documented API contract), and must change nothing.
 
 ## Routing events on a platform
 
-Straddle omits `account_id` from events delivered to a direct account, because the account is implicit. For a SaaS or marketplace platform, every event carries `account_id`, the embedded account the event belongs to. Route on that field. Do not infer the account from the endpoint URL, from the order events arrive in, or from IDs inside `data`. Reject an event that names an account your platform does not own.
+Events delivered to a direct account arrived without `account_id` in Sandbox, where the account is implicit. That was observed in Sandbox and is not a documented API contract, so a direct account's handler must work whether or not the field is present. For a SaaS or marketplace platform, every event carries `account_id`, the embedded account the event belongs to. Route on that field. Do not infer the account from the endpoint URL, from the order events arrive in, or from IDs inside `data`. Reject an event that names an account your platform does not own.
 
 ## The non-negotiables
 
