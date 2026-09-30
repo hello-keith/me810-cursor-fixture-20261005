@@ -11,7 +11,7 @@ Decide whether the Straddle integration in the repository in the current working
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules on credentials, environments, account scope, idempotency, the fourteen SDK/CLI-only operations, notifications, and missing configuration apply to every step.
 
-Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), Go Live is its last step, and step 6 closes the program as that page says.
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md); safety text and markers stay exact. In a [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md) session, Go Live is its last step, and step 6 closes the program as that page says.
 
 ## Boundaries
 

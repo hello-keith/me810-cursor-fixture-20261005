@@ -21,7 +21,7 @@ Read `straddle-integration-plan.md`. Integrate needs, from the plan:
 - the file-change table, which becomes the only files Integrate may change
 - the future Sandbox writes table
 
-If there is no plan, or it is not approved, stop and hand off to [straddle-plan](../../straddle-plan/SKILL.md): print `STRADDLE_ABORT` with the reason and the `blocked` handoff. Do not reconstruct a plan from the request. A request that adds files or writes beyond the plan needs the plan updated and approved first. Say which items are new.
+If there is no plan, or it is not approved, print `STRADDLE_ABORT` with the reason, skip steps 2 to 6, and go straight to [step 7](07-handoff.md). It writes the `blocked` report, with plan hash `none (plan not approved)`, and prints the `blocked` handoff that sends the developer to [straddle-plan](../../straddle-plan/SKILL.md). Change no file and send no Straddle request on the way. Do not reconstruct a plan from the request. A request that adds files or writes beyond the plan needs the plan updated and approved first. Say which items are new.
 
 ### Recorded approval
 

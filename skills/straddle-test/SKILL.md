@@ -11,7 +11,7 @@ Run the verification the approved plan names, against the Straddle code that pla
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules apply to every step. Test uses the same preview, approval, and execution routes as [straddle-integrate](../straddle-integrate/SKILL.md), and cites them instead of restating them.
 
-Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), continue to the next program step after the handoff, as that page says.
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md); safety text and markers stay exact. In a [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md) session, a finished handoff ends Test, not the turn: start the next listed skill as that page says.
 
 ## Boundaries
 

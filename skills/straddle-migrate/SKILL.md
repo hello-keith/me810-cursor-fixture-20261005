@@ -11,11 +11,12 @@ Build Straddle code paths beside an existing provider integration in the reposit
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules on credentials, environments, account scope, idempotency, the fourteen SDK/CLI-only operations, notifications, and missing configuration apply to every step and to every line of code this skill writes.
 
-Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), continue to the next program step after the handoff, as that page says.
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md); safety text and markers stay exact. In a [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md) session, a finished handoff ends Migrate, not the turn: start the next listed skill as that page says.
 
 ## Boundaries
 
-- **Plan before edits.** Write `straddle-migration-plan.md` and get the developer's explicit approval of it before changing any other file. Every file the migration will create or modify is listed in the plan with the reason. Anything not listed is not touched.
+- **Plan before edits.** Write `straddle-migration-plan.md` and get the developer's explicit approval of it before changing any other file. Every file the migration will create or modify is listed in the plan with the reason. Anything not listed is not touched, except this skill's own report.
+- **Local writes.** Only `straddle-migration-plan.md`, the files its approved table lists, and, in step 8, the run's report, `straddle-migration-report.md`, at the repository root. Record the result in that report, never in the plan: any edit to the plan after approval voids its hash.
 - **Additive only.** Add new files and add code to listed files. Do not delete, rename, or rewrite existing provider code, tests, migrations, or configuration. Selecting Straddle happens through a switch the developer controls, and the old path keeps working.
 - **No customer-data transfer.** Do not export, copy, transform, or re-create customers, bank accounts, provider tokens, mandates, or payment history in Straddle, and do not write scripts or run commands that do (including `straddle import`). Re-verifying existing customers is a separate, reviewed process outside this skill; say so when asked.
 - **No unrelated changes.** Check the working tree before the first edit. If a file in the plan already has uncommitted changes, stop and ask; never overwrite, reformat, or stage someone else's work.

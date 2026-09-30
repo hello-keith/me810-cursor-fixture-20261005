@@ -27,4 +27,4 @@ Make the approved changes, one row at a time:
 
 If a change turns out to need a file or kind of change not in the table, stop, update the plan, and return to step 5.
 
-**Summary for step 7:** files touched, tests added.
+**Summary for step 7:** files touched, tests added, and the plan hash checked before the first edit.

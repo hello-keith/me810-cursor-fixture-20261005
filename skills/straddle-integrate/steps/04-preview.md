@@ -48,7 +48,7 @@ Rules for the table:
 
 When step 1 recorded **configured** and a row uses the CLI, run it with `--dry-run --agent` and show the result under the table. A dry run is not a substitute for the preview.
 
-Beside the table, show the rows as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md): which returned ID feeds which row, and which account each row runs as, by row number. The visual adds nothing the table doesn't say, and the developer approves the table.
+Beside the table, show the rows as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md), inline in your reply; write no file. It shows which returned ID feeds which row, and which account each row runs as, by row number. The visual adds nothing the table doesn't say, and the developer approves the table.
 
 ## Ask for approval
 

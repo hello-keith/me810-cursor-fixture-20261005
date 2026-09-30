@@ -1,6 +1,6 @@
 # Step 1: Begin
 
-- **Needs:** the developer's request, the approved plan (`straddle-integration-plan.md`, or `straddle-migration-plan.md` for a migration), and the Integrate report (`straddle-integration-report.md`) or Migrate report when one exists.
+- **Needs:** the developer's request, the approved plan (`straddle-integration-plan.md`, or `straddle-migration-plan.md` for a migration), and the Integrate report (`straddle-integration-report.md`) or Migrate report (`straddle-migration-report.md`) when one exists.
 - **Tools:** Read, Glob, Grep; Bash only for the offline configuration checks and the plan approval hash in Integrate's [step 1](../../straddle-integrate/steps/01-begin.md), `straddle --version`, and `straddle auth status --agent`. No writes, and no command that can reach Straddle, including `straddle doctor`.
 - **Next:** [02-offline.md](02-offline.md).
 
