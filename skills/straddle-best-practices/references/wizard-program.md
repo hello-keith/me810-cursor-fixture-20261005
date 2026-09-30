@@ -1,6 +1,6 @@
 # Straddle Wizard program
 
-The Straddle Wizard can run the whole integration in one agent session. It starts the session with a request that contains a line beginning `Straddle Wizard program:`. That line lists the program and says where to start, for example `Start at straddle-plan.` Without that line, each skill runs on its own and ends at its handoff, as its step files say.
+The Straddle Wizard can run the whole integration in one agent session. It starts the session with a request that contains a line beginning `Straddle Wizard program:`. That line lists the steps for this session and says where to start, for example `Start at straddle-plan.` Run only the steps the line lists, in its order. When its last step finishes, the program ends for this session, even if later steps exist. Without that line, each skill runs on its own and ends at its handoff, as its step files say.
 
 The program, in order:
 
@@ -34,7 +34,7 @@ Each step records its state in a file at the repository root, starting with a sm
 | Migrate | `straddle-migration-plan.md` | the same two lines as the integration plan | the approval is recorded with a matching hash, and the handoff is `migrated` |
 | Integrate | `straddle-integration-report.md` | `Status: complete`, `Status: partial (<reason>)`, or `Status: blocked (<reason>)`, then `Plan:` and `Plan hash:` | `Status: complete` for the current plan's hash |
 | Test | `straddle-test-evidence.md` | `Status: complete`, `Status: partial (<reason>)`, or `Status: blocked (<reason>)`, then `Plan:`, `Plan hash:`, `Latest run:`, and `Test charge:` | `Status: complete` for the current plan's hash |
-| Go Live | `straddle-go-live-report.md` | `Status: ready` or `Status: not ready (<reasons>)` | the report is written. Go Live is the last step either way. |
+| Go Live | `straddle-go-live-report.md` | `Status: ready` or `Status: not ready (<reasons>)`, then `Plan:` and `Plan hash:` | `Status: ready` for the current plan's hash. A `not ready` report sends the Wizard back to Go Live, which shows the listed gaps. In this session Go Live is still the last step. |
 
 `Plan hash` is the plan's approval hash, computed with the same command as the `Approval` line in Integrate's [Recorded approval](../../straddle-integrate/steps/01-begin.md#recorded-approval), on the plan file the step used. A report whose `Plan hash` differs from the current plan's is for an older plan, so that step hasn't finished for this one. Never write a key, token, or other secret value into any of these files.
 
