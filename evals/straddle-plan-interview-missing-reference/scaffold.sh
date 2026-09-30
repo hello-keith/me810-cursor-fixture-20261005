@@ -74,3 +74,17 @@ npm install --ignore-scripts --no-audit --no-fund --silent @straddlecom/straddle
 # history.jsonl loaded the skill from ~/.claude/plugins/cache/straddle/straddle/0.1.0. Unlike the other resumed cases,
 # nothing is linked there, so every read of the skill's references fails, as it would after the plugin was removed.
 rm -rf "$HOME/.claude/plugins/cache/straddle/straddle/0.1.0"
+# Other copies stay unreadable too: the plugin under test and the harness's own copy under the run's config directory
+# (/tmp/claude-eval-<id>/config/plugins/cache/straddle/...), wherever they are.
+rm -rf "${CLAUDE_CONFIG_DIR:-$(dirname "$HOME")/config}/plugins/cache/straddle"
+mkdir -p .claude
+cat > .claude/settings.json <<'JSON'
+{
+  "permissions": {
+    "deny": [
+      "Read(//**/skills/straddle-best-practices/**)",
+      "Read(//**/skills/straddle-plan/**)"
+    ]
+  }
+}
+JSON
