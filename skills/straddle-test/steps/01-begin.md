@@ -10,7 +10,7 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-test","step":"01-begin"}
 ```
 
-Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and the plan. When there is no approved plan, or the repository has no Straddle integration code, print `STRADDLE_ABORT`, write the evidence file with status `blocked`, and hand off to Plan, Integrate, or Migrate.
+Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and the plan. When there is no approved plan, or the repository has no Straddle integration code, print `STRADDLE_ABORT`, skip steps 2 to 5, and go to [step 6](06-evidence.md). It writes the evidence file with its header block (`Status: blocked (<reason>)`, `Plan:`, `Plan hash:`, `Latest run:`, and `Test charge: none`), with plan hash `none (plan not approved)` when no plan is approved, and hands off to Plan, Integrate, or Migrate.
 
 ## Which plan
 
