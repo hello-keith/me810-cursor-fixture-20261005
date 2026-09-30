@@ -6,3 +6,5 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 We use Plaid Link to connect tenants' bank accounts and hand the account to Dwolla with a processor token. Switch the bank-linking side to Straddle. We're a direct account, use the TypeScript SDK, and we'll use a Straddle webhook endpoint.
+
+Straddle is configured here: `straddle auth status --agent` reported `authenticated: true` (source `env:STRADDLE_API_KEY`), and `printenv STRADDLE_ENVIRONMENT` printed `sandbox`.

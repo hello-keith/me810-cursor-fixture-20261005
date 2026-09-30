@@ -6,3 +6,5 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 I want to add bank payments with Straddle to this app. Where do I start?
+
+Straddle is configured here: `straddle auth status --agent` reported `authenticated: true` (source `env:STRADDLE_API_KEY`), and `printenv STRADDLE_ENVIRONMENT` printed `sandbox`.

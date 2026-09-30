@@ -18,6 +18,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 - **No customer-data transfer.** Do not export, copy, transform, or re-create customers, bank accounts, provider tokens, mandates, or payment history in Straddle, and do not write scripts or run commands that do (including `straddle import`). Re-verifying existing customers is a separate, reviewed process outside this skill; say so when asked.
 - **No unrelated changes.** Check the working tree before the first edit. If a file in the plan already has uncommitted changes, stop and ask; never overwrite, reformat, or stage someone else's work.
 - **No remote writes.** Migrate sends no Straddle API request and creates no Straddle resource. Sandbox verification belongs to [straddle-test](../straddle-test/SKILL.md) after the code exists.
+- **Configuration first, offline.** [Step 1](steps/01-begin.md) checks the key (`straddle auth status --agent`) and the environment before anything else, with no Straddle request. When either is missing, name it, ask the developer for it or point to [straddle-setup](../straddle-setup/SKILL.md), and stop before planning.
 - **Config errors, not no-ops.** New Straddle code fails with a configuration error naming the missing key or environment before any request. It never silently falls back to the old provider or to Sandbox.
 
 ## Supported providers
@@ -26,7 +27,7 @@ Stripe, Plaid, Moov, Modern Treasury, Dwolla, Paya, Payliance, and Other. [refer
 
 ## Steps
 
-1. [steps/01-begin.md](steps/01-begin.md): confirm scope and restate the boundaries.
+1. [steps/01-begin.md](steps/01-begin.md): check the key and environment offline, then confirm scope and restate the boundaries.
 2. [steps/02-inventory.md](steps/02-inventory.md): find every provider call site and the working-tree state.
 3. [steps/03-choices.md](steps/03-choices.md): ask provider, integration model, SDK, notification path, and switch design.
 4. [steps/04-plan.md](steps/04-plan.md): write `straddle-migration-plan.md` from [references/plan-template.md](references/plan-template.md).
@@ -45,4 +46,4 @@ STRADDLE_ABORT {"skill":"straddle-migrate","step":"05-approval","reason":"develo
 STRADDLE_HANDOFF {"skill":"straddle-migrate","status":"awaiting_approval","report":"<one-paragraph summary>"}
 ```
 
-`status` is `awaiting_approval` when the plan is written but not approved, `migrated` when approved edits are done and reviewed, or `blocked` when a dirty file or a boundary stops the run. An open choice is not `blocked`: it goes into the plan as `Unresolved`, and the status is `awaiting_approval`. Emit `STRADDLE_ABORT` when the developer declines or stops.
+`status` is `awaiting_approval` when the plan is written but not approved, `migrated` when approved edits are done and reviewed, or `blocked` when a missing key or environment, a dirty file, or a boundary stops the run. An open choice is not `blocked`: it goes into the plan as `Unresolved`, and the status is `awaiting_approval`. Emit `STRADDLE_ABORT` when the developer declines or stops.

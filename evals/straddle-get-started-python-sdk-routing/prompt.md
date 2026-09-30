@@ -6,3 +6,5 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 We're a SaaS platform and our backend is this Django app. Which Straddle SDK should we use? Get us started.
+
+Straddle is configured here: `straddle auth status --agent` reported `authenticated: true` (source `env:STRADDLE_API_KEY`), and `printenv STRADDLE_ENVIRONMENT` printed `sandbox`.
