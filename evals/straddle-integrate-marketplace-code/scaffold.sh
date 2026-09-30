@@ -42,6 +42,7 @@ cat > straddle-integration-plan.md <<'EOF_6'
 ## Status
 
 - Plan state: Approved
+- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 9f05679c93ef1eb332abe0efc86f925de286ea4ee2f2d82ae071eaf32e0a051e
 - SDK package and exact installed version: @straddlecom/straddle 1.0.4
 
 ## Decisions

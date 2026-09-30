@@ -3,7 +3,7 @@
 ## Status
 
 - Plan state: Draft | Approved | Blocked
-- Approval: none | <YYYY-MM-DD>, "<the developer's words>", recorded by <straddle-plan | straddle-integrate>, sha256 <hash>
+- Approval: none | date, "the developer's words", recorded by straddle-plan or straddle-integrate, sha256 (see Integrate step 1, Recorded approval)
 - Last reviewed:
 - Repository and branch:
 - Straddle skills version:

@@ -58,11 +58,11 @@ Your code pulls events, so no public URL is needed. Use it when you cannot expos
 
 The endpoint is a [Svix polling endpoint](https://docs.svix.com/advanced-destinations/polling-endpoints). Straddle's docs don't describe its wire format. The format below was observed on a Straddle SaaS Sandbox endpoint on 2026-09-30; items marked unconfirmed weren't observed there.
 
-- **URL.** The dashboard gives a URL ending in `/consumer/{consumer_id}`. Replace that last segment with your consumer ID. The commit URL is the consumer URL plus `/commit`.
-- **Auth.** `Authorization: Bearer <polling token>` on poll and commit. They aren't Straddle API calls, so they carry no API key and no `Straddle-Account-Id`.
-- **Response.** `GET <consumer URL>` returns `{"data": [...], "done": <boolean>}`. Each item has an integer `offset`, plus `id`, `eventId`, `eventType`, `payload`, `channels` and `timestamp`. `payload` is the Straddle event (`event_id`, `event_type`, `account_id`, `data`). `done: false` means more events are waiting.
-- **`starting_position`.** `starting_position=earliest` on a consumer with no committed offset started at offset 0. After a commit, a poll without the parameter resumed at the next offset. Svix's API also lists `latest`. Unconfirmed: `latest`, and where a new consumer starts when the parameter is omitted.
-- **Lease.** A poll leases its batch to the consumer, and polls return `423 Locked` until that batch is committed. Svix says an uncommitted batch can be served again after the lease expires. Unconfirmed: how long the lease lasts.
+* **URL.** The dashboard gives a URL ending in `/consumer/{consumer_id}`. Replace that last segment with your consumer ID. The commit URL is the consumer URL plus `/commit`.
+* **Auth.** `Authorization: Bearer <polling token>` on poll and commit. They aren't Straddle API calls, so they carry no API key and no `Straddle-Account-Id`.
+* **Response.** `GET <consumer URL>` returns `{"data": [...], "done": <boolean>}`. Each item has an integer `offset`, plus `id`, `eventId`, `eventType`, `payload`, `channels` and `timestamp`. `payload` is the Straddle event (`event_id`, `event_type`, `account_id`, `data`). `done: false` means more events are waiting.
+* **`starting_position`.** `starting_position=earliest` on a consumer with no committed offset started at offset 0. After a commit, a poll without the parameter resumed at the next offset. Svix's API also lists `latest`. Unconfirmed: `latest`, and where a new consumer starts when the parameter is omitted.
+* **Lease.** A poll leases its batch to the consumer, and polls return `423 Locked` until that batch is committed. Svix says an uncommitted batch can be served again after the lease expires. Unconfirmed: how long the lease lasts.
 
 The handler:
 
