@@ -17,6 +17,7 @@ Native installation in each client has not been accepted yet. The commands below
 | `assets/` | Codex and Cursor | `logo.svg` is the published Straddle docs mark (`straddle-openapi/assets/favicon.svg` at `d571b47`). `logo.png` (512 px) and `icon.png` (256 px) are rendered from it with `@resvg/resvg-js` 2.6.2. |
 | `evals/` | `claude plugin eval` | Eval cases per skill, plus MCP mocks. |
 | `scripts/validate-package` | CI and authors | Package validation and the skill policy lint. |
+| `scripts/check-contract-tokens` | CI and authors | Checks that every backticked status, field, operation, and event in the product-model references in `skills/straddle-best-practices/references/` exists in the published API contract that `kit/release-inputs.json` pins. `--contract` checks a local contract instead. |
 | `scripts/kit-release` | CI and the release cut | Builds the checksummed plugin archive, and generates and checks `kit/manifest.yaml`. See [Release manifest and plugin archive](#release-manifest-and-plugin-archive). |
 | `kit/release-inputs.json` | `scripts/kit-release` | Hand-maintained release facts: released CLI, SDK, contract and hosted MCP records, the Wizard artifact and the plugin versions it accepts, client observations and the open publication gates. |
 | `kit/manifest.yaml` | Release acceptance (ME-659), and published with each plugin release. The Wizard doesn't read it. | Generated at the release cut. Every version and digest, minimum CLI and SDK versions, and install, update, remove and validation instructions per client. Between releases it describes the last cut, not the current source. |
@@ -50,7 +51,7 @@ The validator requires the `mcp.json` header, the Codex manifest's servers, and 
 | Codex | `codex plugin marketplace add straddle-build/skills`, then `codex plugin add straddle@straddle` |
 | Cursor | Import this repository as a team marketplace. |
 
-`npx skills add straddle-build/skills` installs the skills only. It doesn't install the manifests or MCP servers, so it isn't evidence that the plugin works. `scripts/validate-package` checks the skill files that both distribution paths ship, including `references/` at the root and under each skill.
+`npx skills add straddle-build/skills` installs the skills only. It doesn't install the manifests or MCP servers, so it isn't evidence that the plugin works. `scripts/validate-package` checks the skill files that both distribution paths ship, including each skill's `references/`.
 
 ## Release manifest and plugin archive
 
@@ -64,7 +65,7 @@ scripts/kit-release check --wizard-tarball path/to/straddlecom-wizard-<version>.
 scripts/kit-release check --release       # fails unless every component has publication proof
 ```
 
-The plugin archive holds what a client loads: the root and native manifests, `mcp.json`, `assets/`, `skills/`, `references/`, `third_party/`, `LICENSE` and `README.md`. It is built from git objects at the given commit, not the working tree, with stored entries, a fixed 1980-01-01 timestamp and the git file modes. The same commit gives the same bytes on any machine and zlib. `kit/` is excluded, so the commit that records the manifest rebuilds the archive the manifest names. Claude Code can load the archive directly with `claude --plugin-dir straddle-plugin-<version>.zip`, which is package-loaded evidence, not a marketplace install.
+The plugin archive holds what a client loads: the root and native manifests, `mcp.json`, `assets/`, `skills/`, `third_party/`, `LICENSE` and `README.md`. It is built from git objects at the given commit, not the working tree, with stored entries, a fixed 1980-01-01 timestamp and the git file modes. The same commit gives the same bytes on any machine and zlib. `kit/` is excluded, so the commit that records the manifest rebuilds the archive the manifest names. Claude Code can load the archive directly with `claude --plugin-dir straddle-plugin-<version>.zip`, which is package-loaded evidence, not a marketplace install.
 
 `plugin.content_sha256` and each skill's `sha256` hash a `sha256sum`-style listing, one `<sha256>  <path>` line per file sorted by repository path, over the plugin files or the skill directory. They don't depend on the archive format, so the Wizard can verify an installed or fetched plugin directory against them. Commit plugin source changes first: `generate` and `check` read plugin files from the commit and inputs from the working tree.
 
@@ -109,16 +110,17 @@ Run these from the repository root:
 scripts/validate-package             # package checks, policy lint, and live link checks
 scripts/validate-package --offline   # same, without fetching remote links
 scripts/validate-package --offline path/to/file.md   # policy lint for specific files only
+scripts/check-contract-tokens        # checks product-model references against the pinned API contract
 python3 -m unittest discover -s tests -v
 ```
 
 The package checks validate `mcp.json`, and `plugin.json`'s metadata fields, against the vendored Agent Plugins 1.0.0 schemas in `scripts/schemas/`. They also check the fixed MCP servers and credential routes, name and version agreement across the manifests, the Codex `interface` fields, that PNG assets are square, the Cursor variables schema, all nine required skills, and eval case layout. They fetch the Codex `websiteURL`, `privacyPolicyURL` and `termsOfServiceURL` and require HTTP 200, like Markdown links. They report missing skills and missing Codex URLs as failures, because both are real release requirements.
 
-CI runs Markdown lint, the validator and kit-release tests, `scripts/validate-package`, `scripts/kit-release build` (the plugin packs), and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job on every run. It doesn't check `kit/manifest.yaml` or the recorded Wizard, so a skills-only change passes without a Wizard change. Those checks run at the release cut.
+CI runs Markdown lint, the validator and kit-release tests, `scripts/check-contract-tokens` against the pinned published contract, `scripts/validate-package`, `scripts/kit-release build` (the plugin packs), and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job on every run. It doesn't check `kit/manifest.yaml` or the recorded Wizard, so a skills-only change passes without a Wizard change. Those checks run at the release cut.
 
 ### Skill policy lint (ME-816)
 
-The lint reads every Markdown file under `skills/` and `references/`. It splits each file into fenced code blocks and prose paragraphs, headings included, then splits paragraphs into clauses at `.`, `!`, `?` and `;`. A prose finding needs a match that no negation (`never`, `not`, `do not`, `avoid`, `instead of`, `rather than` and similar) precedes in its clause. Code blocks ignore negation, because code is an instruction.
+The lint reads every Markdown file under `skills/`. It splits each file into fenced code blocks and prose paragraphs, headings included, then splits paragraphs into clauses at `.`, `!`, `?` and `;`. A prose finding needs a match that no negation (`never`, `not`, `do not`, `avoid`, `instead of`, `rather than` and similar) precedes in its clause. Code blocks ignore negation, because code is an instruction.
 
 Negative examples are recognized only when an explicit prohibition frames them, and only for the rule the frame names. A frame is a heading or a lead-in ending in `:` that starts with `Never`, `Do not`, `Don't`, `Avoid`, `Forbidden`, `Prohibited`, `Anti-pattern`, or `What is not`/`What are not`. A heading frames its section for a rule when it names that rule's topic. For example, "What is not a notification model" frames resource polling, but not credential or `execute-request` checks. A lead-in frames only the list items, table rows and code right after it, when it names the rule's topic or says "the following", "these" or "any of". Each table row is linted as its own unit, so text in one row never combines with another row. The heading text itself is always checked.
 
