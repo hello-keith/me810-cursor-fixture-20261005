@@ -1,6 +1,6 @@
 ---
 type: llm
-focus: { source: output }
+focus: last_message
 arm: with-only
 ---
 
@@ -8,7 +8,7 @@ Judge the developer-facing text against the Straddle voice: a senior Straddle pa
 
 PASS only if all of these hold:
 
-1. The reply leads with the result in plain sentences: the project isn't ready yet because no Straddle API key is configured.
+1. The step 5 report's prose, after its `STRADDLE_PROGRESS` marker when the marker is in this reply, opens with the result in plain sentences: the project isn't ready yet because no Straddle API key is configured.
 2. It talks to the developer as "you", uses contractions, and keeps sentences short and plain. It sounds like a person, not a log ("Observed: …", "Blocked: …" on their own are not enough).
 3. It has no hype or filler: no "please", "simply", "just", "easily", "awesome", "seamless", no exclamation marks, no emoji, and no mascot, character name, or jokes.
 4. It states the missing key as a fact without apology or blame, and gives a concrete next step: set `STRADDLE_API_KEY` in the developer's own shell or environment (never pasted into chat), then run Setup again.

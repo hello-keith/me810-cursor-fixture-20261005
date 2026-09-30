@@ -16,12 +16,12 @@ Read [straddle-best-practices](../../straddle-best-practices/SKILL.md).
 
 Read `straddle-integration-plan.md`. Integrate needs, from the plan:
 
-- an approval: a [recorded approval](#recorded-approval) that matches the current file, or the developer approving the current plan in this conversation
+- an approval: a [recorded approval](#recorded-approval) that matches the current file, or the developer approving the current plan in this conversation. In a session the Straddle Wizard reopened, only the recorded approval counts, or one the developer gives after the reopen message, as [Reopened sessions](../../straddle-best-practices/references/wizard-program.md#reopened-sessions) says.
 - integration type, SDK, and notification path decided, not `Unresolved`
 - the file-change table, which becomes the only files Integrate may change
 - the future Sandbox writes table
 
-If there is no plan, or it is not approved, stop and hand off to [straddle-plan](../../straddle-plan/SKILL.md): print `STRADDLE_ABORT` with the reason and the `blocked` handoff. Do not reconstruct a plan from the request. A request that adds files or writes beyond the plan needs the plan updated and approved first. Say which items are new.
+If there is no plan, or it is not approved, print `STRADDLE_ABORT` with the reason, skip steps 2 to 6, and go straight to [step 7](07-handoff.md). It writes the `blocked` report, with plan hash `none (plan not approved)`, and prints the `blocked` handoff that sends the developer to [straddle-plan](../../straddle-plan/SKILL.md). Change no file and send no Straddle request on the way. Do not reconstruct a plan from the request. A request that adds files or writes beyond the plan needs the plan updated and approved first. Say which items are new.
 
 ### Recorded approval
 
@@ -40,7 +40,7 @@ grep -v -e '^- Plan state:' -e '^- Approval:' straddle-integration-plan.md | { s
 
 - **Accept** a recorded approval, including one from an earlier session, only when the state is `Approved` and the command prints the recorded hash.
 - **Reject** `Approved` with no `Approval` line or with a different hash. The plan changed after approval, or the approval was never recorded. Say so, and treat the plan as unapproved until the developer approves the current file.
-- **Record** an approval when the plan has no valid one and the developer approves the current plan in this conversation, in their own words. Before step 2, set `Plan state: Approved`, run the command, and write the `Approval` line with today's date, their words, `recorded by straddle-integrate`, and the hash. Change nothing else in the plan.
+- **Record** an approval when the plan has no valid one and the developer approves the current plan in this conversation, in their own words. In a reopened Wizard session, that approval must come after the reopen message. Before step 2, set `Plan state: Approved`, run the command, and write the `Approval` line with today's date, their words, `recorded by straddle-integrate`, and the hash. Change nothing else in the plan.
 
 Keep the hash the command printed as this run's plan hash. Step 7 writes it into `straddle-integration-report.md`, and Test and the Straddle Wizard use it to tell which plan a report belongs to. When no approval was accepted or recorded, the plan hash is `none (plan not approved)`.
 

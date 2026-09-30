@@ -2,7 +2,7 @@
 
 - **Needs:** summaries from steps 2 to 4.
 - **Tools:** Write for `straddle-setup.md` at the repository root only.
-- **Next:** hand off to [straddle-plan](../../straddle-plan/SKILL.md) when the status is not `blocked`. When it is `blocked`, the run ends at the handoff and waits for the developer. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, a status other than `blocked` means you continue with the next program step in this session.
+- **Next:** hand off to [straddle-plan](../../straddle-plan/SKILL.md) when the status is not `blocked`. When it is `blocked`, the run ends at the handoff and waits for the developer. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, a status other than `blocked` ends Setup, not the turn: start the next listed skill in this same reply, as that page says. This step's Tools line doesn't limit that.
 
 Print:
 
@@ -87,10 +87,10 @@ End with:
 - [ ] Setup created or changed nothing except `straddle-setup.md`.
 ```
 
-Then print the handoff on one line, followed by one plain sentence that says the result and the next step, for example "Setup's done, so next I'll plan the integration with you." or "I need a Sandbox API key before I call Straddle. Set `STRADDLE_API_KEY` in the shell you start your agent from, then run Setup again.":
+Then print the handoff on one line, followed by one plain sentence that says the result and the next step, for example "Setup's done, so planning the integration with you is next." or "I need a Sandbox API key before I call Straddle, so I haven't sent any Straddle API request. Set `STRADDLE_API_KEY` in the shell you start your agent from, then run Setup again.":
 
 ```text
 STRADDLE_HANDOFF {"skill":"straddle-setup","status":"<status>","report":"<one-paragraph summary of the table and blockers>"}
 ```
 
-The handoff ends Setup's turn. Don't continue into the developer's original request after it, whether with more tool calls or by asking for values that would let the request run as asked. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, starting the next program step after a status other than `blocked` isn't that request: continue as that page says.
+Outside a Wizard program, the handoff ends Setup's turn. In either case, don't continue into the developer's original request after it, whether with more tool calls or by asking for values that would let the request run as asked. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, a status other than `blocked` ends Setup, not the turn: start the next listed skill as that page says.

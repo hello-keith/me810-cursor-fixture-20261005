@@ -17,4 +17,4 @@ Tell the developer in a plain sentence that the plan is ready for their review, 
 - **Plan has `Unresolved` items that affect a listed file:** do not ask for approval yet. Go to step 8 and hand off there with `awaiting_approval`.
 - **No or stop:** print `STRADDLE_ABORT` with the reason and go to step 8.
 
-**Summary for step 6:** approval recorded (yes or no), the approved rows.
+**Summary for step 6:** approval recorded (yes or no), the approved rows, and the recorded hash.

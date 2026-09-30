@@ -48,7 +48,7 @@ Rules for the table:
 
 When step 1 recorded **configured** and a row uses the CLI, run it with `--dry-run --agent` and show the result under the table. A dry run is not a substitute for the preview.
 
-Beside the table, show the rows as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md): which returned ID feeds which row, and which account each row runs as, by row number. The visual adds nothing the table doesn't say, and the developer approves the table.
+Beside the table, show the rows as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md), inline in your reply; write no file. It shows which returned ID feeds which row, and which account each row runs as, by row number. The visual adds nothing the table doesn't say, and the developer approves the table.
 
 ## Ask for approval
 
@@ -59,7 +59,8 @@ Only a yes given after this exact preview counts. These do not count:
 - an approval given before the preview was shown, or a general "go ahead" in the original request
 - an approval of an earlier preview whose environment, account, operation, payload, external ID, or idempotency key differs from this one, for example a charge approved for account A that the developer now wants for account B
 - a yes to some rows, which covers only those rows. Rebuild the preview with just those rows and confirm it.
+- in a session the Straddle Wizard reopened, any approval given before the reopen message, even for this exact preview, and even for a write that was interrupted before it finished. Show the whole preview table again in this run, before you ask, rather than pointing back to a preview from before the reopen message, as [Reopened sessions](../../straddle-best-practices/references/wizard-program.md#reopened-sessions) says.
 
-A no, a changed target or payload, or no answer means zero writes. On a no, print `STRADDLE_ABORT` with `developer denied the Sandbox preview`, continue at step 6, and hand off with `blocked`. On a change, rebuild the preview and ask again. Without an answer, continue at step 6 and hand off with `awaiting_approval`.
+A no, a changed target or payload, or no answer means zero writes. On a no, print `STRADDLE_ABORT` with `developer denied the Sandbox preview`, continue at step 6, and hand off with `blocked`. On a change, rebuild the preview and ask again. Without an answer, including when you end your turn to wait for one, send nothing and continue at step 6 and step 7 before ending the turn. The report then says `Status: partial (awaiting approval of the Sandbox preview)` at this run's plan hash, and the `awaiting_approval` handoff's sentence asks for the yes or no. A later explicit yes may continue at step 5 only if the exact preview and its environment, base URL, account, operation, and payload remain unchanged; otherwise show a new preview and ask again.
 
 **Summary for step 5:** the approved rows exactly as shown, the approval kind (`one-time` or `standing`), and the approval time, or the reason there is no approval.

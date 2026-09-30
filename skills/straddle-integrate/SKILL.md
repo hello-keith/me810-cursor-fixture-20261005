@@ -11,7 +11,7 @@ Implement the approved `straddle-integration-plan.md`: change the approved files
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules on credentials, environments, account scope, idempotency, the fourteen excluded operations, notifications, and tools apply to every step and are cited rather than repeated. [references/execution-routes.md](references/execution-routes.md) maps each write to its SDK method and CLI command.
 
-Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), continue to the next program step after the handoff, as that page says.
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md); safety text and markers stay exact. In a [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md) session, a finished handoff ends Integrate, not the turn: start the next listed skill as that page says.
 
 ## Boundaries
 
@@ -51,6 +51,6 @@ STRADDLE_HANDOFF {"skill":"straddle-integrate","status":"awaiting_approval","rep
 - `awaiting_approval`: code changes are done and the preview is waiting for the developer's yes.
 - `blocked`: configuration, a missing plan decision, or a denied or stale approval stopped the run. The report says which.
 
-Emit `STRADDLE_ABORT` when the run stops before its handoff step, such as a configuration error before a write or the developer ending the run, and still print the handoff with `blocked`.
+Emit `STRADDLE_ABORT` when the run stops before its handoff step, such as a missing or unapproved plan, a configuration error before a write, or the developer ending the run. Then go to [step 7](steps/07-handoff.md), which writes the report and prints the handoff with `blocked`.
 
 A run that stops before a configured step 4 preview ends with a short `blocked` report instead of a preview. It names the blocker, calling a value `unknown` rather than missing when the check that would show it did not run. It says that zero Straddle API requests were sent, lists each requested operation that did not run, says the excluded operations among them will run only through the SDK or CLI, and shows no secret or unmasked value. It offers no Straddle API request, not even a permitted read through `execute-request`, until configuration is confirmed. Docs search and API spec discovery send no Straddle request and stay available as their steps allow. Per-operation routes, acting accounts, and approval belong to the step 4 preview, and any account header the report does mention must follow the header rules.

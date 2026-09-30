@@ -1,17 +1,17 @@
 ---
 name: straddle-setup
-description: Read-only readiness check before a Straddle integration. Use when a developer wants to start, resume, or check a Straddle integration, asks whether their repo, CLI, API key, environment, Docs MCP, API MCP, or SDK are set up, or before running straddle-plan. Reports what is ready, blocked, and unknown without changing configuration or creating any Straddle resource.
+description: Readiness check before a Straddle integration. Writes only `straddle-setup.md`, changes no configuration, and creates no Straddle resource. Use when a developer wants to start, resume, or check a Straddle integration, asks whether their repo, CLI, API key, environment, Docs MCP, API MCP, or SDK are set up, or before running straddle-plan. Reports what is ready, blocked, and unknown.
 metadata:
   version: 0.1.0
 ---
 
 # Straddle Setup
 
-Produce a readiness report for the repository in the current working directory. Setup is diagnostic. It changes nothing locally or remotely.
+Produce a readiness report for the repository in the current working directory. Setup is diagnostic. It changes nothing locally or remotely except its report, `straddle-setup.md`.
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules on credentials, environments, account scope, tools, and missing configuration apply to every step here and are not repeated.
 
-Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), continue to the next program step after the handoff, as that page says.
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md); safety text and markers stay exact. In a [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md) session, a finished handoff ends Setup, not the turn: start the next listed skill as that page says.
 
 ## Boundaries
 

@@ -30,7 +30,7 @@ SOFTWARE.
 
 ## humanlayer/skills (MIT)
 
-[show-me.md](show-me.md) is the `show-me` skill from <https://github.com/humanlayer/skills/blob/6ab9013a10c28f5046f7f999549cd5328a0b30d7/plugins/show-me/skills/show-me/SKILL.md> (`6ab9013`), as adapted in `straddleio/straddle-form` `.agents/skills/show-me/SKILL.md` at `545d9975`. That adaptation rewrites only the HTML bullet: it drops the "a diagram, an infographic, or a short slide deck" examples and replaces the `Bash(open ...)` instruction with an available opener and a report when visual verification is unperformed. Straddle adds the "Where Straddle skills use it" section at the end. The original license follows, from <https://github.com/humanlayer/skills/blob/6ab9013a10c28f5046f7f999549cd5328a0b30d7/LICENSE>.
+[show-me.md](show-me.md) is the `show-me` skill from <https://github.com/humanlayer/skills/blob/6ab9013a10c28f5046f7f999549cd5328a0b30d7/plugins/show-me/skills/show-me/SKILL.md> (`6ab9013`), as adapted in `straddleio/straddle-form` `.agents/skills/show-me/SKILL.md` at `545d9975`. That adaptation rewrites only the HTML bullet: it drops the "a diagram, an infographic, or a short slide deck" examples and replaces the `Bash(open ...)` instruction with an available opener and a report when visual verification is unperformed. Straddle adds the "Where Straddle skills use it" section before that text, and the "Views" heading above it. The original license follows, from <https://github.com/humanlayer/skills/blob/6ab9013a10c28f5046f7f999549cd5328a0b30d7/LICENSE>.
 
 ```text
 MIT License
