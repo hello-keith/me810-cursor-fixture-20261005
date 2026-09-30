@@ -17,7 +17,7 @@ Native installation in each client has not been accepted yet. The commands below
 | `assets/` | Codex and Cursor | `logo.svg` is the published Straddle docs mark (`straddle-openapi/assets/favicon.svg` at `d571b47`). `logo.png` (512 px) and `icon.png` (256 px) are rendered from it with `@resvg/resvg-js` 2.6.2. |
 | `evals/` | `claude plugin eval` | Eval cases per skill, plus MCP mocks. |
 | `scripts/validate-package` | CI and authors | Package validation and the skill policy lint. |
-| `scripts/check-contract-tokens` | CI and authors | Checks that every backticked status, field, operation, and event in the product-model references in `skills/straddle-best-practices/references/` exists in the published API contract that `kit/release-inputs.json` pins. `--contract` checks a local contract instead. |
+| `scripts/check-contract-tokens` | Authors | Checks that every backticked status, field, operation, and event in the product-model references in `skills/straddle-best-practices/references/` exists in the published API contract that `kit/release-inputs.json` pins. `--contract` checks a local contract instead. |
 | `scripts/kit-release` | CI and the release cut | Builds the checksummed plugin archive, and generates and checks `kit/manifest.yaml`. See [Release manifest and plugin archive](#release-manifest-and-plugin-archive). |
 | `kit/release-inputs.json` | `scripts/kit-release` | Hand-maintained release facts: released CLI, SDK, contract and hosted MCP records, the Wizard artifact and the plugin versions it accepts, client observations and the open publication gates. |
 | `kit/manifest.yaml` | Release acceptance (ME-659), and published with each plugin release. The Wizard doesn't read it. | Generated at the release cut. Every version and digest, minimum CLI and SDK versions, and install, update, remove and validation instructions per client. Between releases it describes the last cut, not the current source. |
@@ -110,6 +110,7 @@ Run these from the repository root:
 scripts/validate-package             # package checks, policy lint, and live link checks
 scripts/validate-package --offline   # same, without fetching remote links
 scripts/validate-package --offline path/to/file.md   # policy lint for specific files only
+scripts/check-contract-tokens        # checks product-model references against the pinned API contract
 python3 -m unittest discover -s tests -v
 ```
 
