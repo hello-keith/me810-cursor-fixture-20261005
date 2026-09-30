@@ -1,7 +1,7 @@
 # Step 1: Begin
 
 - **Needs:** the developer's request and `straddle-integration-plan.md` at the repository root.
-- **Tools:** Read, Glob, Grep; Bash only for the offline checks below, `straddle --version`, and `straddle auth status --agent`. No writes, and no command that can reach Straddle, including `straddle doctor`.
+- **Tools:** Read, Glob, Grep; Bash only for the offline checks below, the plan approval hash, `straddle --version`, and `straddle auth status --agent`. Edit only for the two approval lines in the plan's Status section, as [Recorded approval](#recorded-approval) says. No other writes, and no command that can reach Straddle, including `straddle doctor`.
 - **Next:** [02-sources.md](02-sources.md).
 
 Print:
@@ -16,12 +16,31 @@ Read [straddle-best-practices](../../straddle-best-practices/SKILL.md).
 
 Read `straddle-integration-plan.md`. Integrate needs, from the plan:
 
-- plan state `Approved`, or the developer saying in this conversation that they approve it
+- an approval: a [recorded approval](#recorded-approval) that matches the current file, or the developer approving the current plan in this conversation
 - integration type, SDK, and notification path decided, not `Unresolved`
 - the file-change table, which becomes the only files Integrate may change
 - the future Sandbox writes table
 
 If there is no plan, or it is not approved, stop and hand off to [straddle-plan](../../straddle-plan/SKILL.md): print `STRADDLE_ABORT` with the reason and the `blocked` handoff. Do not reconstruct a plan from the request. A request that adds files or writes beyond the plan needs the plan updated and approved first. Say which items are new.
+
+### Recorded approval
+
+Every step runs in a fresh session, so an approval lasts only when it is written into the plan. The Status section records it in two lines:
+
+```markdown
+- Plan state: Approved
+- Approval: <YYYY-MM-DD>, "<the developer's words>", recorded by <straddle-plan | straddle-integrate>, sha256 <64 hex characters>
+```
+
+The hash covers the plan file without those two lines, so recording them doesn't change it. Compute it with:
+
+```bash
+grep -v -e '^- Plan state:' -e '^- Approval:' straddle-integration-plan.md | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-64
+```
+
+- **Accept** a recorded approval, including one from an earlier session, only when the state is `Approved` and the command prints the recorded hash.
+- **Reject** `Approved` with no `Approval` line or with a different hash. The plan changed after approval, or the approval was never recorded. Say so, and treat the plan as unapproved until the developer approves the current file.
+- **Record** an approval when the plan has no valid one and the developer approves the current plan in this conversation, in their own words. Before step 2, set `Plan state: Approved`, run the command, and write the `Approval` line with today's date, their words, `recorded by straddle-integrate`, and the hash. Change nothing else in the plan.
 
 ## Configuration, offline first
 

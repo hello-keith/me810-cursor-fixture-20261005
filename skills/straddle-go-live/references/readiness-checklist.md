@@ -25,7 +25,7 @@ Every row is required unless it says otherwise. SDK facts below were checked aga
 | Row | Pass when |
 | --- | --- |
 | Paid charge | A charge created by this code with `sandbox_outcome: paid` reached `paid`, observed through the notification path. |
-| Reversal | A charge with `sandbox_outcome: reversed_insufficient_funds` was observed going `paid` then `reversed` with `R01`, through the notification path. |
+| Reversal | A charge with `sandbox_outcome: reversed_insufficient_funds` was observed going `paid` then `reversed` with `R01`, through the notification path, ordered as [Ordering status changes](../../straddle-best-practices/references/receiving-webhooks.md#ordering-status-changes) says. In Sandbox this needs the timed funding sweep in Test's [step 4](../../straddle-test/steps/04-sandbox.md#funding-sweep-for-the-return): without it the charge ends `failed` with no `paid`, which leaves this row unproven. |
 | Missing scope | For SaaS and marketplace, a create without a required account failed locally with zero requests sent. |
 | Two accounts | For SaaS and marketplace, requests for account A and account B each carried the right account, and header-omitted operations stayed omitted. |
 | Duplicate delivery | A repeated delivery with the same `webhook-id` or `event_id` changed nothing. |

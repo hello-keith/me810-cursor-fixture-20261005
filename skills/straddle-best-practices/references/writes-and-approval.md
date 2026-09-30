@@ -38,6 +38,8 @@ Before any remote write, show the developer:
 
 Proceed only after an explicit yes. A changed environment, account, operation, or payload needs a new approval. A denial means no request is sent.
 
+Ask for one-time approval: a yes covers this preview's calls and nothing later. When the client's own permission prompt for the command also offers a standing grant, such as Codex's "don't ask again for commands that start with …", which saves a rule in `~/.codex/rules/default.rules` for later sessions, ask the developer to approve once instead. Record which kind the writes ran under: `one-time`, or `standing` with the client and where it saved the rule.
+
 ## Idempotency
 
 - Send an idempotency key on every create. The contract allows 10 to 40 characters. Derive it deterministically from the logical request: a retry of the same request reuses its key, and each distinct write, including each deliberate resubmit attempt, gets its own. Concatenating an operation name with a raw ID can exceed 40 characters. Use a short operation prefix plus a fixed-length hash of the request's identity instead, for example `chg-` plus the first 32 hex characters of SHA-256 of the charge's external ID. Never truncate a raw ID to fit, because truncated IDs can collide.

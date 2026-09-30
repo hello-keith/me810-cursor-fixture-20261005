@@ -50,7 +50,7 @@ When step 1 recorded **configured** and a row uses the CLI, run it with `--dry-r
 
 ## Ask for approval
 
-Ask one question: approve these exact rows, yes or no.
+Ask one question: approve these exact rows, yes or no. Ask for a one-time yes, not a standing grant, and record which kind was given, as [Preview and approval](../../straddle-best-practices/references/writes-and-approval.md#preview-and-approval) says.
 
 Only a yes given after this exact preview counts. These do not count:
 
@@ -60,4 +60,4 @@ Only a yes given after this exact preview counts. These do not count:
 
 A no, a changed target or payload, or no answer means zero writes. On a no, print `STRADDLE_ABORT` with `developer denied the Sandbox preview`, continue at step 6, and hand off with `blocked`. On a change, rebuild the preview and ask again. Without an answer, continue at step 6 and hand off with `awaiting_approval`.
 
-**Summary for step 5:** the approved rows exactly as shown, or the reason there is no approval.
+**Summary for step 5:** the approved rows exactly as shown and the approval kind (`one-time` or `standing`), or the reason there is no approval.

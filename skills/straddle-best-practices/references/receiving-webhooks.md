@@ -56,12 +56,30 @@ A handler that expects one event per request, or reads only `webhook-*` headers,
 
 Your code pulls events, so no public URL is needed. Use it when you cannot expose a public URL, for local development, or for batch processing. Read the endpoint's URL and token from server-side configuration.
 
-1. **Choose a consumer ID.** Each consumer keeps its own position, so give each independent reader its own ID.
-2. **Poll with `starting_position`.** The response is a batch of events with offsets. The poll leases that batch to the consumer.
-3. **Store every event in order**, dropping duplicates by `event_id`.
-4. **Commit the last offset** after the batch is stored: `POST` `{"offset": N}` to the consumer's `…/commit` path.
+The endpoint is a [Svix polling endpoint](https://docs.svix.com/advanced-destinations/polling-endpoints). Straddle's docs don't describe its wire format. The format below was observed on a Straddle SaaS Sandbox endpoint on 2026-09-30; items marked unconfirmed weren't observed there.
 
-Until the previous batch is committed, every poll returns `423 Locked`. A `423` means a missing commit, not a transient error to retry.
+- **URL.** The dashboard gives a URL ending in `/consumer/{consumer_id}`. Replace that last segment with your consumer ID. The commit URL is the consumer URL plus `/commit`.
+- **Auth.** `Authorization: Bearer <polling token>` on poll and commit. They aren't Straddle API calls, so they carry no API key and no `Straddle-Account-Id`.
+- **Response.** `GET <consumer URL>` returns `{"data": [...], "done": <boolean>}`. Each item has an integer `offset`, plus `id`, `eventId`, `eventType`, `payload`, `channels` and `timestamp`. `payload` is the Straddle event (`event_id`, `event_type`, `account_id`, `data`). `done: false` means more events are waiting.
+- **`starting_position`.** `starting_position=earliest` on a consumer with no committed offset started at offset 0. After a commit, a poll without the parameter resumed at the next offset. Svix's API also lists `latest`. Unconfirmed: `latest`, and where a new consumer starts when the parameter is omitted.
+- **Lease.** A poll leases its batch to the consumer, and polls return `423 Locked` until that batch is committed. Svix says an uncommitted batch can be served again after the lease expires. Unconfirmed: how long the lease lasts.
+
+The handler:
+
+1. **Chooses its own consumer ID.** Each consumer keeps its own position. Give each independent reader its own ID, and never reuse another tool's.
+2. **Expects a replay on a new consumer.** From `earliest`, a new consumer replays the endpoint's whole retained history, for every account on the platform, not only this run's resources. The first batch of 50 in the observed run had 32 events from 3 other accounts. Route by `account_id` as [Routing events on a platform](#routing-events-on-a-platform) says, and project only events for resources your application created; store or skip the rest. Starting from `latest` or from a timestamp would avoid the replay, but neither has been tried on a Straddle endpoint.
+3. **Stores every event in order**, dropping duplicates by `event_id`.
+4. **Commits the last offset** after the batch is stored: `POST` `{"offset": N}`, where `N` is the last item's `offset`. It keeps polling while `done` is `false`.
+
+A `423` means a missing commit, not a transient error to retry.
+
+### Ordering status changes
+
+Deliveries can arrive out of order ([Sandbox Pay by Bank troubleshooting](https://docs.straddle.com/guides/resources/sandbox-paybybank)). Order a resource's transitions by `data.status_details.changed_at`, the contract's time the status changed, not by arrival time or the `webhook-timestamp` or `svix-timestamp` header, which is the send time.
+
+Two transitions can share a `changed_at`: Sandbox emitted `paid` and `reversed` for one charge with the identical value `04:13:41.3663282Z`. On a tie, the event later in delivery order is the later transition: the higher polling offset, or the later position in a FIFO batch, with later batches after earlier ones. A webhook endpoint has no delivery order, so there a tie can't be settled from the deliveries. Keep both transitions in the history and don't infer an order from arrival.
+
+When projecting status, an event whose `changed_at` is older than the current status's, or equal but earlier in delivery order, never replaces it. The same status can be delivered again under a new `event_id`, for example after a Sandbox funding sweep, and must change nothing.
 
 ## Routing events on a platform
 
@@ -149,3 +167,5 @@ Prefer the SDK helper or `standardwebhooks`. If your language has neither, follo
 * FIFO: verification accepts the `svix-*` headers, and the parser matches the endpoint's transformation output from a captured delivery or the dashboard's transformation test
 * FIFO: each request is parsed as a batch; every event is stored in order, duplicates are dropped by `event_id`, and `2xx` follows the whole batch's commit
 * Polling: the last offset is committed after the batch is stored, and a `423` is treated as a missing commit
+* Polling: events from other accounts or other applications' resources, replayed to a new consumer, are never projected onto yours
+* Status is projected by `changed_at`, a tie goes to the later event in delivery order, and a re-delivered earlier status changes nothing
