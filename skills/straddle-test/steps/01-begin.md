@@ -38,6 +38,8 @@ Take the scenarios from the plan's verification section, and confirm them with t
 | Onboarding (platforms) | the API-created account A or B is resolved by exact external ID or the notification path and used in an account-scoped payment. The form-created proof waits for Onboarding V2. | yes |
 | Notification | every transition arrives through the selected webhook, FIFO, or polling endpoint, verified, persisted once, with a prompt `2xx` where deliveries arrive | yes |
 
+For each lifecycle the plan covers, add the matching rows from the scenario matrix in [sandbox-outcomes.md](../../straddle-best-practices/references/sandbox-outcomes.md#what-your-app-must-handle): customer review, paykey review, failure before funding, dispute and R29 block, Straddle hold, blocked payment, refund, cancel window, and funding. Each row names the `config.sandbox_outcome` to create the resource with and the transitions that must arrive through the notification path.
+
 A webhook receiver is not required: a polling endpoint is a complete notification path.
 
 **Summary for step 2:** the chosen plan and its plan hash, plan decisions, configuration result, acting accounts A and B, and the selected scenarios.
