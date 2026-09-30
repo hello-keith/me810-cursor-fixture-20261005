@@ -129,10 +129,12 @@ return res.status(204).send();
 
 ## Responding, retries, and auto-disable
 
-* **Only `2xx` means success.** Every other code is treated as a failure and retried on a backoff schedule.
+* **Only `2xx` means success.** Every other code is treated as a failure and retried on a backoff schedule. Straddle's docs give eight attempts over about 27 hours: immediately, then after 5 seconds, 5 minutes, 30 minutes, 2 hours, 5 hours, 10 hours, and 10 hours.
 * **Respond within the delivery timeout.** Keep the work before the response to verify, persist, respond. Everything slower runs from the queue after the `2xx`.
 * **Use `4xx` to reject bad or forged requests** (failed verification returns `400`). Use `5xx` or timeouts only for transient failures you want retried.
-* **Endpoints auto-disable after sustained failure.** Keep the handler healthy and wire up failure notifications from the Straddle dashboard.
+* **Endpoints auto-disable after sustained failure.** Straddle's docs say an endpoint that fails for five consecutive days is disabled, and one success resets the clock. Keep the handler healthy and wire up failure notifications from the Straddle dashboard.
+* **Replays come from the dashboard.** After an outage, resend one message or recover every failed message since a time from the endpoint's page. Replays are ordinary redeliveries, so deduplication handles them.
+* **An IP allowlist is optional, never a substitute.** Straddle publishes the addresses webhooks come from; search the Docs MCP for the webhook IP allowlist instead of copying them, because they can change. Verify the signature either way.
 
 ## Manual verification (only when no library exists)
 

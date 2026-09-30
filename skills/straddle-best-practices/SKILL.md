@@ -35,6 +35,10 @@ Versions change. Check the installed package in the developer's dependency tree 
 6. **Notifications.** Use a webhook endpoint, a FIFO endpoint, or a polling endpoint. Never loop on ordinary resource reads such as `GET /v1/charges/{id}` to discover status. Dashboard email is a human confirmation, not a notification model. See [notifications.md](references/notifications.md) and, for any handler, [receiving-webhooks.md](references/receiving-webhooks.md).
 7. **Tools.** Use the Docs MCP for documentation, the SDK for application code, and the CLI for diagnostics and approved sandbox helpers. If the Docs MCP lists `execute-request` or other API tools, never call them, and tell the developer it is exposing execution. The API MCP can run permitted operations, including reads and approved writes outside the fourteen, under rule 5. A skill may narrow this further, as Setup and Plan do. See [tools.md](references/tools.md).
 
+## Product model
+
+Read the reference for each flow before you plan, build, or test it: [charges](references/charges.md), [payouts](references/payouts.md), [returns and disputes](references/returns-and-disputes.md), [refunds and resubmits](references/refunds-and-resubmits.md), [customers and identity](references/customers-identity.md), [Bridge and paykeys](references/bridge-and-paykeys.md), [funding and reconciliation](references/funding-and-reconciliation.md), [webhook events](references/webhooks.md), [platforms](references/platforms.md), [ACH timing and consent](references/ach-timing-and-consent.md), [errors and limits](references/errors-and-limits.md), and the [Sandbox outcomes](references/sandbox-outcomes.md) that exercise them. Each says what the object is, its contract-checked states, what your app must handle, and its events.
+
 ## Deprecated paths
 
 - SDK releases older than the versions above, such as PyPI `straddle` 0.x or the Go module `github.com/straddleio/straddle-go`, and any MCP server shipped with them.

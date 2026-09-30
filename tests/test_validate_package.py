@@ -92,14 +92,9 @@ class PolicyLintTest(unittest.TestCase):
         self.assertEqual([line.split(": ")[:2] for line in lines],
                          [["straddle-mismatch/SKILL.md:1", "frontmatter"]] * 2)
 
-    def test_webhook_guidance_passes_in_every_distribution_path(self):
-        guides = [REPO / "references" / "receiving-webhooks.md",
-                  REPO / "skills" / "straddle-best-practices" / "references" / "receiving-webhooks.md"]
-        present = [path for path in guides if path.is_file()]
-        self.assertTrue(present)
-        for path in present:
-            with self.subTest(path=path.relative_to(REPO).as_posix()):
-                self.assertEqual(lint(path, remote=lambda url: 200), [])
+    def test_webhook_guidance_passes_the_policy_lint(self):
+        guide = REPO / "skills" / "straddle-best-practices" / "references" / "receiving-webhooks.md"
+        self.assertEqual(lint(guide, remote=lambda url: 200), [])
 
     def test_remote_links_must_return_200_after_redirects(self):
         class Handler(http.server.BaseHTTPRequestHandler):
