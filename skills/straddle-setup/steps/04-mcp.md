@@ -27,8 +27,8 @@ Check the two servers separately and report them as separate rows. One working d
    - the API MCP is registered and discovery passed
    - the call can name the Sandbox host explicitly
 
-   If any prerequisite fails, do not offer or run it, even if the developer asks, and report `authenticated: not run (prerequisite failed: <which>)`. When they hold, run it only after the developer says yes. Never use any other `execute-request` operation in Setup.
-4. Report `authenticated: passed`, `authenticated: failed (<status>)`, or `authenticated: not run (<reason>)`. A 401 means the client has no key configured, a wrong key, or a key for another environment. Never print the header or key.
+   If any prerequisite fails, do not offer or run it, even if the developer asks, and report `authenticated: not run (prerequisite failed: <which>)`. When they hold, run one `search-openapi-operations` query, `list accounts`, and take the call's IDs from that result as [tools.md](../../straddle-best-practices/references/tools.md) describes: `xScalarDocumentId` from the spec's `x-scalar-document-version-id`, and `xScalarOperationId` from the `x-scalar-operation-id` on the `/v1/accounts` path, never `listAccounts`. Then, only after the developer says yes, call `execute-request` with those IDs, `method: GET`, `serverBaseUrl: https://sandbox.straddle.com`, and `path: /v1/accounts`. Never use any other `execute-request` operation in Setup.
+4. Report `authenticated: passed`, `authenticated: failed (<status>)`, or `authenticated: not run (<reason>)`. A 401 means the client has no key configured, a wrong key, or a key for another environment. "Failed to get operation" means the operation ID was wrong, not the key: report it as `authenticated: failed (wrong operation ID)`. Never print the header or key.
 
 If a server is not registered, say so and point to the published setup guide, `https://straddle-build-straddle-openapi.apidocumentation.com/connect-mcp`, which covers each client's documented secret input and the manual fallback. Do not register or configure it yourself.
 

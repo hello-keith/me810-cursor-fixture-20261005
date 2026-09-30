@@ -12,10 +12,13 @@ The same content is published as [llms.txt](https://straddle-build-straddle-open
 
 `https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd`, authenticated with the caller's own Straddle API key. No Scalar login. It exposes `summarize-openapi-specs`, `search-openapi-operations`, `search-documentation`, and `execute-request`.
 
-The plugin's shared MCP declaration carries no credential or header. Each developer supplies the key through their client's documented secret input, following the published [connect-mcp guide](https://straddle-build-straddle-openapi.apidocumentation.com/connect-mcp), with manual configuration as the fallback. A registered server with no key configured is not authenticated, so never treat registration or discovery as proof of access.
+The plugin sends the key from `STRADDLE_API_KEY` in the environment the client starts from, as a bearer token: through the `Authorization` header in the plugin's MCP declaration for Claude Code and Cursor (Cursor prompts for the variable), and through the Codex manifest's bearer setting for Codex. The declaration holds a placeholder, never the key. Without the plugin, follow the published [connect-mcp guide](https://straddle-build-straddle-openapi.apidocumentation.com/connect-mcp). A registered server whose variable is unset is not authenticated, so never treat registration or discovery as proof of access.
 
 - `summarize-openapi-specs` and `search-openapi-operations` read the specification and send no Straddle request. A successful call proves discovery, not that the key works.
 - `execute-request` sends a real Straddle request with the caller's key. It is not read-only. It may run permitted reads, and permitted writes only after the preview and approval in [writes-and-approval.md](writes-and-approval.md). It never runs the fourteen excluded operations listed there, whatever the approval.
+  - Get its IDs from `search-openapi-operations` in the same session, never from memory, another session, or `summarize-openapi-specs`, which returns neither. They change when a contract version publishes. `xScalarDocumentId` is the spec's `x-scalar-document-version-id`. `xScalarOperationId` is the `x-scalar-operation-id` UUID on the matching path, not the OpenAPI `operationId` such as `listAccounts`.
+  - Pass the resolved host as `serverBaseUrl`, for example `https://sandbox.straddle.com`, never the templated server URL. Put query parameters in `path`, for example `/v1/accounts?page_size=1`.
+  - "Failed to get operation" means the operation ID is wrong, and "does not belong to the given document version" means the document ID is wrong. Neither says anything about the key.
 - Individual skills can be stricter. Setup and Plan make no remote writes, so they use only the reads their steps name.
 - Keep the client's tool approval prompts on.
 

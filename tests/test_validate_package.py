@@ -162,18 +162,15 @@ class PackageTest(unittest.TestCase):
     def test_committed_package_reports_only_known_gates(self):
         self.assertEqual(self.check(), sorted(KNOWN_GATES))
 
-    def test_mcp_headers_are_rejected(self):
-        self.edit_json("mcp.json", lambda v: v["mcpServers"]["straddle-api"].update(
-            headers={"Authorization": "Bearer ${STRADDLE_API_KEY}"}))
-        self.assertEqual(self.new_gates(), [
-            ("mcp.json", "mcp", "straddle-api must not declare headers: Agent Plugins header values are literal "
-             "package data and credentials are client-managed (spec section 7.2.1)")])
-
-    def test_claude_api_override_url_drift_is_rejected(self):
-        self.edit_json(".claude-plugin/plugin.json", lambda v: v["mcpServers"][1]["straddle-api"].update(
-            url="https://mcp.scalar.com/mcp/00000000-0000-0000-0000-000000000000"))
-        self.assertEqual([(path, rule) for path, rule, _ in self.new_gates()],
-                         [(".claude-plugin/plugin.json", "package")])
+    def test_every_client_route_must_send_the_api_key(self):
+        self.edit_json("mcp.json", lambda v: v["mcpServers"]["straddle-api"].pop("headers"))
+        self.edit_json(".codex-plugin/plugin.json", lambda v: v["mcpServers"]["straddle-api"].pop("bearer_token_env_var"))
+        self.edit_json("plugin.json", lambda v: v.update({"$schema": validator.AGENT_PLUGIN_SCHEMA}))
+        self.assertEqual([(path, rule) for path, rule, _ in self.new_gates()], [
+            (".codex-plugin/plugin.json", "package"),
+            ("mcp.json", "mcp"),
+            ("plugin.json", "codex"),
+        ])
 
     def test_invalid_plugin_name_and_version_drift(self):
         self.edit_json("plugin.json", lambda v: v.update(name="Straddle_Kit"))

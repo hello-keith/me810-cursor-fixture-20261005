@@ -17,7 +17,17 @@
     "sdk"
   ],
   "skills": "./skills/",
-  "mcpServers": "./mcp.json",
+  "mcpServers": {
+    "straddle-api": {
+      "type": "http",
+      "url": "https://mcp.scalar.com/mcp/d5d1b1c2-ae5b-432d-b795-4fcb31cfdedd",
+      "bearer_token_env_var": "STRADDLE_API_KEY"
+    },
+    "straddle-docs": {
+      "type": "http",
+      "url": "https://straddle-build-straddle-openapi.apidocumentation.com/mcp"
+    }
+  },
   "interface": {
     "displayName": "Straddle",
     "shortDescription": "Build and verify a Straddle integration",
