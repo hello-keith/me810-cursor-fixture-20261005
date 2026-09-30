@@ -68,9 +68,10 @@ Numbered, using the installed SDK's method names with their source file. Remove 
 ## Notifications
 
 - Endpoint type and events subscribed:
-- Signature verification helper and raw-body access:
+- Signature verification helper and raw-body access (FIFO: `svix-*` headers):
+- FIFO body shape, from a captured delivery or the dashboard's transformation test output:
 - Duplicate handling (event ID storage):
-- Prompt `2xx`, or for a polling endpoint, consumer ID and offset storage:
+- Acknowledgement: `2xx` after one event is stored (webhook), after the whole batch commits (FIFO), or the polling consumer ID, offset storage, and commit:
 - Status transitions to record, including `paid` before `reversed` with `R01`:
 
 ## Configuration

@@ -189,7 +189,7 @@ class KitReleaseTest(unittest.TestCase):
         self.commit_all("skill drift")
         code, output = self.run_kit("generate")
         self.assertEqual(code, 1)
-        self.assertIn("wizard.skill_bundle.content_sha256 e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c "
+        self.assertIn("wizard.skill_bundle.content_sha256 1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074 "
                       "does not match the plugin content", output)
 
     def test_manifest_records_versions_digests_and_candidate_provenance(self):
@@ -197,7 +197,7 @@ class KitReleaseTest(unittest.TestCase):
         archive, _ = self.build()
         self.assertEqual(manifest["plugin"]["archive"]["sha256"], hashlib.sha256(archive).hexdigest())
         self.assertEqual(manifest["plugin"]["content_sha256"],
-                         "e9a5db1d995e5798681e04d9d7f840000b6e0861f3e4b76ae3a31b881ad00b7c")
+                         "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074")
         self.assertEqual((manifest["kit"]["status"], manifest["plugin"]["provenance"]), ("candidate", "local-candidate"))
         self.assertEqual(manifest["cli"]["minimum_version"], "1.0.3")
         self.assertEqual({name: sdk["minimum_version"] for name, sdk in manifest["sdks"].items()},

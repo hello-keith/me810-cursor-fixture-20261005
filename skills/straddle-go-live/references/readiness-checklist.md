@@ -16,7 +16,7 @@ Every row is required unless it says otherwise. SDK facts below were checked aga
 | Fourteen operations | No script, agent configuration, or code path sends the fourteen SDK/CLI-only operations through `execute-request`. |
 | Public contract only | Every Straddle operation the code, scripts, or agent configuration uses is in the public API contract. Nothing calls an internal or unknown operation by SDK, CLI, or MCP. |
 | Notification path | One of webhook endpoint, FIFO endpoint, or polling endpoint is implemented. No loop on resource reads (`charges.retrieve`, `GET /v1/charges/{id}`, list calls) or `straddle tail` discovers status. |
-| Webhook verification | Per [receiving-webhooks.md](../../straddle-best-practices/references/receiving-webhooks.md): raw body, verified signature, missing secret fails, `2xx` only after persisting, duplicates are no-ops. With the TypeScript SDK, `client.webhooks.unwrap` skips verification when `headers` is omitted, so the call must pass the request headers. |
+| Notification handling | Per [Endpoint types](../../straddle-best-practices/references/receiving-webhooks.md#endpoint-types) for the implemented type. Webhook: raw body, verified signature, missing secret fails, `2xx` only after persisting, duplicates are no-ops; with the TypeScript SDK, `client.webhooks.unwrap` skips verification when `headers` is omitted, so the call must pass the request headers. FIFO: the same verification with the `svix-*` headers; the parser matches the production endpoint's transformation output; each batch is stored whole and in order before `2xx`, with duplicates dropped by `event_id`. Polling: the last offset is committed after each batch is stored. |
 | Platform event routing | SaaS and marketplace handlers route on the event's `account_id` and reject accounts the platform does not own. |
 | Logs | No key, signing secret, or unmasked customer or bank data is logged. `Request-Id` or `Correlation-Id` is logged for support. |
 
@@ -35,7 +35,7 @@ Every row is required unless it says otherwise. SDK facts below were checked aga
 | Row | Pass when |
 | --- | --- |
 | Production key | Issued in the production dashboard and stored in the deployment's secret manager. |
-| Production endpoint | A production webhook, FIFO, or polling endpoint exists, subscribed to the events the code handles, with its own signing secret stored server-side. |
+| Production endpoint | A production webhook, FIFO, or polling endpoint exists, subscribed to the events the code handles, with its own signing secret or polling token stored server-side. |
 | Endpoint failure alerts | Failure notifications are configured so an auto-disabled endpoint is noticed. |
 | Customer-facing onboarding (platforms) | Production uses the intended customer-facing onboarding path, not the Sandbox API bootstrap used in tests. |
 | Human confirmation channel | Dashboard email recipients are set. This is optional and is never the notification path for code. |

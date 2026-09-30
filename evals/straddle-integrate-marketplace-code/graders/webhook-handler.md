@@ -3,5 +3,5 @@ type: llm
 focus: { source: file, path: src/webhooks/straddle-fifo.mjs }
 ---
 
-PASS if the handler verifies the signature from the raw request body using the SDK's webhooks.unwrap with the request headers passed (or the standardwebhooks library), fails when the signing secret is missing, persists or queues the event keyed by webhook-id or event_id before returning a 2xx, returns a non-2xx (such as 500) when persisting fails, and treats a duplicate delivery as a no-op.
-FAIL if it parses JSON before verification, can skip verification, returns 2xx before the event is persisted, or polls a charge endpoint for status.
+PASS if the handler treats each request as a FIFO batch in the plan's recorded shape: it reads the events from the body's `data` array of `{payload, eventType}` objects, stores every payload in array order, skips any event whose `event_id` is already stored, returns a 2xx only after the whole batch is committed, and returns a non-2xx (such as 500) and commits nothing when any write fails. It must not store an unverified request: it verifies the raw body with the `svix-*` signature headers (directly, or by mapping them for the SDK helper or standardwebhooks) before storing anything, and fails when the signing secret is missing.
+FAIL if it expects one event per request, verifies only `webhook-*` headers, can skip verification, returns 2xx before the batch is committed, or polls a charge endpoint for status.
