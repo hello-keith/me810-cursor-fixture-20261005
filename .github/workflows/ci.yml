@@ -23,6 +23,9 @@ jobs:
       - name: Test package validator
         run: python3 -m unittest discover -s tests -v
 
+      - name: Check product-model references against the API contract
+        run: scripts/check-contract-tokens
+
       - name: Validate package, skills and links
         run: scripts/validate-package
 
