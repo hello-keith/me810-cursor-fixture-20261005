@@ -14,39 +14,39 @@ plugin:
   archive:
     file: "straddle-plugin-0.1.0.zip"
     format: "zip, stored entries, fixed timestamps"
-    sha256: "46c25e05b0b93a98e3a370c35c5e90b17ed59b4fc427182d21f44dcdae54433a"
-    bytes: 331096
+    sha256: "3f22ed18e7afc987a2513fe6e9f3b31b3ecbaf3f678c26564954e14f794d59a7"
+    bytes: 342581
     files: 97
-  content_sha256: "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"
+  content_sha256: "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"
   release: null
 skills:
   - name: "straddle-audit"
     version: "0.1.0"
-    sha256: "42217ed7589beb060682cb577c247c37651efdb7ec629589b9e48bbaebe88d5b"
+    sha256: "5f4d4f7b87945f09c707842e0efd9120ad40577d4566efbcc51d6ee6090d846c"
   - name: "straddle-best-practices"
     version: "0.1.0"
-    sha256: "af24471eeaf2567a38c173cdd990946e089ab23a389cf875e07df918bf28943f"
+    sha256: "4771436bd040328c17bfbb3517c3939dbd837734253f900c940a8efa2f75fabb"
   - name: "straddle-get-started"
     version: "0.1.0"
     sha256: "ada64aa695165ce0d1f41871f35776d7cadfe9843cacc3cb50a31951c8cdc7ea"
   - name: "straddle-go-live"
     version: "0.1.0"
-    sha256: "bb574296dfe6eaf38dcb6d6924529354d86d948bd59c865fa5cab1c20850da83"
+    sha256: "ae2ebdfb38bbab16e61275f05dacb835a44ec2b85b04ca838683dce4d932b896"
   - name: "straddle-integrate"
     version: "0.1.0"
-    sha256: "7ba034a4c04811409a71ba7a57f7b34e8738cda437972d23f5a6d47c55345a1b"
+    sha256: "8f5f3d647d2810ffc82437c48e5f4acecbfdc6c7ed62945574c35e12e8875ce5"
   - name: "straddle-migrate"
     version: "0.1.0"
     sha256: "08a74c7540b87485e30eb3f13a77388685d12de358ae62b4626c67f2ce89d02e"
   - name: "straddle-plan"
     version: "0.1.0"
-    sha256: "3c46f72e5fa992877bc1d3528eb34779dda5dd2fdf828e8859205e6243b128e3"
+    sha256: "3b7aa04c7d067939d781a387c38c44b53bc0dcce36c68a1419ee6eb3fcc8eefa"
   - name: "straddle-setup"
     version: "0.1.0"
     sha256: "95224fe15b1f7d85d0a4b8fd152c07661c9ae99ac28df8e17ef8453c7c7347fc"
   - name: "straddle-test"
     version: "0.1.0"
-    sha256: "0453d4ff0ca364b1d50d1921b9655efebc2337d2144fafb06b47bf8b5367d71f"
+    sha256: "f945ee1afa5cee38273c996edc1d33366f149c6e178c1375c18e5c7f6ffe2ba9"
 wizard:
   package: "@straddlecom/wizard"
   version: "0.1.0"
@@ -54,17 +54,17 @@ wizard:
   provenance: "local-candidate"
   artifact:
     file: "straddlecom-wizard-0.1.0.tgz"
-    bytes: 40491
-    sha256: "2db353aa1806ea070dea53c031d02d2d41176d8bf10902f7dcd5e1a2b93f9bc9"
-    integrity: "sha512-Cg1RMNkOyICwmu3zeG1ToBEHG00ePJ23VI6CjM/+Y985LWvN+6G1A+eyrIxPBV8sfjMDhaUjUe0wlnlkdnYoEA=="
+    bytes: 40490
+    sha256: "cb427a471bc09bf6d18042cff8d826d9f2f519043527a656035e7a622a34daae"
+    integrity: "sha512-4VgzhaGcbB7xVuPk7AUuseGQAFw3A66VpPnxzuejr5a6iBI3sf+cJd/IP4upw14MssvvRirsBTbHaVQGW28/NQ=="
   source:
     repository: "straddle-build/wizard"
-    commit: "469f7381228d670852909519dd7c4f4a883e6d64"
-    note: "npm pack of this main commit, which merged the gated re-pin (wizard PR #2); not published to npm"
+    commit: "bb1ee38dfda4d718447c5eb72c7c30ad11c5bbd9"
+    note: "npm pack of the re-pin commit on wizard branch fix/me-894-repin-skills, before its merge to main; not published to npm"
   skill_bundle:
     repository: "straddle-build/skills"
-    commit: "4bb8afe20b72448e0f1b12a42257075a5d53e26b"
-    content_sha256: "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"
+    commit: "643632e78654a4fa929873d0e1ec0ba15525a9e8"
+    content_sha256: "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"
     note: "PINNED_BUNDLE in the pack's dist/bundle.js: a merged-source snapshot verified by content, not a tagged release"
 cli:
   package: "@straddlecom/cli"
@@ -235,7 +235,7 @@ instructions:
           set -eu
           : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
           cd "$STRADDLE_KIT_DIR"
-          echo "2db353aa1806ea070dea53c031d02d2d41176d8bf10902f7dcd5e1a2b93f9bc9  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
+          echo "cb427a471bc09bf6d18042cff8d826d9f2f519043527a656035e7a622a34daae  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
           npm install --global "$PWD/straddlecom-wizard-0.1.0.tgz"
         )
       update: |-
@@ -243,7 +243,7 @@ instructions:
           set -eu
           : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
           cd "$STRADDLE_KIT_DIR"
-          echo "2db353aa1806ea070dea53c031d02d2d41176d8bf10902f7dcd5e1a2b93f9bc9  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
+          echo "cb427a471bc09bf6d18042cff8d826d9f2f519043527a656035e7a622a34daae  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
           npm install --global "$PWD/straddlecom-wizard-0.1.0.tgz"
         )
       remove: |-
@@ -287,9 +287,9 @@ instructions:
           : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
           cd "$STRADDLE_KIT_DIR"
           rm -rf claude-code-plugin.new
-          echo "46c25e05b0b93a98e3a370c35c5e90b17ed59b4fc427182d21f44dcdae54433a  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
+          echo "3f22ed18e7afc987a2513fe6e9f3b31b3ecbaf3f678c26564954e14f794d59a7  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
           unzip -q straddle-plugin-0.1.0.zip -d claude-code-plugin.new
-          { test -z "$(cd claude-code-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd claude-code-plugin.new && find . ! -type f ! -type d)" && test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"; } || { echo "claude-code-plugin.new is not exactly the verified plugin (plugin.content_sha256 1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074): unexpected entries, links or content" >&2; rm -rf claude-code-plugin.new; exit 1; }
+          { test -z "$(cd claude-code-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd claude-code-plugin.new && find . ! -type f ! -type d)" && test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"; } || { echo "claude-code-plugin.new is not exactly the verified plugin (plugin.content_sha256 9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833): unexpected entries, links or content" >&2; rm -rf claude-code-plugin.new; exit 1; }
           rm -rf claude-code-plugin
           mv claude-code-plugin.new claude-code-plugin
           claude plugin marketplace add "$PWD/claude-code-plugin"
@@ -302,9 +302,9 @@ instructions:
           cd "$STRADDLE_KIT_DIR"
           test -d claude-code-plugin || { echo "no installed plugin directory $PWD/claude-code-plugin; run install" >&2; exit 1; }
           rm -rf claude-code-plugin.new claude-code-plugin.old
-          echo "46c25e05b0b93a98e3a370c35c5e90b17ed59b4fc427182d21f44dcdae54433a  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
+          echo "3f22ed18e7afc987a2513fe6e9f3b31b3ecbaf3f678c26564954e14f794d59a7  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
           unzip -q straddle-plugin-0.1.0.zip -d claude-code-plugin.new
-          { test -z "$(cd claude-code-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd claude-code-plugin.new && find . ! -type f ! -type d)" && test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"; } || { echo "claude-code-plugin.new is not exactly the verified plugin (plugin.content_sha256 1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074): unexpected entries, links or content" >&2; rm -rf claude-code-plugin.new; exit 1; }
+          { test -z "$(cd claude-code-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd claude-code-plugin.new && find . ! -type f ! -type d)" && test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"; } || { echo "claude-code-plugin.new is not exactly the verified plugin (plugin.content_sha256 9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833): unexpected entries, links or content" >&2; rm -rf claude-code-plugin.new; exit 1; }
           mv claude-code-plugin claude-code-plugin.old
           mv claude-code-plugin.new claude-code-plugin
           if claude plugin marketplace update straddle && claude plugin update straddle@straddle; then
@@ -342,7 +342,7 @@ instructions:
           mkdir claude-code-plugin.new
           git -C claude-code-plugin.new.src archive --format=tar HEAD -- .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party | tar -x -C claude-code-plugin.new -f -
           rm -rf claude-code-plugin.new.src
-          { test -z "$(cd claude-code-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd claude-code-plugin.new && find . ! -type f ! -type d)" && test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"; } || { echo "claude-code-plugin.new is not exactly the verified plugin (plugin.content_sha256 1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074): unexpected entries, links or content" >&2; rm -rf claude-code-plugin.new; exit 1; }
+          { test -z "$(cd claude-code-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd claude-code-plugin.new && find . ! -type f ! -type d)" && test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"; } || { echo "claude-code-plugin.new is not exactly the verified plugin (plugin.content_sha256 9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833): unexpected entries, links or content" >&2; rm -rf claude-code-plugin.new; exit 1; }
           rm -rf claude-code-plugin
           mv claude-code-plugin.new claude-code-plugin
           claude plugin marketplace add "$PWD/claude-code-plugin"
@@ -360,7 +360,7 @@ instructions:
           mkdir claude-code-plugin.new
           git -C claude-code-plugin.new.src archive --format=tar HEAD -- .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party | tar -x -C claude-code-plugin.new -f -
           rm -rf claude-code-plugin.new.src
-          { test -z "$(cd claude-code-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd claude-code-plugin.new && find . ! -type f ! -type d)" && test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"; } || { echo "claude-code-plugin.new is not exactly the verified plugin (plugin.content_sha256 1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074): unexpected entries, links or content" >&2; rm -rf claude-code-plugin.new; exit 1; }
+          { test -z "$(cd claude-code-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd claude-code-plugin.new && find . ! -type f ! -type d)" && test "$(cd claude-code-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"; } || { echo "claude-code-plugin.new is not exactly the verified plugin (plugin.content_sha256 9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833): unexpected entries, links or content" >&2; rm -rf claude-code-plugin.new; exit 1; }
           mv claude-code-plugin claude-code-plugin.old
           mv claude-code-plugin.new claude-code-plugin
           if claude plugin marketplace update straddle && claude plugin update straddle@straddle; then
@@ -396,9 +396,9 @@ instructions:
           : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
           cd "$STRADDLE_KIT_DIR"
           rm -rf codex-plugin.new
-          echo "46c25e05b0b93a98e3a370c35c5e90b17ed59b4fc427182d21f44dcdae54433a  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
+          echo "3f22ed18e7afc987a2513fe6e9f3b31b3ecbaf3f678c26564954e14f794d59a7  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
           unzip -q straddle-plugin-0.1.0.zip -d codex-plugin.new
-          { test -z "$(cd codex-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd codex-plugin.new && find . ! -type f ! -type d)" && test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"; } || { echo "codex-plugin.new is not exactly the verified plugin (plugin.content_sha256 1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074): unexpected entries, links or content" >&2; rm -rf codex-plugin.new; exit 1; }
+          { test -z "$(cd codex-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd codex-plugin.new && find . ! -type f ! -type d)" && test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"; } || { echo "codex-plugin.new is not exactly the verified plugin (plugin.content_sha256 9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833): unexpected entries, links or content" >&2; rm -rf codex-plugin.new; exit 1; }
           rm -rf codex-plugin
           mv codex-plugin.new codex-plugin
           codex plugin marketplace add "$PWD/codex-plugin"
@@ -412,9 +412,9 @@ instructions:
           cd "$STRADDLE_KIT_DIR"
           test -d codex-plugin || { echo "no installed plugin directory $PWD/codex-plugin; run install" >&2; exit 1; }
           rm -rf codex-plugin.new codex-plugin.old
-          echo "46c25e05b0b93a98e3a370c35c5e90b17ed59b4fc427182d21f44dcdae54433a  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
+          echo "3f22ed18e7afc987a2513fe6e9f3b31b3ecbaf3f678c26564954e14f794d59a7  straddle-plugin-0.1.0.zip" | shasum -a 256 -c -
           unzip -q straddle-plugin-0.1.0.zip -d codex-plugin.new
-          { test -z "$(cd codex-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd codex-plugin.new && find . ! -type f ! -type d)" && test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"; } || { echo "codex-plugin.new is not exactly the verified plugin (plugin.content_sha256 1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074): unexpected entries, links or content" >&2; rm -rf codex-plugin.new; exit 1; }
+          { test -z "$(cd codex-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd codex-plugin.new && find . ! -type f ! -type d)" && test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"; } || { echo "codex-plugin.new is not exactly the verified plugin (plugin.content_sha256 9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833): unexpected entries, links or content" >&2; rm -rf codex-plugin.new; exit 1; }
           mv codex-plugin codex-plugin.old
           mv codex-plugin.new codex-plugin
           if codex plugin add straddle@straddle; then
@@ -454,7 +454,7 @@ instructions:
           mkdir codex-plugin.new
           git -C codex-plugin.new.src archive --format=tar HEAD -- .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party | tar -x -C codex-plugin.new -f -
           rm -rf codex-plugin.new.src
-          { test -z "$(cd codex-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd codex-plugin.new && find . ! -type f ! -type d)" && test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"; } || { echo "codex-plugin.new is not exactly the verified plugin (plugin.content_sha256 1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074): unexpected entries, links or content" >&2; rm -rf codex-plugin.new; exit 1; }
+          { test -z "$(cd codex-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd codex-plugin.new && find . ! -type f ! -type d)" && test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"; } || { echo "codex-plugin.new is not exactly the verified plugin (plugin.content_sha256 9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833): unexpected entries, links or content" >&2; rm -rf codex-plugin.new; exit 1; }
           rm -rf codex-plugin
           mv codex-plugin.new codex-plugin
           codex plugin marketplace add "$PWD/codex-plugin"
@@ -473,7 +473,7 @@ instructions:
           mkdir codex-plugin.new
           git -C codex-plugin.new.src archive --format=tar HEAD -- .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party | tar -x -C codex-plugin.new -f -
           rm -rf codex-plugin.new.src
-          { test -z "$(cd codex-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd codex-plugin.new && find . ! -type f ! -type d)" && test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074"; } || { echo "codex-plugin.new is not exactly the verified plugin (plugin.content_sha256 1056487cca08a0783b34048228381dbf907806057969c9811f919dad2c8c5074): unexpected entries, links or content" >&2; rm -rf codex-plugin.new; exit 1; }
+          { test -z "$(cd codex-plugin.new && find . -mindepth 1 -maxdepth 1 ! -name .claude-plugin ! -name .codex-plugin ! -name .cursor-plugin ! -name LICENSE ! -name README.md ! -name assets ! -name mcp.json ! -name plugin.json ! -name references ! -name skills ! -name third_party)" && test -z "$(cd codex-plugin.new && find . ! -type f ! -type d)" && test "$(cd codex-plugin.new && find .claude-plugin .codex-plugin .cursor-plugin LICENSE README.md assets mcp.json plugin.json references skills third_party -type f | LC_ALL=C sort | while IFS= read -r f; do shasum -a 256 "$f"; done | shasum -a 256 | cut -c1-64)" = "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"; } || { echo "codex-plugin.new is not exactly the verified plugin (plugin.content_sha256 9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833): unexpected entries, links or content" >&2; rm -rf codex-plugin.new; exit 1; }
           mv codex-plugin codex-plugin.old
           mv codex-plugin.new codex-plugin
           if codex plugin add straddle@straddle; then
