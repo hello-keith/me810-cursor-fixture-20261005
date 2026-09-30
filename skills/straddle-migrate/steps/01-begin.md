@@ -35,4 +35,4 @@ If the request itself asks to move data (for example "import our Dwolla customer
 
 If `straddle-migration-plan.md` exists, read it. An approval recorded there is valid only if the plan has not changed since; treat any edit to the plan after approval as unapproved.
 
-**Summary for step 2:** requested provider, declined requests, existing plan and approval state.
+**Summary for step 2:** key and environment present, requested provider, declined requests, existing plan and approval state.
