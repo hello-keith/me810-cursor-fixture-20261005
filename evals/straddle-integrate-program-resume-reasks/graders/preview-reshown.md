@@ -1,6 +1,6 @@
 ---
 type: regex
-target: last_message
-pattern: 'client\.customers\.create[^\n]*member-0001[^\n]*cust-member-0001'
+target: trace
+pattern: '"type":"text","text":"(?:[^"\\]|\\.)*client\.customers\.create(?:[^"\\]|\\.)*member-0001(?:[^"\\]|\\.)*cust-member-0001'
 arm: with-only
 ---
