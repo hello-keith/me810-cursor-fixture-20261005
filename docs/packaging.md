@@ -17,9 +17,10 @@ Native installation in each client has not been accepted yet. The commands below
 | `assets/` | Codex and Cursor | `logo.svg` is the published Straddle docs mark (`straddle-openapi/assets/favicon.svg` at `d571b47`). `logo.png` (512 px) and `icon.png` (256 px) are rendered from it with `@resvg/resvg-js` 2.6.2. |
 | `evals/` | `claude plugin eval` | Eval cases per skill, plus MCP mocks. |
 | `scripts/validate-package` | CI and authors | Package validation and the skill policy lint. |
-| `scripts/kit-release` | Release preparation and CI | Builds the checksummed plugin archive and generates and checks `kit/manifest.yaml`. See [Release manifest and plugin archive](#release-manifest-and-plugin-archive). |
-| `kit/release-inputs.json` | `scripts/kit-release` | Hand-maintained release facts: released CLI, SDK, contract and hosted MCP records, the Wizard artifact, client observations and the open publication gates. |
-| `kit/manifest.yaml` | Release acceptance (ME-659). The Wizard doesn't read it yet. | Generated. Every version and digest, minimum CLI and SDK versions, and install, update, remove and validation instructions per client. |
+| `scripts/kit-release` | CI and the release cut | Builds the checksummed plugin archive, and generates and checks `kit/manifest.yaml`. See [Release manifest and plugin archive](#release-manifest-and-plugin-archive). |
+| `kit/release-inputs.json` | `scripts/kit-release` | Hand-maintained release facts: released CLI, SDK, contract and hosted MCP records, the Wizard artifact and the plugin versions it accepts, client observations and the open publication gates. |
+| `kit/manifest.yaml` | Release acceptance (ME-659), and published with each plugin release. The Wizard doesn't read it. | Generated at the release cut. Every version and digest, minimum CLI and SDK versions, and install, update, remove and validation instructions per client. Between releases it describes the last cut, not the current source. |
+| `.github/workflows/release.yml` | GitHub Actions, on a `v*` tag push | The plugin release cut. See [Plugin releases](#plugin-releases). |
 | `third_party/LICENSES.md` | Maintainers | Every vendored third-party file and its license. A skill that vendors a file also carries the notice in its own `references/third-party-licenses.md`, so skills-only installs keep it. |
 
 The version is `0.1.0` in `plugin.json`, all three native manifests, and both version fields in `.claude-plugin/marketplace.json`. Clients stay on a release until the version changes, so bump every copy together. The validator fails when they differ.
@@ -51,12 +52,12 @@ Registering the plugin's servers and authenticating `straddle-api` are separate 
 
 ## Release manifest and plugin archive
 
-ME-810's release cut is `kit/manifest.yaml`. `scripts/kit-release` generates it from `kit/release-inputs.json` and the committed plugin source, so the manifest never holds a hand-typed plugin or skill digest.
+ME-810's release cut is `kit/manifest.yaml`. `scripts/kit-release` generates it from `kit/release-inputs.json` and the committed plugin source, so the manifest never holds a hand-typed plugin or skill digest. It is regenerated at the release cut, not on every change, so a skills-only change needs no manifest refresh.
 
 ```sh
 scripts/kit-release build                 # dist/straddle-plugin-<version>.zip and dist/SHA256SUMS from HEAD
 scripts/kit-release generate              # rewrite kit/manifest.yaml from HEAD and the inputs
-scripts/kit-release check                 # regenerate and compare; CI runs this
+scripts/kit-release check                 # regenerate and compare; the release cut runs this
 scripts/kit-release check --wizard-tarball path/to/straddlecom-wizard-<version>.tgz   # needs node and Python 3.12+
 scripts/kit-release check --release       # fails unless every component has publication proof
 ```
@@ -71,9 +72,18 @@ The plugin archive holds what a client loads: the root and native manifests, `mc
 
 `generate` and `check` reject an incomplete record before writing anything. The inputs must carry the CLI and all five SDKs with a version, a minimum version no newer than it, and a provenance of `released` or `local-candidate`. A released component also needs an https evidence URL and a digest. The contract version and the hosted MCP's served version must both be present and equal. Both MCP URLs must equal the servers in the committed `mcp.json`, and the plugin repository must be a GitHub `owner/name`. The four gates `walkthrough-approval`, `wizard-npm-publication`, `plugin-release-tag` and `clean-client-acceptance` are required by ID, once each. Removing one from the inputs fails generation rather than dropping the requirement.
 
-`wizard.skill_bundle` records the plugin the Wizard pack pins: its repository, commit and `content_sha256`. Generation fails when that digest differs from the plugin content at the commit, because that Wizard would refuse the plugin the same manifest records. After any skill or reference change, refresh the Wizard pin and artifact before regenerating. `check --wizard-tarball` first checks the tarball's sha256 and npm integrity and stops on a mismatch without extracting it. Safe extraction of the pack and checkout uses `tarfile`'s data filter, which requires Python 3.12 or later; plain `check` has no such requirement. It then checks the package name, version and bin, and stops on a mismatch before running any of the pack's code. Only then does it run the pack's own `loadBundle` from `dist/bundle.js` with `node` on two layouts: the extracted plugin archive, and a full `git archive` checkout of the commit, which is what a native marketplace install copies. The Wizard must accept both.
+`wizard.plugin_range` records the plugin versions the Wizard pack accepts, such as `0.1.x`. Generation fails when the plugin version is outside it, because that Wizard would refuse the plugin the same manifest records. A skill or reference change inside the range needs no Wizard change. `check --wizard-tarball` first checks the tarball's bytes and stops on a mismatch without extracting it. A `local-candidate` Wizard must match `wizard.artifact`'s sha256 and npm integrity, and a `released` Wizard must match the npm `dist.integrity` in `wizard.evidence.digest`. Safe extraction of the pack uses `tarfile`'s data filter, which requires Python 3.12 or later; plain `check` has no such requirement. It then checks the package name, version and bin, and stops on a mismatch before running any of the pack's code. Only then does it run the pack's own `unpackRelease` from `dist/bundle.js` with `node` on the plugin archive and `SHA256SUMS` this commit publishes. That is the code path the Wizard runs on a downloaded release, so it checks the checksum, the range, and that `plugin.json` matches the version.
 
 `check --release` lists every reason the manifest isn't a published release: a `candidate` status, any component without `released` provenance and public proof, no `plugin_release` tag and checksum URL, a missing tag or one that doesn't point at the checked commit, and every gate that hasn't `passed` with evidence. It reads only local git state and makes no network request, so it proves the record is complete, not that the registries still serve those bytes.
+
+### Plugin releases
+
+A plugin release is a versioned, checksummed artifact built from one commit. It is released independently of the Wizard. The Wizard runs the newest release in its range (ME-891).
+
+* **Where releases live.** A GitHub release on `straddle-build/skills`, tagged `v<plugin.json version>`, with three assets: `straddle-plugin-<version>.zip`, `SHA256SUMS` and `manifest.yaml`. The Wizard reads the release list from `https://api.github.com/repos/straddle-build/skills/releases`. It skips drafts, prereleases and any tag that isn't exactly `vX.Y.Z`. It takes the newest release in its range, downloads the zip and `SHA256SUMS`, and refuses the release when the zip's sha256 differs from its `SHA256SUMS` line. It also refuses the release when the zip holds anything but regular files under the plugin paths, or when its `plugin.json` version isn't the tag's. A release outside its range is never used. The Wizard's README has the client side.
+* **Cutting a release.** Bump the version in `plugin.json` and every native manifest, record the release facts in `kit/release-inputs.json`, run `scripts/kit-release generate` and commit. Then push tag `v<version>` under the version-tag ruleset. `.github/workflows/release.yml` checks that the tag equals `plugin.json`. It fetches the recorded Wizard from npm and runs `scripts/kit-release check --release --wizard-tarball`, which includes the Wizard compatibility check above. It then builds the archive and `SHA256SUMS` and creates the GitHub release with all three assets in one `gh release create`, so the release is never published without them. Any failed check stops the workflow before a release exists.
+* **Compatibility.** A change within the Wizard's range (for example `0.1.0` to `0.1.1`) reaches Wizard users with the next plugin release, with no Wizard release. A new minor version (`0.2.0`) is ignored by Wizards that accept `0.1.x` until a Wizard release widens its range and `wizard.plugin_range` records it.
+* **Integrity.** The published `SHA256SUMS` is what the Wizard trusts. Enable GitHub's immutable releases on this repository so a published release's tag and assets can't change afterwards.
 
 ### Generated instructions
 
@@ -85,7 +95,7 @@ The plugin archive holds what a client loads: the root and native manifests, `mc
 * **Remove.** Uninstalls the plugin, removes the marketplace, Codex's `straddle-api` server and the client's directory.
 * **Validate.** Read-only. It checks the installed version, the enabled state and both MCP URLs. For Codex it also checks that `straddle-api` reads the bearer token from the variable named `STRADDLE_API_KEY`, never the value. On failure, Codex validate prints only which of those checks failed, never a server's transport, headers or other MCP servers.
 
-Neither client can move an installed Git marketplace to another ref without removing it. Claude Code refuses a second `marketplace add` with a different ref, Codex refuses a different source, and removing the marketplace uninstalls the plugin. That is why releases are installed from a verified local copy of the plugin files, the same way the Wizard installs its verified snapshot. `claude plugin marketplace add straddle-build/skills` from [Install paths](#install-paths) still installs the untagged default branch. The Wizard candidate verifies the tarball's sha256 before `npm install --global`. Cursor instructions are manual, and Cursor has no candidate channel, because it imports a team marketplace from a GitHub repository.
+Neither client can move an installed Git marketplace to another ref without removing it. Claude Code refuses a second `marketplace add` with a different ref, Codex refuses a different source, and removing the marketplace uninstalls the plugin. That is why releases are installed from a verified local copy of the plugin files, the same way the Wizard installs its verified plugin release. `claude plugin marketplace add straddle-build/skills` from [Install paths](#install-paths) still installs the untagged default branch. The Wizard candidate verifies the tarball's sha256 before `npm install --global`. Cursor instructions are manual, and Cursor has no candidate channel, because it imports a team marketplace from a GitHub repository.
 
 The generated operations were run in scratch Claude Code 2.1.284 and Codex 0.157.1 profiles with remote network denied, including tampered, unset-directory, unavailable-tag, mismatched-tag and failed-refresh cases. The release channel ran against a loopback Git mirror with scratch tags, because tag `v<version>` isn't published. That is offline evidence. It is not a clean-client release install, which needs the tag, a signed-in client, and Cursor.
 
@@ -102,7 +112,7 @@ python3 -m unittest discover -s tests -v
 
 The package checks validate `plugin.json` and `mcp.json` against the vendored Agent Plugins 1.0.0 schemas in `scripts/schemas/`. They also check the fixed MCP servers, name and version agreement across the manifests, the Codex `interface` fields, that PNG assets are square, the Cursor variables schema, all nine required skills, and eval case layout. They fetch the Codex `websiteURL`, `privacyPolicyURL` and `termsOfServiceURL` and require HTTP 200, like Markdown links. They report missing skills and missing Codex URLs as failures, because both are real release requirements.
 
-CI runs Markdown lint, the validator and kit-release tests, `scripts/validate-package`, `scripts/kit-release check`, and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job on every run.
+CI runs Markdown lint, the validator and kit-release tests, `scripts/validate-package`, `scripts/kit-release build` (the plugin packs), and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job on every run. It doesn't check `kit/manifest.yaml` or the recorded Wizard, so a skills-only change passes without a Wizard change. Those checks run at the release cut.
 
 ### Skill policy lint (ME-816)
 

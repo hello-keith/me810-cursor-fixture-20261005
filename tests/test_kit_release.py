@@ -1,4 +1,3 @@
-import base64
 import gzip
 import hashlib
 import io
@@ -18,14 +17,14 @@ SCRIPT = REPO / "scripts" / "kit-release"
 kit = SourceFileLoader("kit_release", str(SCRIPT)).load_module()
 PLUGIN_PATHS = ("plugin.json", "mcp.json", ".claude-plugin", ".codex-plugin", ".cursor-plugin", "assets", "skills",
                 "references", "third_party", "LICENSE", "README.md")
-# A stand-in Wizard pack: its loadBundle accepts any directory with plugin.json, and optionally rejects one that also
-# holds kit/, the way a Wizard that only knows the stripped archive layout would.
-BUNDLE_JS = """import { appendFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+# A stand-in Wizard pack: its unpackRelease accepts an archive listed in SHA256SUMS whose version starts with ACCEPTS,
+# the way a Wizard with plugin range 0.1.x accepts 0.1.0 and a 0.2.x Wizard refuses it.
+BUNDLE_JS = """import { appendFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 if (process.env.KIT_TEST_MARKER) appendFileSync(process.env.KIT_TEST_MARKER, 'imported\\n');
-export function loadBundle(dir) {
-  if (REJECT_KIT && existsSync(join(dir, 'kit'))) return { ok: false, reason: 'unexpected kit/' };
-  return { ok: existsSync(join(dir, 'plugin.json')), reason: null };
+export function unpackRelease({ version, archive, sums }, dest) {
+  if (!version.startsWith(ACCEPTS)) return { ok: false, reason: `plugin ${version} is outside ${ACCEPTS}x` };
+  return { ok: sums.startsWith(createHash('sha256').update(archive).digest('hex')), reason: 'checksum' };
 }
 """
 STUB = """#!/bin/bash
@@ -47,12 +46,12 @@ def git(root, *args):
                           check=True, capture_output=True, text=True).stdout.strip()
 
 
-def wizard_pack(reject_kit=False, name="@straddlecom/wizard"):
+def wizard_pack(accepts="0.1.", name="@straddlecom/wizard"):
     buffer = io.BytesIO()
     with tarfile.open(fileobj=buffer, mode="w") as pack:
         for path, text in (("package/package.json", json.dumps({"name": name, "version": "0.1.0",
                                                                  "bin": {"wizard": "dist/cli.js"}})),
-                           ("package/dist/bundle.js", BUNDLE_JS.replace("REJECT_KIT", json.dumps(reject_kit)))):
+                           ("package/dist/bundle.js", BUNDLE_JS.replace("ACCEPTS", json.dumps(accepts)))):
             info = tarfile.TarInfo(path)
             info.size = len(text.encode())
             pack.addfile(info, io.BytesIO(text.encode()))
@@ -62,9 +61,9 @@ def wizard_pack(reject_kit=False, name="@straddlecom/wizard"):
 def wizard_input(data):
     return {"package": "@straddlecom/wizard", "version": "0.1.0", "bin": "wizard", "provenance": "local-candidate",
             "artifact": {"file": "straddlecom-wizard-0.1.0.tgz", "sha256": hashlib.sha256(data).hexdigest(),
-                         "integrity": "sha512-" + base64.b64encode(hashlib.sha512(data).digest()).decode()},
+                         "integrity": kit.npm_integrity(data)},
             "source": {"repository": "straddle-build/wizard", "commit": "0" * 40},
-            "skill_bundle": json.loads((REPO / "kit" / "release-inputs.json").read_text())["wizard"]["skill_bundle"]}
+            "plugin_range": "0.1.x"}
 
 
 class KitReleaseTest(unittest.TestCase):
@@ -173,7 +172,7 @@ class KitReleaseTest(unittest.TestCase):
         self.assertIn("wizard (the Wizard npm pack artifact is a true dependency) is required", output)
         self.assertFalse((self.root / "kit" / "manifest.yaml").exists())
 
-    def test_check_fails_on_stale_manifest_and_skill_drift_fails_generation(self):
+    def test_check_fails_on_stale_manifest_and_only_a_version_outside_the_wizard_range_fails_generation(self):
         self.assertEqual(self.run_kit("generate")[0], 0)
         self.commit_all("manifest")
         self.assertEqual(self.run_kit("check"),
@@ -186,18 +185,24 @@ class KitReleaseTest(unittest.TestCase):
         self.assertIn("kit/manifest.yaml does not match plugin source", output)
         skill = self.root / "skills" / "straddle-plan" / "SKILL.md"
         skill.write_text(skill.read_text() + "\nchanged\n")
-        self.commit_all("skill drift")
+        self.commit_all("skill change")
+        self.assertEqual(self.run_kit("generate")[0], 0)
+        plugin = json.loads((self.root / "plugin.json").read_text())
+        (self.root / "plugin.json").write_text(json.dumps({**plugin, "version": "0.2.0"}))
+        self.commit_all("plugin 0.2.0")
         code, output = self.run_kit("generate")
         self.assertEqual(code, 1)
-        self.assertIn("wizard.skill_bundle.content_sha256 9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833 "
-                      "does not match the plugin content", output)
+        self.assertIn("plugin 0.2.0 is outside wizard.plugin_range 0.1.x", output)
 
     def test_manifest_records_versions_digests_and_candidate_provenance(self):
         manifest = self.model()
         archive, _ = self.build()
         self.assertEqual(manifest["plugin"]["archive"]["sha256"], hashlib.sha256(archive).hexdigest())
-        self.assertEqual(manifest["plugin"]["content_sha256"],
-                         "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833")
+        # The listing digest the Wizard and the generated content checks recompute over an unpacked plugin.
+        paths = sorted(str(f.relative_to(self.root)) for f in self.root.rglob("*")
+                       if f.is_file() and f.relative_to(self.root).parts[0] in PLUGIN_PATHS)
+        listing = "".join(f"{hashlib.sha256((self.root / p).read_bytes()).hexdigest()}  {p}\n" for p in paths)
+        self.assertEqual(manifest["plugin"]["content_sha256"], hashlib.sha256(listing.encode()).hexdigest())
         self.assertEqual((manifest["kit"]["status"], manifest["plugin"]["provenance"]), ("candidate", "local-candidate"))
         self.assertEqual(manifest["cli"]["minimum_version"], "1.0.3")
         self.assertEqual({name: sdk["minimum_version"] for name, sdk in manifest["sdks"].items()},
@@ -242,6 +247,7 @@ class KitReleaseTest(unittest.TestCase):
                 set_value(("hosted_mcp", "api_url"), "https://example.com/mcp"),
             "sdks.ruby.minimum_version is newer than version": set_value(("sdks", "ruby", "minimum_version"), "1.1.0"),
             "plugin_repository must be a GitHub owner/name": set_value(("plugin_repository",), "x; rm -rf /"),
+            "wizard.plugin_range must be the plugin versions the Wizard accepts": drop(("wizard", "plugin_range")),
         }
         original = self.inputs()
         for message, edit in cases.items():
@@ -291,7 +297,7 @@ class KitReleaseTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("gate walkthrough-approval: passed but missing evidence", output)
 
-    def test_wizard_tarball_must_match_and_accept_archive_and_checkout(self):
+    def test_wizard_tarball_must_match_and_accept_the_plugin_release(self):
         self.assertEqual(self.run_kit("generate")[0], 0)
         self.commit_all("manifest")
         tarball = self.scratch() / "straddlecom-wizard-0.1.0.tgz"
@@ -301,17 +307,36 @@ class KitReleaseTest(unittest.TestCase):
         code, output = self.run_kit("check", "--wizard-tarball", str(tarball))
         self.assertEqual(code, 1)
         self.assertIn("sha256 does not match wizard.artifact.sha256", output)
-        rejecting = wizard_pack(reject_kit=True)
+        # The pack's own verifier decides, even when the recorded range says 0.1.x.
+        other_range = wizard_pack(accepts="0.2.")
         inputs = self.inputs()
-        inputs["wizard"] = wizard_input(rejecting)
+        inputs["wizard"] = wizard_input(other_range)
         self.write_inputs(inputs)
         self.assertEqual(self.run_kit("generate")[0], 0)
-        self.commit_all("kit-rejecting wizard")
-        tarball.write_bytes(rejecting)
+        self.commit_all("wizard for another plugin range")
+        tarball.write_bytes(other_range)
         code, output = self.run_kit("check", "--wizard-tarball", str(tarball))
         self.assertEqual(code, 1)
-        self.assertIn("the Wizard rejects the full repository checkout", output)
-        self.assertNotIn("rejects the plugin archive", output)
+        self.assertIn("the Wizard refuses plugin release 0.1.0", output)
+        self.assertIn("plugin 0.1.0 is outside 0.2.x", output)
+
+    def test_released_wizard_tarball_must_match_its_npm_integrity(self):
+        pack = wizard_pack()
+        inputs = self.inputs()
+        inputs["wizard"] = {"package": "@straddlecom/wizard", "version": "0.1.0", "bin": "wizard", "provenance": "released",
+                            "plugin_range": "0.1.x",
+                            "evidence": {"url": "https://registry.npmjs.org/@straddlecom/wizard/0.1.0",
+                                         "digest": {"algorithm": "sha512", "value": kit.npm_integrity(pack)}}}
+        self.write_inputs(inputs)
+        self.assertEqual(self.run_kit("generate")[0], 0)
+        self.commit_all("released wizard")
+        tarball = self.scratch() / "wizard-0.1.0.tgz"
+        tarball.write_bytes(pack)
+        self.assertEqual(self.run_kit("check", "--wizard-tarball", str(tarball))[0], 0)
+        tarball.write_bytes(pack + b"!")
+        code, output = self.run_kit("check", "--wizard-tarball", str(tarball))
+        self.assertEqual(code, 1)
+        self.assertIn("integrity does not match wizard.evidence.digest.value", output)
 
     def test_wizard_tarball_code_runs_only_after_bytes_and_identity_verify(self):
         self.assertEqual(self.run_kit("generate")[0], 0)
@@ -337,7 +362,7 @@ class KitReleaseTest(unittest.TestCase):
         self.commit_all("verified pack")
         tarball.write_bytes(wizard_pack())
         self.assertEqual(self.run_kit("check", "--wizard-tarball", str(tarball), env=env)[0], 0)
-        self.assertEqual(marker.read_text(), "imported\nimported\n")
+        self.assertEqual(marker.read_text(), "imported\n")
 
     def test_candidate_install_changes_nothing_without_a_verified_archive(self):
         archive, _ = self.build()

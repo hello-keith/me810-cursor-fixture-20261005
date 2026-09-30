@@ -20,12 +20,7 @@
       "commit": "7a9883e48b10eba08089ff06089476d9e9bcbfe1",
       "note": "npm pack of wizard PR #4 head (fix/me-894-repin-skills, on top of PR #3), before merge to main; not published to npm"
     },
-    "skill_bundle": {
-      "repository": "straddle-build/skills",
-      "commit": "643632e78654a4fa929873d0e1ec0ba15525a9e8",
-      "content_sha256": "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833",
-      "note": "PINNED_BUNDLE in the pack's dist/bundle.js: a merged-source snapshot verified by content, not a tagged release"
-    }
+    "plugin_range": "0.1.x"
   },
   "cli": {
     "package": "@straddlecom/cli",

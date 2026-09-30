@@ -1,0 +1,51 @@
+name: Release
+
+# The plugin release cut. Pushing tag v<plugin.json version> runs the release checks, including the recorded Wizard's
+# compatibility with this plugin, then publishes a GitHub release with straddle-plugin-<version>.zip, SHA256SUMS and
+# kit/manifest.yaml attached. The Wizard downloads the newest release in its range from these assets. See
+# docs/packaging.md, Plugin releases.
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Check the tag matches plugin.json
+        run: test "$GITHUB_REF_NAME" = "v$(jq -r .version plugin.json)"
+
+      - name: Fetch the recorded Wizard from npm
+        run: npm pack "$(jq -r '.wizard.package + "@" + .wizard.version' kit/release-inputs.json)" --pack-destination "$RUNNER_TEMP"
+
+      - name: Check the release, and that the recorded Wizard accepts it
+        run: scripts/kit-release check --release --wizard-tarball "$RUNNER_TEMP"/*.tgz
+
+      - name: Build the plugin archive and SHA256SUMS
+        run: scripts/kit-release build --out "$RUNNER_TEMP/plugin"
+
+      - name: Publish the release with its assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "Straddle plugin $GITHUB_REF_NAME"
+          --notes "Built by scripts/kit-release from $GITHUB_SHA. Verify straddle-plugin-*.zip against SHA256SUMS."
+          "$RUNNER_TEMP"/plugin/* kit/manifest.yaml
