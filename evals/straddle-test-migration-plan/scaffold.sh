@@ -153,7 +153,9 @@ EOF_7
 cat > straddle-migration-plan.md <<'EOF_8'
 # Straddle migration plan
 
-Status: approved
+- Plan state: Approved
+- Approval: 2026-09-28, "Approved, all four rows, additive only, Stripe stays default.", rows 1-4, recorded by straddle-migrate, sha256 bf04e9a4ebe33efe07a1504a141e3ac22adee2382bf563f3e655b520c3b928e9
+
 Provider: `Stripe` (reference: `references/providers/stripe.md`)
 Integration model: `direct`
 SDK: `@straddlecom/straddle 1.0.4`
@@ -243,10 +245,6 @@ Customer records, bank accounts, provider tokens, mandates and authorizations, a
 ## Unresolved
 
 None.
-
-## Approval
-
-2026-09-28, "Approved, all four rows, additive only, Stripe stays default.", rows 1-4. Any later change to this file voids this entry.
 EOF_8
 npm install --ignore-scripts --no-audit --no-fund --silent @straddlecom/straddle@1.0.4
 git init -q && git add -A && git -c user.name=eval -c user.email=eval@example.invalid commit -q -m scaffold
