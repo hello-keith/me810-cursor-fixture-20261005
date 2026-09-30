@@ -49,7 +49,7 @@ Seed the tree with these decisions. A branch opens once the decisions it hangs o
 | Notification path | nothing | webhook endpoint, FIFO endpoint, or polling endpoint | [notifications](../../straddle-best-practices/references/notifications.md) |
 | Duplicate events | notification path | where event IDs are stored so a repeat or redelivery is ignored | [receiving-webhooks](../../straddle-best-practices/references/receiving-webhooks.md) |
 | App behavior per status | products, notification path | what the app does on `paid`, `failed`, holds, and `reversed` after `paid`, such as an R01 after the order shipped | [charges](../../straddle-best-practices/references/charges.md), [returns and disputes](../../straddle-best-practices/references/returns-and-disputes.md) |
-| Refunds and resubmits | app behavior per status | whether the app refunds a `paid` charge (`refundCharge`, a payout linked to the charge) and when it resubmits (`insufficient_funds` only) | [refunds and resubmits](../../straddle-best-practices/references/refunds-and-resubmits.md) |
+| Refunds and resubmits | app behavior per status | whether the app refunds a `paid` charge (`refundCharge`, a payout linked to the charge) and when it resubmits (`insufficient_funds` only, which is R01 or R09) | [refunds and resubmits](../../straddle-best-practices/references/refunds-and-resubmits.md) |
 | Reconciliation | products | how funding events are matched to the bank statement and to your orders | [funding and reconciliation](../../straddle-best-practices/references/funding-and-reconciliation.md) |
 
 Two product rules are not decisions. Don't ask them:
@@ -60,7 +60,7 @@ Two product rules are not decisions. Don't ask them:
 ## Asking a round
 
 - Ask every frontier question at once, in the format in [interview.md](../references/interview.md): one question for each open branch. Don't fold a branch into another branch's question, and don't hold back a branch whose prerequisites are settled. Number them `Q1`, `Q2`, and on, continuing the Decisions log's numbering across rounds.
-- Give each question a `Recommended:` answer and a one-line reason from the repository or the reference. A recommendation is advice. The developer still decides.
+- Give each question a `Recommended:` answer and a one-line reason from the repository or the reference. Read each branch's reference before you ask it, in every round. A recommendation is advice. The developer still decides.
 - Offer only what Straddle supports. When the developer wants to learn a status by reading a charge or payout again and again, explain that the polling endpoint is the supported way to pull events, and offer it. Do not plan a read loop.
 - Show a picture with [show-me.md](../../straddle-best-practices/references/show-me.md) when it settles a question faster than prose, such as a sequence of `paid` and then `reversed` after the order shipped.
 - Before you end the turn, add the round's questions to the Decisions log as `open (round N)` rows. End the reply with the questions and what you need from the developer.
