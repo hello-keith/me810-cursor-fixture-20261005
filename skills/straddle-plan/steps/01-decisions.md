@@ -1,7 +1,7 @@
 # Step 1: Decisions
 
 - **Needs:** the developer's request, the Setup report (`straddle-setup.md`) when one exists, and `straddle-integration-plan.md` when one exists.
-- **Tools:** Read, Glob, Grep. Write and Edit only for `straddle-integration-plan.md`.
+- **Tools:** Read, Glob, Grep. Write and Edit only for `straddle-integration-plan.md`. Read files yourself: no sub-agents.
 - **Next:** [02-sources.md](02-sources.md), once the frontier is empty and the developer confirms the shared understanding.
 
 Print this once, right after reading this file and before any other tool call, even when the request already supplies every decision:
@@ -32,19 +32,19 @@ Seed the tree with these decisions. A branch opens once the decisions it hangs o
 | Decision | Opens after | What to settle | Reference |
 | --- | --- | --- | --- |
 | Integration type | nothing | direct (`account`), SaaS, or marketplace | [platforms](../../straddle-best-practices/references/platforms.md) |
-| Products | integration type | Pay by Bank charges, payouts, or both | [charges](../../straddle-best-practices/references/charges.md), [payouts](../../straddle-best-practices/references/payouts.md) |
-| Bank connection | products | the Bridge widget (session token from `POST /v1/bridge/initialize`), bank account details (`POST /v1/bridge/bank_account`), a Plaid token (`POST /v1/bridge/plaid`), or a Quiltt token (`POST /v1/bridge/quiltt`). Offer only these. | [Bridge and paykeys](../../straddle-best-practices/references/bridge-and-paykeys.md) |
+| Products | nothing | Pay by Bank charges, payouts, or both | [charges](../../straddle-best-practices/references/charges.md), [payouts](../../straddle-best-practices/references/payouts.md) |
+| Bank connection | nothing | the Bridge widget (session token from `POST /v1/bridge/initialize`), bank account details (`POST /v1/bridge/bank_account`), a Plaid token (`POST /v1/bridge/plaid`), or a Quiltt token (`POST /v1/bridge/quiltt`). Offer only these. | [Bridge and paykeys](../../straddle-best-practices/references/bridge-and-paykeys.md) |
 | Paykey storage | bank connection | where the paykey `id` and label live, and where the token is kept as a secret | [Bridge and paykeys](../../straddle-best-practices/references/bridge-and-paykeys.md) |
-| Customer review | products | who decides customers in `review` (your team with a queue, or waiting for Straddle), and what a `rejected` customer sees | [customers and identity](../../straddle-best-practices/references/customers-identity.md) |
+| Customer review | integration type | who decides customers in `review` (your team with a queue, or waiting for Straddle), and what a `rejected` customer sees | [customers and identity](../../straddle-best-practices/references/customers-identity.md) |
 | Paykey review and blocks | bank connection | who decides paykeys in `review`, and what happens on an R29 block and its one-time unblock | [Bridge and paykeys](../../straddle-best-practices/references/bridge-and-paykeys.md) |
-| Identity mapping | products | how an app user maps to a Straddle customer, and on platforms to an embedded account, by `external_id` | [customers and identity](../../straddle-best-practices/references/customers-identity.md) |
+| Identity mapping | integration type | how an app user maps to a Straddle customer, and on platforms to an embedded account, by `external_id` | [customers and identity](../../straddle-best-practices/references/customers-identity.md) |
 | Consent | charges | how consent is collected (`internet` or `signed`) and where the record is kept | [ACH timing and consent](../../straddle-best-practices/references/ach-timing-and-consent.md) |
 | Payout timing and funding | payouts | when the recipient's money is available, and keeping the linked bank account funded, since the `payout_withdrawal` comes first | [payouts](../../straddle-best-practices/references/payouts.md) |
 | Account model | SaaS or marketplace | how your businesses map to embedded accounts | [platforms](../../straddle-best-practices/references/platforms.md) |
 | Onboarding | account model | hosted iframe onboarding for the customer-facing path, and Sandbox accounts created through the API for testing | [platforms](../../straddle-best-practices/references/platforms.md) |
 | Acting-account switching | account model | how the app selects and switches the acting account | [account scope](../../straddle-best-practices/references/account-scope.md) |
 | SDK | nothing | TypeScript, Python, Ruby, C#, or Go | [best-practices versions](../../straddle-best-practices/SKILL.md#current-versions) |
-| Notification path | products | webhook endpoint, FIFO endpoint, or polling endpoint | [notifications](../../straddle-best-practices/references/notifications.md) |
+| Notification path | nothing | webhook endpoint, FIFO endpoint, or polling endpoint | [notifications](../../straddle-best-practices/references/notifications.md) |
 | Duplicate events | notification path | where event IDs are stored so a repeat or redelivery is ignored | [receiving-webhooks](../../straddle-best-practices/references/receiving-webhooks.md) |
 | App behavior per status | products, notification path | what the app does on `paid`, `failed`, holds, and `reversed` after `paid`, such as an R01 after the order shipped | [charges](../../straddle-best-practices/references/charges.md), [returns and disputes](../../straddle-best-practices/references/returns-and-disputes.md) |
 | Refunds and resubmits | app behavior per status | whether the app refunds a `paid` charge (`refundCharge`, a payout linked to the charge) and when it resubmits (`insufficient_funds` only) | [refunds and resubmits](../../straddle-best-practices/references/refunds-and-resubmits.md) |
@@ -74,7 +74,7 @@ When the developer uses a word that means something else in Straddle, ask what t
 
 ## Finishing the interview
 
-When the frontier is empty, summarize the shared understanding: the decisions, each `assumption`, and the Glossary. Ask the developer to confirm it or correct it, and go to step 2 only after they confirm.
+When the frontier is empty, summarize the shared understanding: the decisions, each `assumption`, and the Glossary. Ask the developer to confirm it or correct it, and go to step 2 only after they confirm. When the log already settles every branch and the developer asks you to write the plan, that's their confirmation.
 
 When the developer tells you to take your recommendations for everything left and write the plan, record each one as `developer, accepted recommendation` and treat that as their confirmation. When they can't answer more now, record every open question as `Unresolved` with your recommendation, and go to step 2. Step 3 marks the plan `Blocked` if any of them blocks implementation.
 
