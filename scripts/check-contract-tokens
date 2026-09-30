@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+"""Check that the product-model references name only statuses, fields and operations in the API contract.
+
+A checked token is a backticked span that is an identifier (`paid`, `status_details.reason`, `charge.event.v1`,
+`Straddle-Account-Id`, `refundCharge`) or an API path with an optional method (`POST /v1/charges/{id}/refund`).
+Spans with spaces, and spans starting with a digit such as `2xx` or `422`, aren't checked, so the references write
+ACH return codes, SEC codes and prose in plain text and backtick only contract vocabulary.
+
+The vocabulary is every mapping key and every identifier-like scalar in the OpenAPI YAML. A dotted token passes when
+the whole token or each of its parts is in it. The default contract is the published one that kit/release-inputs.json
+pins (`contract.evidence`), fetched and verified against its sha256. `--contract PATH` checks a local file instead.
+"""
+
+import argparse
+import hashlib
+import json
+import re
+import sys
+import urllib.request
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+REFERENCES = ROOT / "skills" / "straddle-best-practices" / "references"
+CHECKED = (
+    "ach-timing-and-consent.md", "bridge-and-paykeys.md", "charges.md", "customers-identity.md", "errors-and-limits.md",
+    "funding-and-reconciliation.md", "payouts.md", "platforms.md", "refunds-and-resubmits.md", "returns-and-disputes.md",
+    "sandbox-outcomes.md", "webhooks.md",
+)
+
+YAML_KEY = re.compile(r"^\s*(?:-\s+)?([\"']?)([^\s\"'#:][^\"'#]*?)\1:(?:\s|$)")
+YAML_SCALAR = re.compile(r"^\s*(?:-\s+|[^\s:#][^:#]*:\s+)([\"']?)([A-Za-z0-9_./{}$#-]+)\1\s*$")
+SPAN = re.compile(r"`([^`\n]+)`")
+TOKEN = re.compile(r"(?:(?:GET|POST|PUT|PATCH|DELETE) )?(/v1/\S+|[A-Za-z][A-Za-z0-9_.-]*)")
+
+
+def pinned_contract():
+    record = json.loads((ROOT / "kit" / "release-inputs.json").read_text())["contract"]["evidence"]
+    blob = re.fullmatch(r"https://github\.com/([^/]+/[^/]+)/blob/(.+)", record["url"])
+    url = f"https://raw.githubusercontent.com/{blob.group(1)}/{blob.group(2)}"
+    with urllib.request.urlopen(url, timeout=60) as response:
+        data = response.read()
+    digest = hashlib.sha256(data).hexdigest()
+    if digest != record["digest"]["value"]:
+        sys.exit(f"check-contract-tokens: {url} has sha256 {digest}, but kit/release-inputs.json pins "
+                 f"{record['digest']['value']}")
+    return data.decode()
+
+
+def vocabulary(contract_text):
+    words = set()
+    for line in contract_text.splitlines():
+        for pattern in (YAML_KEY, YAML_SCALAR):
+            match = pattern.match(line)
+            if match:
+                words.add(match.group(2))
+    return words
+
+
+def unknown_tokens(markdown, words):
+    """(line, token) for each checked token outside code fences that the vocabulary doesn't contain."""
+    found, fence = [], False
+    for number, line in enumerate(markdown.splitlines(), start=1):
+        if line.lstrip().startswith("```"):
+            fence = not fence
+            continue
+        if fence:
+            continue
+        for span in SPAN.findall(line):
+            match = TOKEN.fullmatch(span.strip())
+            if not match:
+                continue
+            token = match.group(1)
+            if token not in words and not all(part in words for part in token.split(".")):
+                found.append((number, span))
+    return found
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--contract", type=Path, help="local OpenAPI YAML (default: the pinned published contract)")
+    parser.add_argument("files", nargs="*", type=Path, help=f"Markdown files (default: {', '.join(CHECKED)})")
+    args = parser.parse_args(argv)
+    words = vocabulary(args.contract.read_text() if args.contract else pinned_contract())
+    files = args.files or [REFERENCES / name for name in CHECKED]
+    problems = 0
+    for path in files:
+        for line, span in unknown_tokens(path.read_text(), words):
+            problems += 1
+            print(f"{path}:{line}: `{span}` is not in the API contract")
+    print(f"check-contract-tokens: {problems} unknown token(s) in {len(files)} file(s)", file=sys.stderr)
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
