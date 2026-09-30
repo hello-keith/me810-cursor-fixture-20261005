@@ -52,5 +52,5 @@ The three paykey creates run only through the SDK or CLI after approval ([writes
 ## Events and Sandbox outcomes
 
 - `paykey.created.v1` on create and `paykey.event.v1` on every change: verification, review decisions, blocks, unblocks, cancels, and balance refreshes ([webhooks.md](webhooks.md)).
-- The event schema lists fewer `status_details.reason` values than the REST schema. Observed in Sandbox: paykeys carried `failed_verification` and `cancel_request`, which only the REST list has. Don't reject an event for an unknown reason.
+- The event schema lists fewer `status_details.reason` values than the REST schema ([webhooks.md](webhooks.md)). Don't reject an event for an unknown reason.
 - Sandbox: set `config.sandbox_outcome` on the create to `standard`, `active`, `review`, or `rejected`. Observed in Sandbox with bank account details: `active`, `review`, and `rejected` were set in the create response, and `standard` ran the real checks and returned `rejected` (`failed_verification`, `watchtower`) for the test identity. A charge with `failed_not_authorized` blocked the paykey with R29. See [sandbox-outcomes.md](sandbox-outcomes.md).
