@@ -377,7 +377,9 @@ def instructions(plugin, archive_name, archive_sha, content_sha256, skill_count,
         },
         "codex": {
             "notes": ["Start Codex from a shell where STRADDLE_API_KEY is set; the plugin's straddle-api server reads "
-                      "its bearer token from that variable. Validate checks the variable name, never its value."],
+                      "its bearer token from that variable. Validate checks the variable name, never its value.",
+                      "A client-level straddle-api server from an older install is left developer-managed "
+                      "(remove with 'codex mcp remove straddle-api')."],
             "candidate": codex(candidate),
             "release": codex(release),
         },

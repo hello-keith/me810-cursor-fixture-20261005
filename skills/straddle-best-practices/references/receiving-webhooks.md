@@ -79,7 +79,7 @@ Deliveries can arrive out of order ([Sandbox Pay by Bank troubleshooting](https:
 
 Two transitions can share a `changed_at`. Sandbox emitted `paid` and `reversed` for one charge with the identical value `04:13:41.3663282Z`. That was observed in Sandbox and is not a documented API contract, so handle a tie whether or not production produces one. On a tie, the event later in delivery order is the later transition: the higher polling offset, or the later position in a FIFO batch, with later batches after earlier ones. A webhook endpoint has no delivery order, so there a tie can't be settled from the deliveries. Keep both transitions in the history and don't infer an order from arrival.
 
-When projecting status, an event whose `changed_at` is older than the current status's, or equal but earlier in delivery order, never replaces it. The same status can be delivered again under a new `event_id`, for example after a Sandbox funding sweep, and must change nothing.
+When projecting status, an event whose `changed_at` is older than the current status's, or equal but earlier in delivery order, never replaces it. The same status can be delivered again under a new `event_id`, for example after a funding sweep (observed in Sandbox, not a documented API contract), and must change nothing.
 
 ## Routing events on a platform
 
