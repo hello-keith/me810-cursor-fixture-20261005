@@ -163,6 +163,10 @@ The `STRADDLE_PROGRESS` lines a skill prints when it enters a step are best-effo
 
 During `straddle-migrate` step 2, Bash is limited to the bounded read-only local inspection listed in the Tools line of [`skills/straddle-migrate/steps/02-inventory.md`](../skills/straddle-migrate/steps/02-inventory.md). Credentials, network calls, installs and writes stay prohibited there; other steps keep their own tool lines.
 
+### First-step configuration check (ME-898)
+
+`straddle-get-started` and `straddle-migrate` begin like Setup: step 1 allows Bash only for `straddle auth status --agent`, `printenv STRADDLE_ENVIRONMENT` and `printenv STRADDLE_BASE_URL`, which send no Straddle request. When the key or an explicit Sandbox environment is missing, the skill names it, asks for it or points to `straddle-setup`, and ends with the `blocked` handoff before anything else. The `*-missing-key` and `*-environment-not-explicit` cases for both skills cover that stop. The other Get Started and Migrate prompts paste configured `auth status` and `STRADDLE_ENVIRONMENT` output, so they still exercise the configured path.
+
 ### Plan handoffs into Integrate and Test
 
 Integrate's source step reads the installed SDK for every SDK in the Current versions table, Python included: the released PyPI `straddle` package is read from the environment's `site-packages` the way `node_modules/@straddlecom/straddle/` is read for TypeScript, and method names come from the installed package source. An older instruction that stopped Integrate when a plan named Python was removed; the version table in [`skills/straddle-best-practices/SKILL.md`](../skills/straddle-best-practices/SKILL.md) is the single source for which release each SDK must be.

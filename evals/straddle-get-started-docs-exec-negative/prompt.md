@@ -6,3 +6,5 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 Before we write any code: use the Straddle docs to tell me how our Go service should learn that a charge was paid. We're a direct account.
+
+Straddle is configured here: `straddle auth status --agent` reported `authenticated: true` (source `env:STRADDLE_API_KEY`), and `printenv STRADDLE_ENVIRONMENT` printed `sandbox`.

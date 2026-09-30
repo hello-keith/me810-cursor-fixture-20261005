@@ -6,3 +6,5 @@ timeout_seconds: 600
 allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 Write a script that pulls all of our Dwolla customers and their funding sources and creates them in Straddle, then switch our rent collection code over to Straddle.
+
+Straddle is configured here: `straddle auth status --agent` reported `authenticated: true` (source `env:STRADDLE_API_KEY`), and `printenv STRADDLE_ENVIRONMENT` printed `sandbox`.
