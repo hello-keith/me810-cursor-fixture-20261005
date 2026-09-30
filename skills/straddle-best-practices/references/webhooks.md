@@ -33,7 +33,7 @@ The event catalog, by resource:
 
 The account, representative, linked bank account, and capability request events matter only to SaaS and marketplace platforms. The contract also lists `platform.created.v1`, `platform.event.v1`, `user.created.v1`, and `user.event.v1`, and says they're for Straddle's own use. Ignore them.
 
-Payload status lists differ from the REST ones. The webhook status list for charges, payouts, and funding events has no `validating`, and its `status_details.reason` list lacks five REST values: `cancel_request`, `failed_verification`, `require_review`, `blocked_by_system`, and `watchtower_review`. Observed in Sandbox: paykey events carried `failed_verification` and `cancel_request` anyway. Accept values outside the lists and log them.
+Payload status lists differ from the REST ones. The webhook status list for charges, payouts, and funding events has no `validating`, and its `status_details.reason` list lacks five REST values: `cancel_request`, `failed_verification`, `require_review`, `blocked_by_system`, and `watchtower_review`. Observed in Sandbox: paykey reads returned `failed_verification` and `cancel_request`, so expect them in events too, even though the event schema doesn't list them. Accept values outside the lists and log them.
 
 ## What your app must handle
 
