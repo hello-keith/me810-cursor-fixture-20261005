@@ -2,7 +2,7 @@
 
 - **Needs:** every earlier summary that exists for this run, including step 1's plan hash.
 - **Tools:** Read and Write for `straddle-integration-report.md` at the repository root only. Never edit the plan here: any change to it voids its approval hash.
-- **Next:** [straddle-test](../../straddle-test/SKILL.md) when the status is `complete`. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, continue with the next program step in this session when the status is `complete`, and stop and wait for the developer otherwise.
+- **Next:** [straddle-test](../../straddle-test/SKILL.md) when the status is `complete`. In a [Straddle Wizard program](../../straddle-best-practices/references/wizard-program.md) session, a `complete` status ends Integrate, not the turn: start the next listed skill in this same reply, as that page says. This step's Tools line doesn't limit that. Any other status stops and waits for the developer.
 
 Print:
 
@@ -14,7 +14,7 @@ Write the report to `straddle-integration-report.md` at the repository root, the
 
 When the file already exists with the same `Plan hash`, read it first and keep its earlier Sandbox write rows, adding this run's. With a different or missing hash, replace it: it belongs to an older plan.
 
-State what the run verified and what it did not. A passing unit test proves code behavior, not that Sandbox accepted a request.
+State what the run verified and what it did not. A passing unit test proves code behavior, not that Sandbox accepted a request. A run that stopped early, for example at step 1 without an approved plan, still writes the report: each section for work that didn't run says `not run` and why.
 
 The header block comes first, because the Straddle Wizard reads it. `Status` follows the handoff status: `complete` for `complete`, `partial (<reason>)` for `awaiting_approval`, and `blocked (<reason>)` for `blocked`. `Plan hash` is step 1's plan hash.
 
@@ -66,7 +66,7 @@ End the reply with:
 - [ ] Notifications use the selected webhook, FIFO, or polling endpoint, with no status polling of resource reads.
 ```
 
-Then print on one line, followed by one plain sentence that says what finished and what comes next, for example "The code's in and the Sandbox charge ran, so next I'll test it end to end.":
+Then print on one line, followed by one plain sentence that says what finished and what comes next, for example "The code's in and the Sandbox charge ran, so testing it end to end is next.":
 
 ```text
 STRADDLE_HANDOFF {"skill":"straddle-integrate","status":"<complete|awaiting_approval|blocked>","report":"<one-paragraph summary: files changed, resources created or reused, and blockers>"}

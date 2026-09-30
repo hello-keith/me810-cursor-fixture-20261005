@@ -1,6 +1,6 @@
 # Step 1: Begin
 
-- **Needs:** the developer's request, the approved plan (`straddle-integration-plan.md`, or `straddle-migration-plan.md` for a migration), and the Integrate report (`straddle-integration-report.md`) or Migrate report when one exists.
+- **Needs:** the developer's request, the approved plan (`straddle-integration-plan.md`, or `straddle-migration-plan.md` for a migration), and the Integrate report (`straddle-integration-report.md`) or Migrate report (`straddle-migration-report.md`) when one exists.
 - **Tools:** Read, Glob, Grep; Bash only for the offline configuration checks and the plan approval hash in Integrate's [step 1](../../straddle-integrate/steps/01-begin.md), `straddle --version`, and `straddle auth status --agent`. No writes, and no command that can reach Straddle, including `straddle doctor`.
 - **Next:** [02-offline.md](02-offline.md).
 
@@ -10,7 +10,7 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-test","step":"01-begin"}
 ```
 
-Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and the plan. When there is no approved plan, or the repository has no Straddle integration code, print `STRADDLE_ABORT`, write the evidence file with status `blocked`, and hand off to Plan, Integrate, or Migrate.
+Read [straddle-best-practices](../../straddle-best-practices/SKILL.md) and the plan. When there is no approved plan, or the repository has no Straddle integration code, print `STRADDLE_ABORT`, skip steps 2 to 5, and go to [step 6](06-evidence.md). It writes the evidence file with its header block (`Status: blocked (<reason>)`, `Plan:`, `Plan hash:`, `Latest run:`, and `Test charge: none`), with plan hash `none (plan not approved)` when no plan is approved, and hands off to Plan, Integrate, or Migrate.
 
 ## Which plan
 

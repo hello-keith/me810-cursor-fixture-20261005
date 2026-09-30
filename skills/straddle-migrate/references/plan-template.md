@@ -1,7 +1,7 @@
 # Straddle migration plan
 
 - Plan state: Draft | Approved | Blocked
-- Approval: none | `<YYYY-MM-DD>`, "`<developer's words>`", rows `<n>`, recorded by straddle-migrate, sha256 `<64 hex characters>`
+- Approval: none | date, "the developer's words", rows approved, recorded by straddle-migrate, sha256 of the plan (see step 5, Approval)
 
 Provider: `<provider>` (reference: `references/providers/<file>.md`)
 Integration model: `<direct / SaaS / marketplace / Unresolved>`
@@ -78,6 +78,6 @@ Customer records, bank accounts, provider tokens, mandates and authorizations, a
 - Test command: `<command>`
 - New tests: `<paths>`
 - Status-mapping tests cover every row of the status mapping, including `failed` vs `reversed`.
-- Sandbox proof: run straddle-test after review, using `sandbox_outcome` values for `paid`, `failed_*`, and `reversed_*`.
+- Sandbox proof: run straddle-test after review, using charge `sandbox_outcome` values for `paid`, `failed_*`, and `reversed_*`. Sandbox payouts don't reach `paid` today, so payout `paid`, `failed`, and `reversed` handling is covered by the offline tests with recorded event payloads.
 
 ## Unresolved

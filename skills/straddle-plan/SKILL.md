@@ -11,7 +11,7 @@ Write or refresh `straddle-integration-plan.md` in the application repository. T
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules on credentials, account scope, idempotency, the fourteen excluded operations, notifications, and tools apply to the plan and are cited there rather than copied.
 
-Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), Plan finishes when step 6 records the approval, and the next program step starts from there, as that page says.
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md); safety text and markers stay exact. In a [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md) session, Plan finishes when step 6 records the approval. That ends Plan, not the turn: start the next listed skill as that page says.
 
 ## Boundaries
 
@@ -43,4 +43,4 @@ STRADDLE_HANDOFF {"skill":"straddle-plan","status":"draft","report":"<summary>"}
 
 `status` is `draft` when the plan is complete and awaits the developer's approval, or `blocked` when unresolved decisions stop implementation.
 
-`STRADDLE_HANDOFF` ends the planning turn. Step 6 continues on a later turn, only when the handoff was `draft` and the developer then explicitly approves the plan. It prints its own `STRADDLE_PROGRESS` marker and no second handoff.
+Outside a Wizard program, `STRADDLE_HANDOFF` ends the planning turn. In a Wizard program it also stops for the developer's review, because the plan isn't approved yet. Step 6 continues on a later turn, only when the handoff was `draft` and the developer then explicitly approves the plan. It prints its own `STRADDLE_PROGRESS` marker and no second handoff.
