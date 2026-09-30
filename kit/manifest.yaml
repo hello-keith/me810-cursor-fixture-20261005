@@ -54,18 +54,14 @@ wizard:
   provenance: "local-candidate"
   artifact:
     file: "straddlecom-wizard-0.1.0.tgz"
-    bytes: 41329
-    sha256: "8f51b770d2b5787518e34d7a7f85f282f3fb5c27d3cc1d862e6f25bd8630e1ef"
-    integrity: "sha512-NVQVpk3pgBx0jOgB33ui/m+XuCKUK2e9OIVYveqBKNpjHtyWHWcYr7Le9zFMOBRC7GbVObBnhBqM05CK2N2jdQ=="
+    bytes: 44240
+    sha256: "0ec4ffa1b142c8684cc24f555d35cbdc0d93002b4bfd69cff60c357f2171437b"
+    integrity: "sha512-ed87wX0niYYdAq0gTyM/mYyIUgFr/NMM0HR+DJhQaxvxZYHxmfpn18JZcWQTN/SClWUBOq2AzwSB492++2VPLw=="
   source:
     repository: "straddle-build/wizard"
-    commit: "7a9883e48b10eba08089ff06089476d9e9bcbfe1"
-    note: "npm pack of wizard PR #4 head (fix/me-894-repin-skills, on top of PR #3), before merge to main; not published to npm"
-  skill_bundle:
-    repository: "straddle-build/skills"
-    commit: "643632e78654a4fa929873d0e1ec0ba15525a9e8"
-    content_sha256: "9e9f46c34fe5bb97d6b75d849506c31c1412c61b147855ff523c96ae1e7a3833"
-    note: "PINNED_BUNDLE in the pack's dist/bundle.js: a merged-source snapshot verified by content, not a tagged release"
+    commit: "6e6b7bcc58f73fcb69dc61818d4542c7df679dc4"
+    note: "npm pack of wizard PR #5 head (feat/me-891-plugin-releases), before merge to main; not published to npm. This Wizard runs the newest 0.1.x plugin release instead of a pinned skills commit"
+  plugin_range: "0.1.x"
 cli:
   package: "@straddlecom/cli"
   version: "1.0.3"
@@ -235,7 +231,7 @@ instructions:
           set -eu
           : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
           cd "$STRADDLE_KIT_DIR"
-          echo "8f51b770d2b5787518e34d7a7f85f282f3fb5c27d3cc1d862e6f25bd8630e1ef  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
+          echo "0ec4ffa1b142c8684cc24f555d35cbdc0d93002b4bfd69cff60c357f2171437b  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
           npm install --global "$PWD/straddlecom-wizard-0.1.0.tgz"
         )
       update: |-
@@ -243,7 +239,7 @@ instructions:
           set -eu
           : "${STRADDLE_KIT_DIR:?set STRADDLE_KIT_DIR to a durable directory for Straddle kit artifacts}"
           cd "$STRADDLE_KIT_DIR"
-          echo "8f51b770d2b5787518e34d7a7f85f282f3fb5c27d3cc1d862e6f25bd8630e1ef  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
+          echo "0ec4ffa1b142c8684cc24f555d35cbdc0d93002b4bfd69cff60c357f2171437b  straddlecom-wizard-0.1.0.tgz" | shasum -a 256 -c -
           npm install --global "$PWD/straddlecom-wizard-0.1.0.tgz"
         )
       remove: |-
