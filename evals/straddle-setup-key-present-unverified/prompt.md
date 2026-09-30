@@ -5,7 +5,7 @@ max_turns: 20
 allowed_tools: [Read, Glob, Grep, Skill, Write]
 ---
 
-Run a Straddle readiness check for our marketplace integration in Sandbox. Don't send any Straddle API requests with my key today. I can't run shell commands here; this is what I ran locally:
+Run a Straddle readiness check for our marketplace integration in Sandbox. We'll use the TypeScript SDK. Don't send any Straddle API requests with my key today. I can't run shell commands here; this is what I ran locally:
 
 `straddle --version`:
 
