@@ -49,6 +49,8 @@ cat > straddle-integration-plan.md <<'PLAN'
 | # | Decision | Answer | Source | Why |
 | --- | --- | --- | --- | --- |
 | | SDK | TypeScript, `@straddlecom/straddle` 1.0.4 | `package.json:6` | Already installed. |
+| | Customer phone | every customer create sends `phone` in E.164; the member sign-up form collects it and stores it on the member (`Member` has none yet, `src/db.ts:1`) | `customers-identity.md` | Required on every customer create. |
+| | Balance check | `config.balance_check: enabled` on every charge | `charges.md` | Checks the balance when it can, and still sends the charge when it can't. |
 | Q1 | Integration type | direct (`account`) | developer | Only the club collects dues. |
 | Q2 | Products | Pay by Bank charges only | developer | Members pay monthly dues; nothing is paid out. |
 | Q3 | Bank connection | Bridge widget | developer | |
@@ -59,7 +61,7 @@ cat > straddle-integration-plan.md <<'PLAN'
 | Q8 | Paykey review and R29 blocks | "verifying your bank account" during `review`; on `blocked`, stop charging and offer the one-time unblock only after the member confirms the debit | developer, accepted recommendation | There's no second unblock. |
 | Q9 | Consent | `internet` consent with a checkbox on the pay page; store the text, time, and IP address | developer | |
 | Q10 | Duplicate events | processed-events table keyed by `event_id`, checked before acting | developer, accepted recommendation | A redelivery changes nothing. |
-| Q11 | Dues that come back after `paid` | mark the dues unpaid again, email the member, and resubmit once for R01 or R09 only | developer | `paid` isn't final for ACH. |
+| Q11 | App behavior per dues status | while the charge is `created`, `scheduled`, `on_hold`, or `pending`, the dues show "payment processing" and can't be paid again; on `paid`, mark the dues paid; on `failed` or `cancelled`, the dues stay unpaid and the member is emailed to pay again; on `reversed` after `paid`, mark the dues unpaid again, email the member, and resubmit once for R01 or R09 only | developer | `paid` isn't final for ACH. |
 | Q12 | Reconciliation | record each charge's `funding_ids`; match deposits by funding event `id` | developer, accepted recommendation | The bank shows one line per funding event. |
 | Q13 | Refunds and resubmits | no refunds through Straddle for now; resubmit only `insufficient_funds`, once | developer | The club doesn't refund dues. |
 

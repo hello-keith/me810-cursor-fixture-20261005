@@ -21,6 +21,8 @@ Then find the facts yourself, before you ask anything:
 - **The repository.** Agent instructions, manifests and lockfiles, the installed Straddle SDK and its version, existing payment or bank-linking providers, the user, order, and account models, the routes and handlers where payments belong, any webhook handler, and the tests.
 - **The product model.** The best-practices reference for each branch in play, from the table below.
 
+If a reference can't be read, because it's missing or the read is denied, name it in your reply and ask for it back. Don't state its product facts from memory, and don't reopen or change an answer the developer already gave or accepted because of it.
+
 A decision the repository or Setup settles goes into the Decisions log with its `file:line` or `Setup` as the source, and is not asked. The framework or language alone settles none of them. If the repository already pins a retired SDK release, such as PyPI `straddle` 0.x, the SDK decision is the move to the version in the best-practices table.
 
 When `straddle-integration-plan.md` doesn't exist yet, create it with the title, the Status lines `- Plan state: Draft` and `- Approval: none`, and the Decisions, Glossary, and Unresolved decisions sections of [plan-template.md](../references/plan-template.md). Step 3 fills in the rest.
@@ -50,9 +52,14 @@ Seed the tree with these decisions. A branch opens once the decisions it hangs o
 | Refunds and resubmits | app behavior per status | whether the app refunds a `paid` charge (`refundCharge`, a payout linked to the charge) and when it resubmits (`insufficient_funds` only) | [refunds and resubmits](../../straddle-best-practices/references/refunds-and-resubmits.md) |
 | Reconciliation | products | how funding events are matched to the bank statement and to your orders | [funding and reconciliation](../../straddle-best-practices/references/funding-and-reconciliation.md) |
 
+Two product rules are not decisions. Don't ask them:
+
+- **Customer phone.** Every customer create needs `phone` in E.164 ([customers and identity](../../straddle-best-practices/references/customers-identity.md)). Record it as a Decisions row with no number, source `customers-identity.md`, and when the app's user model has no phone, that the app collects one where the user signs up.
+- **Balance check.** Record `config.balance_check: enabled` as a Decisions row with no number, source `charges.md`, as the recommendation ([charges](../../straddle-best-practices/references/charges.md)). Explain what another value changes only when the developer asks for one, and never offer `required` when the app creates paykeys from routing and account numbers.
+
 ## Asking a round
 
-- Ask every frontier question at once, in the format in [interview.md](../references/interview.md). Number them `Q1`, `Q2`, and on, continuing the Decisions log's numbering across rounds.
+- Ask every frontier question at once, in the format in [interview.md](../references/interview.md): one question for each open branch. Don't fold a branch into another branch's question, and don't hold back a branch whose prerequisites are settled. Number them `Q1`, `Q2`, and on, continuing the Decisions log's numbering across rounds.
 - Give each question a `Recommended:` answer and a one-line reason from the repository or the reference. A recommendation is advice. The developer still decides.
 - Offer only what Straddle supports. When the developer wants to learn a status by reading a charge or payout again and again, explain that the polling endpoint is the supported way to pull events, and offer it. Do not plan a read loop.
 - Show a picture with [show-me.md](../../straddle-best-practices/references/show-me.md) when it settles a question faster than prose, such as a sequence of `paid` and then `reversed` after the order shipped.
