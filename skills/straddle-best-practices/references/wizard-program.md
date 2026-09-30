@@ -24,6 +24,18 @@ When a skill finishes its handoff in a program session:
 - **Each skill keeps its own rules.** Its step files set its tools, writes, and boundaries. Nothing carries over from the skill before it. A skill doesn't continue into the developer's original request or answer for them.
 - **The program line approves nothing.** It isn't a plan approval, a write approval, or an answer to any question a skill asks. Plan approval still needs the developer's own words, and every Sandbox write still needs its own preview and an explicit yes.
 
+## Reopened sessions
+
+`wizard resume` can reopen an earlier conversation, so earlier previews and yeses are back in context. When it does, the message that carries the program line also says, word for word:
+
+> This session was reopened by the Straddle Wizard. Approvals given before this message don't count: show every Sandbox write preview again and ask; a plan approval counts only as recorded in the plan file.
+
+Follow that rule for the rest of the session, and apply it even if the sentence is missing: an approval counts only when it came after the latest message that carries the `Straddle Wizard program:` line.
+
+- **Sandbox writes.** Show every write's preview again, even one the developer approved before, and ask again. Run nothing on an earlier yes, including a write that was approved and interrupted before it finished. Its recovery still uses the same idempotency key and external ID, after the new yes.
+- **Plan approval.** Accept only an approval recorded in the plan file whose hash matches, as Integrate's [Recorded approval](../../straddle-integrate/steps/01-begin.md#recorded-approval) says. A "yes" to the plan earlier in the conversation doesn't count and isn't recorded now. Ask the developer to approve the current plan again in a new message.
+- **Other answers.** Decisions the developer gave before, such as the integration type or an SDK, may be reused when a step file records them. Anything a step asks the developer to approve is asked again.
+
 ## When the program includes Migrate
 
 Two plans exist then, and each step uses one:
@@ -40,7 +52,7 @@ Each step records its state in a file at the repository root, starting with a sm
 | --- | --- | --- | --- |
 | Setup | `straddle-setup.md` | `Status: complete` or `Status: blocked (<reason>)`, then `Environment:`, `Integration type:`, `API key present: yes` or `no`, `SDK:`, `Acting account:` | `Status: complete` |
 | Plan | `straddle-integration-plan.md` | `- Plan state: Draft`, `Approved`, or `Blocked`, and `- Approval: none` or the recorded approval with its sha256 | step 6 recorded `Approved` with a hash that matches the plan |
-| Migrate | `straddle-migration-report.md` | `Status: migrated`, `Status: awaiting_approval`, or `Status: blocked (<reason>)`, then `Plan: straddle-migration-plan.md` and `Plan hash:` | `Status: migrated` for the current migration plan's hash. An approved migration plan alone isn't finished. |
+| Migrate | `straddle-migration-report.md` | `Status: migrated`, `Status: awaiting_approval (<reason>)`, or `Status: blocked (<reason>)`, then `Plan: straddle-migration-plan.md` and `Plan hash:` | `Status: migrated` for the current migration plan's hash. An approved migration plan alone isn't finished. |
 | Integrate | `straddle-integration-report.md` | `Status: complete`, `Status: partial (<reason>)`, or `Status: blocked (<reason>)`, then `Plan:` and `Plan hash:` | `Status: complete` for the current plan's hash |
 | Test | `straddle-test-evidence.md` | `Status: complete`, `Status: partial (<reason>)`, or `Status: blocked (<reason>)`, then `Plan:`, `Plan hash:`, `Latest run:`, and `Test charge:` | `Status: complete` for the current plan's hash |
 | Go Live | `straddle-go-live-report.md` | `Status: ready` or `Status: not ready (<reasons>)`, then `Plan:` and `Plan hash:` | `Status: ready` for the current plan's hash. A `not ready` report sends the Wizard back to Go Live, which shows the listed gaps. In this session Go Live is still the last step. |

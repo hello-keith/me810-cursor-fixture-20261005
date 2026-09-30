@@ -12,12 +12,12 @@ STRADDLE_PROGRESS {"skill":"straddle-migrate","step":"08-report"}
 
 Write the report to `straddle-migration-report.md` at the repository root, replacing an earlier one, and give the same report in your reply. Open the reply with two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md): what changed, what didn't, and what's next. When the client doesn't allow the write, give the report in the reply and say `straddle-migration-report.md` wasn't written.
 
-The header block comes first, because the Straddle Wizard reads it to tell whether Migrate finished. `Status` is the handoff status, with the reason when it's `blocked`. It's `migrated` only when the approved edits are made and step 7 reviewed them; an approval alone is never `migrated`. `Plan hash` is the approval hash step 6 checked before the first edit, or step 5 recorded when step 6 didn't run, and `none` when the plan has no accepted approval. Never write a key, token, or customer data into the report.
+The header block comes first, because the Straddle Wizard reads it to tell whether Migrate finished. `Status` is the handoff status, with the reason when it's `awaiting_approval` or `blocked`. It's `migrated` only when the approved edits are made and step 7 reviewed them; an approval alone is never `migrated`. `Plan hash` is the approval hash step 6 checked before the first edit, or step 5 recorded when step 6 didn't run, and `none` when the plan has no accepted approval. Never write a key, token, or customer data into the report.
 
 ```markdown
 # Straddle migration report
 
-Status: migrated | awaiting_approval | blocked (<reason>)
+Status: migrated | awaiting_approval (<reason>) | blocked (<reason>)
 Plan: straddle-migration-plan.md
 Plan hash: <64 hex characters> | none
 Provider: <provider>   Model: <direct / SaaS / marketplace>   SDK: <package version>

@@ -59,6 +59,7 @@ Only a yes given after this exact preview counts. These do not count:
 - an approval given before the preview was shown, or a general "go ahead" in the original request
 - an approval of an earlier preview whose environment, account, operation, payload, external ID, or idempotency key differs from this one, for example a charge approved for account A that the developer now wants for account B
 - a yes to some rows, which covers only those rows. Rebuild the preview with just those rows and confirm it.
+- in a session the Straddle Wizard reopened, any approval given before the reopen message, even for this exact preview, and even for a write that was interrupted before it finished. Show the preview again and ask, as [Reopened sessions](../../straddle-best-practices/references/wizard-program.md#reopened-sessions) says.
 
 A no, a changed target or payload, or no answer means zero writes. On a no, print `STRADDLE_ABORT` with `developer denied the Sandbox preview`, continue at step 6, and hand off with `blocked`. On a change, rebuild the preview and ask again. Without an answer, continue at step 6 and hand off with `awaiting_approval`.
 
