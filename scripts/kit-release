@@ -182,9 +182,8 @@ def check_inputs(inputs):
         require((wizard.get("source") or {}).get("commit"), "wizard.source.commit")
     else:
         check_component(wizard, "wizard", ("package", "version", "provenance"))
-    bundle = require(wizard.get("skill_bundle"), "wizard.skill_bundle")
-    for field in ("repository", "commit", "content_sha256"):
-        require(bundle.get(field), f"wizard.skill_bundle.{field}")
+    if not re.fullmatch(r"\d+\.\d+\.x", str(wizard.get("plugin_range"))):
+        raise KitError(f"{INPUTS}: wizard.plugin_range must be the plugin versions the Wizard accepts, like 0.1.x")
     gates = inputs.get("gates")
     if not isinstance(gates, list) or not all(isinstance(gate, dict) for gate in gates):
         raise KitError(f"{INPUTS}: gates must be a list of gate records")
@@ -200,16 +199,16 @@ def check_inputs(inputs):
             raise KitError(f"{INPUTS}: gate {gate.get('id')}.status must be one of {list(GATE_STATUSES)}")
 
 
-def check_source_binding(inputs, files, content_sha256):
-    """The inputs must describe the plugin at this commit: its MCP servers and the bundle the Wizard pins."""
+def check_source_binding(inputs, files, plugin_version):
+    """The inputs must describe the plugin at this commit: its MCP servers and a Wizard that accepts its version."""
     servers = json.loads(dict((p, d) for p, _, d in files)["mcp.json"])["mcpServers"]
     for server, field in (("straddle-api", "api_url"), ("straddle-docs", "docs_url")):
         if servers.get(server, {}).get("url") != inputs["hosted_mcp"][field]:
             raise KitError(f"{INPUTS}: hosted_mcp.{field} does not match {server} in mcp.json")
-    pinned = inputs["wizard"]["skill_bundle"]["content_sha256"]
-    if pinned != content_sha256:
-        raise KitError(f"{INPUTS}: wizard.skill_bundle.content_sha256 {pinned} does not match the plugin content "
-                       f"{content_sha256}; the Wizard would refuse this plugin, so refresh the Wizard pin and artifact")
+    accepted = inputs["wizard"]["plugin_range"]
+    if not re.fullmatch(re.escape(accepted[:-1]) + r"\d+", plugin_version):
+        raise KitError(f"{INPUTS}: plugin {plugin_version} is outside wizard.plugin_range {accepted}; the recorded "
+                       "Wizard would refuse this plugin, so record a Wizard that accepts it")
 
 
 def release_problems(inputs, plugin_version, root, commit):
@@ -413,7 +412,7 @@ def manifest_model(root, commit, inputs):
     files = source_files(root, commit)
     plugin, skills = plugin_facts(files)
     content_sha256 = tree_digest(files)
-    check_source_binding(inputs, files, content_sha256)
+    check_source_binding(inputs, files, plugin["version"])
     archive = build_archive(files)
     archive_name = archive_file(plugin["version"])
     archive_sha = hashlib.sha256(archive).hexdigest()
@@ -487,25 +486,35 @@ def npm_integrity(data):
     return "sha512-" + base64.b64encode(hashlib.sha512(data).digest()).decode()
 
 
-# Loads the packed Wizard's own bundle verifier and runs it on a directory.
-LOAD_BUNDLE = """
-const { loadBundle } = await import(new URL(`file://${process.argv[1]}`));
-if (typeof loadBundle !== 'function') { console.log(JSON.stringify({ ok: false, reason: 'no loadBundle export' })); }
-else { const r = loadBundle(process.argv[2]); console.log(JSON.stringify({ ok: r.ok, reason: r.reason ?? null })); }
+# Loads the packed Wizard's own release verifier and runs it on the plugin archive and SHA256SUMS this commit publishes,
+# the same bytes the Wizard downloads from the GitHub release.
+UNPACK_RELEASE = """
+import { readFileSync } from 'node:fs';
+const [verifier, version, archive, sums, dest] = process.argv.slice(1);
+const { unpackRelease } = await import(new URL(`file://${verifier}`));
+if (typeof unpackRelease !== 'function') { console.log(JSON.stringify({ ok: false, reason: 'no unpackRelease export' })); }
+else {
+  const r = unpackRelease({ version, archive: readFileSync(archive), sums: readFileSync(sums, 'utf8') }, dest);
+  console.log(JSON.stringify({ ok: r.ok, reason: r.reason ?? null }));
+}
 """
 
 
 def wizard_problems(root, commit, wizard, tarball):
-    """The tarball is the recorded artifact, and its Wizard accepts this plugin as both an archive and a checkout.
+    """The tarball is the recorded Wizard, and it accepts the plugin release this commit publishes.
 
     Importing bundle.js runs the pack's code, so nothing is extracted until the bytes match the recorded digests, and
-    nothing is imported until package.json matches the recorded identity.
+    nothing is imported until package.json matches the recorded identity. A local candidate is checked against
+    wizard.artifact; a released Wizard against the npm dist.integrity in wizard.evidence.digest.
     """
     data, artifact, problems = tarball.read_bytes(), wizard.get("artifact") or {}, []
-    if hashlib.sha256(data).hexdigest() != artifact.get("sha256"):
-        problems.append(f"{tarball}: sha256 does not match wizard.artifact.sha256")
-    if npm_integrity(data) != artifact.get("integrity"):
-        problems.append(f"{tarball}: integrity does not match wizard.artifact.integrity")
+    if wizard["provenance"] == LOCAL_CANDIDATE:
+        if hashlib.sha256(data).hexdigest() != artifact.get("sha256"):
+            problems.append(f"{tarball}: sha256 does not match wizard.artifact.sha256")
+        if npm_integrity(data) != artifact.get("integrity"):
+            problems.append(f"{tarball}: integrity does not match wizard.artifact.integrity")
+    elif npm_integrity(data) != ((wizard.get("evidence") or {}).get("digest") or {}).get("value"):
+        problems.append(f"{tarball}: integrity does not match wizard.evidence.digest.value")
     if problems:
         return problems
     if not hasattr(tarfile, "data_filter"):
@@ -519,16 +528,18 @@ def wizard_problems(root, commit, wizard, tarball):
         if package.get("name") != wizard["package"] or package.get("version") != wizard["version"] \
                 or wizard["bin"] not in (package.get("bin") or {}):
             return [f"{tarball}: package.json name, version or bin differs from wizard in {INPUTS}"]
-        zipfile.ZipFile(io.BytesIO(build_archive(source_files(root, commit)))).extractall(scratch / "archive")
-        with tarfile.open(fileobj=io.BytesIO(git(root, "archive", "--format=tar", commit))) as tree:
-            tree.extractall(scratch / "checkout", filter="data")
-        verifier = scratch / "wizard" / "package" / "dist" / "bundle.js"
-        for label, directory in (("plugin archive", "archive"), ("full repository checkout", "checkout")):
-            run = subprocess.run(["node", "--input-type=module", "-e", LOAD_BUNDLE, str(verifier),
-                                  str(scratch / directory)], capture_output=True, text=True)
-            result = json.loads(run.stdout) if run.returncode == 0 else {"ok": False, "reason": run.stderr.strip()}
-            if not result["ok"]:
-                problems.append(f"{tarball}: the Wizard rejects the {label} at {commit}: {result['reason']}")
+        files = source_files(root, commit)
+        version = plugin_facts(files)[0]["version"]
+        archive = build_archive(files)
+        (scratch / "archive.zip").write_bytes(archive)
+        (scratch / "SHA256SUMS").write_text(f"{hashlib.sha256(archive).hexdigest()}  {archive_file(version)}\n")
+        run = subprocess.run(["node", "--input-type=module", "-e", UNPACK_RELEASE,
+                              str(scratch / "wizard" / "package" / "dist" / "bundle.js"), version,
+                              str(scratch / "archive.zip"), str(scratch / "SHA256SUMS"), str(scratch / "plugin")],
+                             capture_output=True, text=True)
+        result = json.loads(run.stdout) if run.returncode == 0 else {"ok": False, "reason": run.stderr.strip()}
+        if not result["ok"]:
+            problems.append(f"{tarball}: the Wizard refuses plugin release {version} at {commit}: {result['reason']}")
     return problems
 
 

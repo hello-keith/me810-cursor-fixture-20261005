@@ -26,8 +26,10 @@ jobs:
       - name: Validate package, skills and links
         run: scripts/validate-package
 
-      - name: Check kit manifest
-        run: scripts/kit-release check
+      # The plugin itself must pack. kit/manifest.yaml and the Wizard compatibility check belong to the release cut
+      # (release.yml), so a skills-only change needs no Wizard change or manifest refresh.
+      - name: Build plugin archive
+        run: scripts/kit-release build --out "$RUNNER_TEMP/plugin"
 
       - uses: actions/setup-node@v5
         with:
