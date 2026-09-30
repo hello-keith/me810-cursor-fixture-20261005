@@ -63,3 +63,8 @@ cat > straddle-integration-plan.md <<'PLAN'
 - None yet.
 PLAN
 npm install --ignore-scripts --no-audit --no-fund --silent @straddlecom/straddle@1.0.4
+# history.jsonl loaded the skill from ~/.claude/plugins/cache/straddle/straddle/0.1.0, where an installed plugin lives.
+# Link the plugin under test there so the resumed session can read the skill's files as a real one can.
+plugin_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+mkdir -p "$HOME/.claude/plugins/cache/straddle/straddle"
+ln -sfn "$plugin_root" "$HOME/.claude/plugins/cache/straddle/straddle/0.1.0"
