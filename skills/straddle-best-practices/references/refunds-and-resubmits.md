@@ -5,7 +5,7 @@ Every status, field, and operation in backticks is checked against API contract 
 ## What it is
 
 - **Resubmit** retries a payment that didn't complete. `resubmitCharge` or `resubmitPayout` creates a new payment from a `failed`, `reversed`, or `cancelled` one. It copies the paykey, `amount`, and other details from the original. The request can set only `description`, `external_id`, and `payment_date`, which default to the original description, a new external ID, and today.
-- **Refund** returns money from a `paid` charge. `refundCharge` creates a payout to the bank account the charge came from. `amount` is optional: omit it or send `null` for a full refund, or send more than zero and no more than the charge amount for a partial one. The request can also set `description`, `external_id`, `payment_date`, and `metadata`. The charge stays `paid`.
+- **Refund** returns money from a `paid` charge. `refundCharge` creates a payout to the bank account the charge came from. `amount` is in cents, like every Straddle amount, and optional: omit it or send `null` for a full refund, or send more than zero and no more than the charge amount for a partial one (2000 refunds $20). The request can also set `description`, `external_id`, `payment_date`, and `metadata`. The charge stays `paid`.
 
 Both link the payments through `related_payments`, a list of `id`, `payment_type`, and `relationship`:
 
