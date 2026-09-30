@@ -11,14 +11,14 @@
     "provenance": "local-candidate",
     "artifact": {
       "file": "straddlecom-wizard-0.1.0.tgz",
-      "bytes": 40490,
-      "sha256": "cb427a471bc09bf6d18042cff8d826d9f2f519043527a656035e7a622a34daae",
-      "integrity": "sha512-4VgzhaGcbB7xVuPk7AUuseGQAFw3A66VpPnxzuejr5a6iBI3sf+cJd/IP4upw14MssvvRirsBTbHaVQGW28/NQ=="
+      "bytes": 41329,
+      "sha256": "8f51b770d2b5787518e34d7a7f85f282f3fb5c27d3cc1d862e6f25bd8630e1ef",
+      "integrity": "sha512-NVQVpk3pgBx0jOgB33ui/m+XuCKUK2e9OIVYveqBKNpjHtyWHWcYr7Le9zFMOBRC7GbVObBnhBqM05CK2N2jdQ=="
     },
     "source": {
       "repository": "straddle-build/wizard",
-      "commit": "bb1ee38dfda4d718447c5eb72c7c30ad11c5bbd9",
-      "note": "npm pack of the re-pin commit on wizard branch fix/me-894-repin-skills, before its merge to main; not published to npm"
+      "commit": "7a9883e48b10eba08089ff06089476d9e9bcbfe1",
+      "note": "npm pack of wizard PR #4 head (fix/me-894-repin-skills, on top of PR #3), before merge to main; not published to npm"
     },
     "skill_bundle": {
       "repository": "straddle-build/skills",
