@@ -27,6 +27,7 @@ cat > straddle-integration-plan.md <<'EOF_5'
 ## Status
 
 - Plan state: Approved
+- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 1b3340328881ff7594f759bfad05bf72eb188aa503e668d9db893b99c7af60ee
 - Last reviewed: 2026-09-28
 - Repository and branch: dues, main
 - Straddle skills version: 0.1.0

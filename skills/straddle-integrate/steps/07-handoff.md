@@ -17,6 +17,7 @@ Report in this shape. State what the run verified and what it did not. A passing
 
 Status: complete | awaiting_approval | blocked (<reason>)
 Target: Straddle Sandbox | offline synthetic localhost <base URL>: offline synthetic proof, not live Straddle Sandbox proof
+Sandbox write approval: one-time | standing (<client and where it saved the rule>) | none
 
 ## Code changes
 | File | Change | Test |

@@ -12,7 +12,7 @@ STRADDLE_PROGRESS {"skill":"straddle-integrate","step":"06-review"}
 
 Review only the files the step 3 summary lists, and the writes the step 5 summary lists. Check `git status` and confirm that every changed path is in the approved list and that no unrelated file was deleted or rewritten. Fix every item that fails:
 
-- [ ] Changed files are exactly the approved ones. Existing providers and unrelated code are byte-for-byte unchanged.
+- [ ] Changed files are exactly the approved ones, plus the plan's two approval lines if step 1 recorded an approval. Existing providers and unrelated code are byte-for-byte unchanged.
 - [ ] No key, signing secret, token, or `.env` content appears in code, tests, fixtures, logs, or comments. Tests use synthetic values.
 - [ ] Missing key or environment throws a configuration error before a request, and a test proves zero requests.
 - [ ] The header rules match the integration type in every call, and the missing-account case fails locally with zero requests.

@@ -132,6 +132,8 @@ The lint matches patterns and doesn't understand prose. Writers should know thes
 
 Cases live in `evals/<skill>-<case>/` with `prompt.md` and `graders/*.md`. Mocks go in `evals/mocks/<server>/<tool>.md` or a case's own `mocks/`, where `<server>` is `straddle-api` or `straddle-docs`. The validator requires at least one case per present skill and rejects mocks for unknown servers. `evals/results/` is ignored by Git. `evals/.markdownlint.jsonc` turns off only MD041 (first-line heading) for these files, because prompts, graders and mocks are literal model input and output.
 
+Integrate and Test accept an integration plan's approval from an earlier session only when its `Approval` line's sha256 matches the plan ([Recorded approval](../skills/straddle-integrate/steps/01-begin.md#recorded-approval), ME-894). So every scaffold whose plan is `Approved` records that hash. After editing such a plan, recompute it with the command there, or the case silently becomes an unapproved-plan case. `straddle-test-plan-edited-after-approval` is that case on purpose.
+
 Model evals run on the existing exe.dev VM with the Claude Code login already approved there, not in GitHub CI, which stays deterministic. The approved model and judge are both `claude-opus-5-5`. The command keeps real MCP servers off, and reports stay local:
 
 ```sh

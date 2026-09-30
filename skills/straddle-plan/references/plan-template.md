@@ -3,6 +3,7 @@
 ## Status
 
 - Plan state: Draft | Approved | Blocked
+- Approval: none | date, "the developer's words", recorded by straddle-plan or straddle-integrate, sha256 (see Integrate step 1, Recorded approval)
 - Last reviewed:
 - Repository and branch:
 - Straddle skills version:
@@ -72,7 +73,7 @@ Numbered, using the installed SDK's method names with their source file. Remove 
 - FIFO body shape, from a captured delivery or the dashboard's transformation test output:
 - Duplicate handling (event ID storage):
 - Acknowledgement: `2xx` after one event is stored (webhook), after the whole batch commits (FIFO), or the polling consumer ID, offset storage, and commit:
-- Status transitions to record, including `paid` before `reversed` with `R01`:
+- Status transitions to record, including `paid` then `reversed` with `R01`, ordered by `changed_at` with delivery order breaking a tie (best-practices receiving-webhooks reference, Ordering status changes):
 
 ## Configuration
 
@@ -97,7 +98,7 @@ Each row runs later, in Integrate or Test, only after its own preview and approv
 
 - Repository tests:
 - Sandbox success outcome:
-- Sandbox failure or return outcome:
+- Sandbox failure or return outcome (for `reversed_insufficient_funds`, with Test's timed funding sweep row):
 - Retry with the same idempotency key:
 - Two-account proof:
 - Notification proof (one signed event received, duplicate ignored):
