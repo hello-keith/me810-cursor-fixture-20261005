@@ -11,9 +11,11 @@ Implement the approved `straddle-integration-plan.md`: change the approved files
 
 Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its rules on credentials, environments, account scope, idempotency, the fourteen excluded operations, notifications, and tools apply to every step and are cited rather than repeated. [references/execution-routes.md](references/execution-routes.md) maps each write to its SDK method and CLI command.
 
+Write developer-facing replies in the [Straddle voice](../straddle-best-practices/references/voice.md): lead with the result, keep it plain and friendly, and end with the next step. Put one plain sentence for the developer on the line after each marker. Approval questions, previews, and blocked or configuration-error messages keep their exact wording and values. When the session runs the [Straddle Wizard program](../straddle-best-practices/references/wizard-program.md), continue to the next program step after the handoff, as that page says.
+
 ## Boundaries
 
-- **Approved files only.** Change only the files the plan's file-change table lists, plus the plan's own approval lines when step 1 records the developer's approval. Never delete, rename, reformat, or overwrite unrelated code, including existing payment providers. A file the plan does not list needs the developer's approval and a plan update first.
+- **Approved files only.** Change only the files the plan's file-change table lists, plus the plan's own approval lines when step 1 records the developer's approval, and write the run's report, `straddle-integration-report.md`, in step 7. Never edit the plan otherwise. Never delete, rename, reformat, or overwrite unrelated code, including existing payment providers. A file the plan does not list needs the developer's approval and a plan update first.
 - **No remote write without an exact, current approval.** Every Sandbox write appears in a preview that names its environment, base URL, acting account, operation, executing tool, payload summary, external ID, and idempotency key. Only an explicit yes to that preview counts. A denial or a changed environment, account, operation, or payload means zero writes until a new preview is approved.
 - **Missing configuration stops the run.** Integrate first establishes, with offline checks only, an explicitly selected Sandbox environment and a credential for each route it will use. Without them it makes no Straddle request of any kind and reports a configuration error. When a check cannot run in this session, for example without a shell, the value is unknown, and unknown is a configuration error, not a pending detail. Code changes to approved files are not requests and may still be made.
 - **The fourteen excluded operations run only through the SDK or CLI**, never the API MCP's `execute-request`. Other permitted API MCP operations stay available, mainly reads for independent verification.
@@ -29,7 +31,7 @@ Read [straddle-best-practices](../straddle-best-practices/SKILL.md) first. Its r
 4. [steps/04-preview.md](steps/04-preview.md): show the exact Sandbox write preview and ask for approval.
 5. [steps/05-execute.md](steps/05-execute.md): run only the approved writes, chaining returned IDs.
 6. [steps/06-review.md](steps/06-review.md): review the files and writes the earlier summaries touched.
-7. [steps/07-handoff.md](steps/07-handoff.md): report code changes, server-side resources, and the final marker.
+7. [steps/07-handoff.md](steps/07-handoff.md): write `straddle-integration-report.md`, report code changes and server-side resources, and print the final marker.
 
 Each step file lists what it needs, its allowed tools, the next step, and its summary and marker. References: [execution-routes.md](references/execution-routes.md), [onboarding.md](references/onboarding.md), and [offline-synthetic-target.md](references/offline-synthetic-target.md).
 

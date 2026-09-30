@@ -1,7 +1,7 @@
 ---
 name: show-me
 description: Help the user understand the current topic visually with concise diagrams, code-shape sketches, and focused HTML artifacts.
-source: humanlayer/skills plugins/show-me/skills/show-me/SKILL.md at 6ab9013 (MIT, Copyright (c) 2026 HumanLayer; notice in third-party-licenses.md beside this file), as adapted in straddleio/straddle-form .agents/skills/show-me/SKILL.md at 545d9975cda57031fe4b900242089b90355c2fc6. The body below is that form copy, verbatim. Loaded by straddle-plan step 6; not a standalone skill.
+source: humanlayer/skills plugins/show-me/skills/show-me/SKILL.md at 6ab9013 (MIT, Copyright (c) 2026 HumanLayer; notice in third-party-licenses.md beside this file), as adapted in straddleio/straddle-form .agents/skills/show-me/SKILL.md at 545d9975cda57031fe4b900242089b90355c2fc6. The body down to "guidance" is that form copy, verbatim. "Where Straddle skills use it" at the end is Straddle's addition. Loaded by straddle-plan, straddle-integrate and straddle-test; not a standalone skill.
 ---
 
 Help the user understand the current topic of conversation visually. Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear.
@@ -122,5 +122,21 @@ function expandSkill(command: string): string {
 Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
 
 You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.
+
+## Where Straddle skills use it
+
+This section is Straddle's addition to the adapted text above. Straddle skills show one visual at each of these decision points, sized to the point:
+
+| Skill and step | Point | Typical view |
+| --- | --- | --- |
+| Plan, [step 5](../../straddle-plan/steps/05-handoff.md) | The integration shape, and the files the plan changes | A Mermaid sequence of customer, Bridge and paykey, charge or payout, and the chosen notification path, and a `diff` file tree of the file-change table |
+| Integrate, [step 4](../../straddle-integrate/steps/04-preview.md) | The Sandbox writes in the preview | A call tree or Mermaid chain of the preview rows by number: which returned ID feeds which row, and which account each row runs as |
+| Test, [step 3](../../straddle-test/steps/03-preview.md) | Account A/B switching and the notification flow | A Mermaid sequence of the A and B requests, where the account header is sent or omitted, and how each status arrives through the webhook, FIFO, or polling endpoint |
+
+- Show only what the plan, the preview, or the run already says. A visual never adds an operation, file, account, or decision.
+- A visual never replaces safety text. The preview table and the approval question stay exactly as the step gives them, and the visual sits beside them. The developer approves the table, not the picture.
+- Use IDs, external IDs, and row numbers. Never put a key, token, paykey value, or unmasked data in a visual.
+- Keep a diagram to about eight nodes. Terminal clients show Mermaid as text, so a small one stays readable there.
+- Show views inline. Only Plan's step 6 may write an HTML view, `straddle-plan-visual.html`. Integrate and Test write no visual files.
 
 <!-- markdownlint-disable-file MD041 -->

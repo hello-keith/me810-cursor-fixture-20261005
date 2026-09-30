@@ -2,7 +2,7 @@
 description: A missing API key is a blocking configuration failure found offline; no doctor or live request may run before prerequisites hold.
 tags: [setup, configuration]
 max_turns: 20
-allowed_tools: [Read, Glob, Grep, Skill, Bash]
+allowed_tools: [Read, Glob, Grep, Skill, Bash, Write]
 ---
 
 Check whether this project is ready for our Straddle SaaS integration. Our target is Sandbox. Run whatever checks you need.

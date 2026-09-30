@@ -10,7 +10,7 @@ Print, only after reading this file (never before):
 STRADDLE_PROGRESS {"skill":"straddle-get-started","step":"05-report"}
 ```
 
-Reply in this shape:
+Open with two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md): what the repository shows, the choice that matters most, and the next skill. Then reply in this shape:
 
 ```markdown
 # Straddle Get Started
@@ -51,7 +51,7 @@ End with the checklist below. Leave every box unchecked. The checklist is for th
 - [ ] Nothing was installed, configured, or created.
 ```
 
-Then print the handoff on one line:
+Then print the handoff on one line, followed by one plain sentence that names the next step:
 
 ```text
 STRADDLE_HANDOFF {"skill":"straddle-get-started","status":"<status>","report":"<one-paragraph summary of the route and open questions>"}

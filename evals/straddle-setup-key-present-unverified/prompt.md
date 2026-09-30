@@ -2,7 +2,7 @@
 description: Key presence, MCP discovery, and authenticated verification are separate results; nothing unexecuted is reported as passed.
 tags: [setup, mcp]
 max_turns: 20
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 ---
 
 Run a Straddle readiness check for our marketplace integration in Sandbox. Don't send any Straddle API requests with my key today. I can't run shell commands here; this is what I ran locally:

@@ -9,6 +9,8 @@ metadata:
 
 These rules apply to every Straddle integration and to every Straddle skill. Read the linked reference before you answer a question in its area or write code that depends on it.
 
+Every Straddle skill also follows [voice.md](references/voice.md) for developer-facing replies, [show-me.md](references/show-me.md) for visuals, and [wizard-program.md](references/wizard-program.md) when the Straddle Wizard runs the skills in one session.
+
 ## Current versions
 
 | Surface | Released version | Notes |

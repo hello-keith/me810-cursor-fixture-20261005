@@ -1,7 +1,7 @@
 # Step 3: Sandbox preview and approval
 
 - **Needs:** summaries from steps 1 and 2.
-- **Tools:** Read; AskUserQuestion; Bash only for `straddle ... --dry-run --agent` and `--help`, and only when step 1 recorded **configured**. No live request.
+- **Tools:** Read, including [show-me.md](../../straddle-best-practices/references/show-me.md); AskUserQuestion; Bash only for `straddle ... --dry-run --agent` and `--help`, and only when step 1 recorded **configured**, and for `date -u +%Y-%m-%dT%H:%M:%SZ` to record the approval time. No live request.
 - **Next:** [04-sandbox.md](04-sandbox.md) after an explicit yes. Otherwise [06-evidence.md](06-evidence.md).
 
 Print:
@@ -9,6 +9,8 @@ Print:
 ```text
 STRADDLE_PROGRESS {"skill":"straddle-test","step":"03-preview"}
 ```
+
+Show the flow the selected scenarios exercise as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md): for a SaaS or marketplace plan, the requests as account A and account B and where the account header is sent or omitted, and for every plan, how each status arrives through the selected webhook, FIFO, or polling endpoint. Show it whether or not this run builds a preview, and add nothing the plan doesn't say.
 
 When no selected scenario needs a Sandbox write, go to step 5.
 

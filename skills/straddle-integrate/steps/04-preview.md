@@ -1,7 +1,7 @@
 # Step 4: Preview and approval
 
 - **Needs:** summaries from steps 1 to 3, and the plan's future Sandbox writes table.
-- **Tools:** Read; AskUserQuestion; Bash only for `straddle ... --dry-run --agent` and `--help`, and only when step 1 recorded **configured**. No live request.
+- **Tools:** Read, including [show-me.md](../../straddle-best-practices/references/show-me.md); AskUserQuestion; Bash only for `straddle ... --dry-run --agent` and `--help`, and only when step 1 recorded **configured**, and for `date -u +%Y-%m-%dT%H:%M:%SZ` to record the approval time. No live request.
 - **Next:** [05-execute.md](05-execute.md) after an explicit yes. Otherwise [06-review.md](06-review.md), then the handoff with the status below.
 
 Print:
@@ -48,9 +48,11 @@ Rules for the table:
 
 When step 1 recorded **configured** and a row uses the CLI, run it with `--dry-run --agent` and show the result under the table. A dry run is not a substitute for the preview.
 
+Beside the table, show the rows as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md): which returned ID feeds which row, and which account each row runs as, by row number. The visual adds nothing the table doesn't say, and the developer approves the table.
+
 ## Ask for approval
 
-Ask one question: approve these exact rows, yes or no. Ask for a one-time yes, not a standing grant, and record which kind was given, as [Preview and approval](../../straddle-best-practices/references/writes-and-approval.md#preview-and-approval) says.
+Frame the question in a plain sentence or two in the [Straddle voice](../../straddle-best-practices/references/voice.md), such as "Here's what I'll send to Sandbox. Nothing runs until you say yes." Then ask one question: approve these exact rows, yes or no. Ask for a one-time yes, not a standing grant, and record which kind was given, as [Preview and approval](../../straddle-best-practices/references/writes-and-approval.md#preview-and-approval) says. Right after a yes, run the `date` command above and record its output as the approval time.
 
 Only a yes given after this exact preview counts. These do not count:
 
@@ -60,4 +62,4 @@ Only a yes given after this exact preview counts. These do not count:
 
 A no, a changed target or payload, or no answer means zero writes. On a no, print `STRADDLE_ABORT` with `developer denied the Sandbox preview`, continue at step 6, and hand off with `blocked`. On a change, rebuild the preview and ask again. Without an answer, continue at step 6 and hand off with `awaiting_approval`.
 
-**Summary for step 5:** the approved rows exactly as shown and the approval kind (`one-time` or `standing`), or the reason there is no approval.
+**Summary for step 5:** the approved rows exactly as shown, the approval kind (`one-time` or `standing`), and the approval time, or the reason there is no approval.
