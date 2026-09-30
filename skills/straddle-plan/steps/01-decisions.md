@@ -1,6 +1,6 @@
 # Step 1: Decisions
 
-- **Needs:** the developer's request, and the Setup report when one exists.
+- **Needs:** the developer's request, and the Setup report (`straddle-setup.md`) when one exists.
 - **Tools:** Read, Glob, AskUserQuestion. No writes.
 - **Next:** [02-sources.md](02-sources.md).
 
@@ -10,7 +10,7 @@ Print this once, right after reading this file and before any other tool call, e
 STRADDLE_PROGRESS {"skill":"straddle-plan","step":"01-decisions"}
 ```
 
-Read [straddle-best-practices](../../straddle-best-practices/SKILL.md). If `straddle-integration-plan.md` exists, read it and keep decisions that are still valid.
+Read [straddle-best-practices](../../straddle-best-practices/SKILL.md). If `straddle-integration-plan.md` exists, read it and keep decisions that are still valid. If `straddle-setup.md` exists, read it for what Setup confirmed.
 
 Collect these answers before planning. Use what the developer already said or what Setup confirmed. Ask for the rest in one short batch. The framework or language alone does not answer any of them.
 
