@@ -1,0 +1,1189 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.280",
+  "startedAt": "2026-10-02T09:30:00.000Z",
+  "durationSeconds": 154,
+  "partial": false,
+  "suite": {
+    "ablation": "with-without",
+    "modelOverride": "claude-opus-5-5",
+    "judgeModel": "claude-opus-5-5",
+    "caseFilter": null,
+    "threshold": 1
+  },
+  "cases": [
+    {
+      "name": "straddle-plan-asks-decisions",
+      "dir": "evals/straddle-plan-asks-decisions",
+      "runsPerCase": 3,
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "asks-before-guessing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "open-questions-logged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched open \\(round 1\\)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "round-format",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "asks-before-guessing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "open-questions-logged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched open \\(round 1\\)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "round-format",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "asks-before-guessing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "open-questions-logged",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched open \\(round 1\\)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "round-format",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 0,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "asks-before-guessing",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "open-questions-logged",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "round-format",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "asks-before-guessing",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "open-questions-logged",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "round-format",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "asks-before-guessing",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "open-questions-logged",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "round-format",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "straddle-plan-interview-resume",
+      "dir": "evals/straddle-plan-interview-resume",
+      "runsPerCase": 3,
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "read-plan",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Read called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resumes-open-questions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0.75,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "read-plan",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resumes-open-questions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "read-plan",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Read called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resumes-open-questions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 0,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-execute-request",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "read-plan",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resumes-open-questions",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-execute-request",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "read-plan",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resumes-open-questions",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-execute-request",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "read-plan",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resumes-open-questions",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "straddle-plan-interview-dont-know",
+      "dir": "evals/straddle-plan-interview-dont-know",
+      "runsPerCase": 3,
+      "arms": {
+        "with": [
+          {
+            "score": 0.75,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "assumption-recorded",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Q11[^\\n]*\\bassumption\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "explains-assumption",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0.75,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "assumption-recorded",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Q11[^\\n]*\\bassumption\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "explains-assumption",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "assumption-recorded",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched Q11[^\\n]*\\bassumption\\b",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "explains-assumption",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 0,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "assumption-recorded",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "explains-assumption",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "assumption-recorded",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "explains-assumption",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "assumption-recorded",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "explains-assumption",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    },
+    {
+      "name": "straddle-integrate-ambiguous-retry",
+      "dir": "evals/straddle-integrate-ambiguous-retry",
+      "runsPerCase": 3,
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-docs-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-docs__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-doctor-before-prerequisites",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-live-write-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-transport-attempt",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "same-key-or-lookup",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-docs-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-docs__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-doctor-before-prerequisites",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-live-write-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-transport-attempt",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "same-key-or-lookup",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-docs-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-docs__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-doctor-before-prerequisites",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-live-write-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-transport-attempt",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "same-key-or-lookup",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-docs-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-docs__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-doctor-before-prerequisites",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-live-write-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-transport-attempt",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "same-key-or-lookup",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-docs-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-docs__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-doctor-before-prerequisites",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-live-write-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-transport-attempt",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "same-key-or-lookup",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0.8333333333333334,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-docs-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-docs__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-doctor-before-prerequisites",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-live-write-command",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Bash called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-transport-attempt",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "same-key-or-lookup",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 0.9444444444444445,
+        "passRateWithout": 0.6666666666666666,
+        "delta": 0.05555555555555547
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 4,
+    "casesPassed": 2,
+    "overallScore": null,
+    "overallPassRate": null
+  }
+}

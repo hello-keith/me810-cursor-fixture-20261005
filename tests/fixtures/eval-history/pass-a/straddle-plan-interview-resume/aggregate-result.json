@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.286",
+  "startedAt": "2026-10-01T00:18:20.466Z",
+  "durationSeconds": 121,
+  "partial": false,
+  "suite": {
+    "ablation": "none",
+    "modelOverride": "claude-opus-5-5",
+    "judgeModel": "claude-opus-5-5",
+    "caseFilter": "straddle-plan-interview-resume",
+    "threshold": 1
+  },
+  "cases": [
+    {
+      "name": "straddle-plan-interview-resume",
+      "dir": "evals/straddle-plan-interview-resume",
+      "runsPerCase": 3,
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "read-plan",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Read called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resumes-open-questions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "read-plan",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Read called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resumes-open-questions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "read-plan",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Read called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "resumes-open-questions",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}
