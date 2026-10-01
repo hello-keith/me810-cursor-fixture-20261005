@@ -91,7 +91,7 @@ Each row runs only after its own preview and approval. Creates send an Idempoten
 
 ## Notification path
 
-FIFO endpoint `GET /internal/straddle/fifo`, polled every 30 seconds, stores each event by `event_id`.
+FIFO endpoint `POST /webhooks/straddle/fifo` on the app's public HTTPS URL: Straddle sends one signed `POST` per batch, in strict order. The receiver verifies the raw body against the `svix-*` headers, stores every event in batch order, drops duplicates by `event_id`, and returns `2xx` only after the whole batch is committed, `500` otherwise so the batch is retried whole.
 
 | Charge | Account | Expected status sequence |
 | --- | --- | --- |

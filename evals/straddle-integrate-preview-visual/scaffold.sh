@@ -103,13 +103,12 @@ EOF_7
 cat > src/straddle/payments.mjs <<'EOF_8'
 // Straddle payments (implemented by Integrate).
 // Customer, paykey and reveal calls omit Straddle-Account-Id; charges carry the seller account.
-const opts = (idempotencyKey, accountId) => ({ idempotencyKey, ...(accountId && { headers: { "Straddle-Account-Id": accountId } }) });
-
+// SDK 1.0.4 sends Idempotency-Key from params only; it ignores the idempotencyKey request option (ME-899).
 export const createBuyer = (client, { externalId, name, email, phone, ipAddress }) =>
-  client.customers.create({ name, email, phone, type: "individual", device: { ip_address: ipAddress }, external_id: externalId }, opts(`cust-${externalId}`));
+  client.customers.create({ "Idempotency-Key": `cust-${externalId}`, name, email, phone, type: "individual", device: { ip_address: ipAddress }, external_id: externalId });
 
 export const createBankPaykey = (client, { customerId, routingNumber, accountNumber, externalId }) =>
-  client.bridge.createBankAccountPaykey({ customer_id: customerId, routing_number: routingNumber, account_number: accountNumber, account_type: "checking", external_id: externalId }, opts(`pk-${externalId}`));
+  client.bridge.createBankAccountPaykey({ "Idempotency-Key": `pk-${externalId}`, customer_id: customerId, routing_number: routingNumber, account_number: accountNumber, account_type: "checking", external_id: externalId });
 
 // The create response masks the token; a charge needs the full one, used in-process and never logged.
 export const revealPaykeyToken = async (client, paykeyId) => (await client.paykeys.reveal(paykeyId)).data.paykey;
@@ -117,9 +116,10 @@ export const revealPaykeyToken = async (client, paykeyId) => (await client.payke
 export function chargeForSeller(client, { sellerAccountId, paykeyToken, amount, externalId, paymentDate, ipAddress }) {
   if (!sellerAccountId) throw new Error("seller account is required for a marketplace charge");
   return client.charges.create({
+    "Straddle-Account-Id": sellerAccountId, "Idempotency-Key": `chg-${externalId}`,
     paykey: paykeyToken, amount, currency: "USD", consent_type: "internet", description: `order ${externalId}`,
     payment_date: paymentDate, external_id: externalId, device: { ip_address: ipAddress }, config: { balance_check: "enabled" },
-  }, opts(`chg-${externalId}`, sellerAccountId));
+  });
 }
 EOF_8
 npm install --ignore-scripts --no-audit --no-fund --silent @straddlecom/straddle@1.0.4
