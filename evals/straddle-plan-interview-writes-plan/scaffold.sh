@@ -56,12 +56,12 @@ cat > straddle-integration-plan.md <<'PLAN'
 | Q3 | Bank connection | Bridge widget | developer | |
 | Q4 | Notification path | webhook endpoint | developer | The server is already public over HTTPS. |
 | Q5 | Identity mapping | one Straddle customer per member, `external_id` = member `id` | developer, accepted recommendation | Exact lookups that survive an email change. |
-| Q6 | Customer review | wait for Straddle's decision; show "we're verifying your details" | developer, accepted recommendation | The club has no staff review queue. |
+| Q6 | Customer review | wait for Straddle's decision; show "we're verifying your details"; a `rejected` member can't pay dues by bank and is asked to contact the club | developer, accepted recommendation | The club has no staff review queue. |
 | Q7 | Paykey storage | paykey `id` and label on the member; token encrypted in its own column, never logged | developer, accepted recommendation | The token is a secret. |
 | Q8 | Paykey review and R29 blocks | "verifying your bank account" during `review`; on `blocked`, stop charging and offer the one-time unblock only after the member confirms the debit | developer, accepted recommendation | There's no second unblock. |
 | Q9 | Consent | `internet` consent with a checkbox on the pay page; store the text, time, and IP address | developer | |
 | Q10 | Duplicate events | processed-events table keyed by `event_id`, checked before acting | developer, accepted recommendation | A redelivery changes nothing. |
-| Q11 | App behavior per dues status | while the charge is `created`, `scheduled`, `on_hold`, or `pending`, the dues show "payment processing" and can't be paid again; on `paid`, mark the dues paid; on `failed` or `cancelled`, the dues stay unpaid and the member is emailed to pay again; on `reversed` after `paid`, mark the dues unpaid again, email the member, and resubmit once for R01 or R09 only | developer | `paid` isn't final for ACH. |
+| Q11 | App behavior per dues status | while the charge is `created`, `scheduled`, `on_hold`, or `pending`, the dues show "payment processing" and can't be paid again; on `paid`, mark the dues paid; on `failed` with `insufficient_funds` (R01 or R09), resubmit once and keep showing "payment processing"; on another `failed` reason or `cancelled`, the dues stay unpaid and the member is emailed to pay again; on `reversed` after `paid`, mark the dues unpaid again, email the member, and resubmit once for R01 or R09 only | developer | `paid` isn't final for ACH. |
 | Q12 | Reconciliation | record each charge's `funding_ids`; match deposits by funding event `id` | developer, accepted recommendation | The bank shows one line per funding event. |
 | Q13 | Refunds and resubmits | no refunds through Straddle for now; resubmit only `insufficient_funds`, once | developer | The club doesn't refund dues. |
 
