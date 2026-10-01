@@ -10,7 +10,7 @@ Print:
 STRADDLE_PROGRESS {"skill":"straddle-test","step":"03-preview"}
 ```
 
-Show the flow the selected scenarios exercise as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md), inline in your reply; write no file. For a SaaS or marketplace plan, it shows the requests as account A and account B and where the account header is sent or omitted, and for every plan, how each status arrives through the selected webhook, FIFO, or polling endpoint. It uses the preview table's row numbers, operations, accounts and values, or, when this run builds no preview, only what the plan says, and adds nothing else. Show it whether or not this run builds a preview.
+Show the flow the selected scenarios exercise as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md), inline in your reply; write no file. For a SaaS or marketplace plan, it shows the requests as account A and account B and where the account header is sent or omitted, and for every plan, how each status arrives through the selected webhook, FIFO, or polling endpoint. It uses only what the preview shows: its header lines, the table (its row numbers, and operations, accounts, outcomes and values as the table writes them), and the notification path under it, or, when this run builds no preview, only what the plan says, and adds nothing else. Show it whether or not this run builds a preview.
 
 When no selected scenario needs a Sandbox write, go to step 5.
 
