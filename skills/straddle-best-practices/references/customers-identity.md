@@ -11,7 +11,7 @@ A create needs `name`, `type`, `email`, `phone` (E.164), and `device.ip_address`
 - **Individuals (KYC):** `dob` and `ssn`.
 - **Businesses (KYB):** `ein` and `legal_business_name`, plus optional `website` and `representatives` (each with `name`, `email`, `phone`).
 
-`email` is unique on the account: a create with an email another customer already has fails. Observed in Sandbox on 2026-10-01: `422`, `type` `/validation_error`, `detail` "Email '<email>' already exists and must be unique.", with an empty `items` list. Straddle's API reference shows the same rule in its error example, as a `400` whose item is "customer.email", "Email address must be unique." So a customer is one person, not one order or checkout.
+`email` is unique on the account: a create with an email another customer already has fails. Observed in Sandbox on 2026-10-01: `422`, `type` `/validation_error`, `detail` "Email '`<email>`' already exists and must be unique.", with an empty `items` list. Straddle's API reference shows the same rule in its error example, as a `400` whose item is "customer.email", "Email address must be unique." So a customer is one person, not one order or checkout.
 
 Responses mask `compliance_profile`. `getUnmaskedCustomer` returns it unmasked, but only when Straddle has enabled unmasking for the account (`allow_data_unmask` in the account settings' `configuration`). It's one of the operations that run only through the SDK or CLI after approval ([writes-and-approval.md](writes-and-approval.md)). So is `deleteCustomer`, which is for regulatory or privacy requests only and can't be undone.
 
