@@ -8,3 +8,4 @@ MD
 hash=$(grep -v -e '^- Plan state:' -e '^- Approval:' straddle-integration-plan.md | { sha256sum 2>/dev/null || shasum -a 256; } | cut -c1-64)
 awk -v h="$hash" '/^- Approval:/ { sub(/sha256 [0-9a-f]+/, "sha256 " h) } { print }' straddle-integration-plan.md > straddle-integration-plan.md.tmp
 mv straddle-integration-plan.md.tmp straddle-integration-plan.md
+git add -A && git -c user.name=eval -c user.email=eval@example.invalid commit -q --amend --no-edit

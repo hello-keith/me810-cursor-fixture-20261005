@@ -73,7 +73,7 @@ A Sandbox test run proves the handlers, not only the happy path. Pick the rows t
 Rules for the run:
 
 - Count a status only when it arrives through the webhook, FIFO, or polling endpoint. A create response only shows `created`.
-- Give each run's resources fresh external IDs, because the simulations and a new polling consumer also show other testers' activity on the account.
+- Give each run's resources fresh external IDs, because the simulations and a new polling consumer also show other testers' activity on the account. Give each customer the run creates a fresh email too, because a customer's email is unique on the account and a repeated one fails with `422` ([customers-identity.md](customers-identity.md)).
 - Give each dispute and R29 scenario its own bank account number, never one another scenario or the developer's demo uses. The R29 blocks every paykey made from that account, across customers, and refuses new links of it.
 - Record the payout gap as not testable in Sandbox, and cover those handlers with recorded payloads.
 

@@ -38,7 +38,7 @@ Payload status lists differ from the REST ones. The webhook status list for char
 ## What your app must handle
 
 - Route every event by `event_type`, and store it before you act on it ([receiving-webhooks.md](receiving-webhooks.md)).
-- Treat `data` as the resource's current state. Project it by `data.status_details.changed_at`, and never let an older change overwrite a newer one.
+- Treat `data` as the resource's current state. Project it by `data.status_details.changed_at`, and never let an older change overwrite a newer one. An event without `changed_at`, such as the R29 paykey block events observed in Sandbox ([bridge-and-paykeys.md](bridge-and-paykeys.md#events-and-sandbox-outcomes)), is ordered by `data.updated_at` instead, never dropped.
 - Handle each resource's whole lifecycle, not only the happy path: a charge handler that knows only `paid` misses `failed`, `reversed`, `on_hold`, and `cancelled`.
 - Expect repeats: the same status under a new `event_id`, a create that arrives as both `.created.v1` and `.event.v1`, and redeliveries.
 - Look up your own record from `data.external_id` or the resource `id`, and ignore events for resources your app didn't create.

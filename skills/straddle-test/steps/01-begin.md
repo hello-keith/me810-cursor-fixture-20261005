@@ -42,8 +42,8 @@ Take the scenarios from the plan's verification section, and confirm them with t
 
 For each lifecycle the plan covers, add the matching rows from the scenario matrix in [sandbox-outcomes.md](../../straddle-best-practices/references/sandbox-outcomes.md#what-your-app-must-handle): customer review, paykey review, failure before funding, dispute and R29 block, Straddle hold, blocked payment, refund, cancel window, and funding. Each row names the `config.sandbox_outcome` to create the resource with and the transitions that must arrive through the notification path.
 
-The dispute and R29 block scenario creates its paykey from its own bank account number, one no other scenario, earlier run, or the developer's demo uses. An R29 blocks every paykey made from that bank account, across customers, and Straddle refuses new links of it ([returns-and-disputes.md](../../straddle-best-practices/references/returns-and-disputes.md#states-and-transitions)), so a shared number would break the other scenarios and the demo. This holds even when the developer asks to share one.
+The dispute and R29 block scenario creates its paykey from its own bank account number, one no other scenario, earlier run, or the developer's demo uses. Choose it here: a number the developer gives for it, or a random 10-digit number generated for this run. An R29 blocks every paykey made from that bank account, across customers, and Straddle refuses new links of it ([returns-and-disputes.md](../../straddle-best-practices/references/returns-and-disputes.md#states-and-transitions)), so a shared number would break the other scenarios and the demo. This holds even when the developer asks to share one.
 
 A webhook receiver is not required: a polling endpoint is a complete notification path.
 
-**Summary for step 2:** the chosen plan and its plan hash, plan decisions, configuration result, acting accounts A and B, and the selected scenarios.
+**Summary for step 2:** the chosen plan and its plan hash, plan decisions, configuration result, acting accounts A and B, the selected scenarios, and the dispute scenario's own bank account number when that scenario is selected.
