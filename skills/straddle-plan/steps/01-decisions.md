@@ -29,7 +29,7 @@ When `straddle-integration-plan.md` doesn't exist yet, create it with the title,
 
 ## The design tree
 
-Seed the tree with these decisions. A branch opens once the decisions it hangs off are settled. Skip the branches the answers rule out, such as payouts for a charges-only integration or onboarding for a direct one, and add a branch for anything the repository makes risky, such as existing provider code, orders fulfilled before payment, or data kept only in memory. A seeded branch whose answer depends on an open risk branch opens after it, such as Duplicate events while where the app stores data durably is open; name it in the reply as a later round's question.
+Seed the tree with these decisions. A branch opens once the decisions it hangs off are settled. Skip the branches the answers rule out, such as payouts for a charges-only integration or onboarding for a direct one, and add a branch for anything the repository makes risky, such as existing provider code or orders fulfilled before payment. A seeded branch whose answer depends on a risk branch you added waits until that branch is settled; say in the reply that it comes in a later round.
 
 | Decision | Opens after | What to settle | Reference |
 | --- | --- | --- | --- |
