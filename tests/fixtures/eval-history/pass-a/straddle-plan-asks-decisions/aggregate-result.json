@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.286",
+  "startedAt": "2026-09-30T22:55:25.376Z",
+  "durationSeconds": 93,
+  "partial": false,
+  "suite": {
+    "ablation": "none",
+    "modelOverride": "claude-opus-5-5",
+    "judgeModel": "claude-opus-5-5",
+    "caseFilter": "straddle-plan-asks-decisions",
+    "threshold": 1
+  },
+  "cases": [
+    {
+      "name": "straddle-plan-asks-decisions",
+      "dir": "evals/straddle-plan-asks-decisions",
+      "runsPerCase": 3,
+      "arms": {
+        "with": [
+          {
+            "score": 0.6,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "asks-before-guessing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "open-questions-logged",
+                "passed": false,
+                "weight": 1,
+                "explanation": "grader threw: case \"straddle-plan-asks-decisions\" grader focus file \"straddle-integration-plan.md\": path \"straddle-integration-plan.md\" does not exist",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "round-format",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0.6,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "asks-before-guessing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "open-questions-logged",
+                "passed": false,
+                "weight": 1,
+                "explanation": "grader threw: case \"straddle-plan-asks-decisions\" grader focus file \"straddle-integration-plan.md\": path \"straddle-integration-plan.md\" does not exist",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "round-format",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0.6,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "asks-before-guessing",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "open-questions-logged",
+                "passed": false,
+                "weight": 1,
+                "explanation": "grader threw: case \"straddle-plan-asks-decisions\" grader focus file \"straddle-integration-plan.md\": path \"straddle-integration-plan.md\" does not exist",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "round-format",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 0.6,
+        "passRate": 0
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 0,
+    "overallScore": 0.6,
+    "overallPassRate": 0
+  }
+}

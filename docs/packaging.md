@@ -19,6 +19,7 @@ Native installation in each client has not been accepted yet. The commands below
 | `scripts/validate-package` | CI and authors | Package validation and the skill policy lint. |
 | `scripts/check-contract-tokens` | CI and authors | Checks that every backticked status, field, operation, and event in the product-model references in `skills/straddle-best-practices/references/` exists in the published API contract that `kit/release-inputs.json` pins. `--contract` checks a local contract instead. |
 | `scripts/kit-release` | CI and the release cut | Builds the checksummed plugin archive, and generates and checks `kit/manifest.yaml`. See [Release manifest and plugin archive](#release-manifest-and-plugin-archive). |
+| `scripts/eval-history` | Whoever runs a model eval pass | Records each `claude plugin eval` pass in `evals/history/` and compares two recorded passes. See [Eval history](#eval-history). |
 | `kit/release-inputs.json` | `scripts/kit-release` | Hand-maintained release facts: released CLI, SDK, contract and hosted MCP records, the Wizard artifact and the plugin versions it accepts, client observations and the open publication gates. |
 | `kit/manifest.yaml` | Release acceptance (ME-659), and published with each plugin release. The Wizard doesn't read it. | Generated at the release cut. Every version and digest, minimum CLI and SDK versions, and install, update, remove and validation instructions per client. Between releases it describes the last cut, not the current source. |
 | `.github/workflows/release.yml` | GitHub Actions, on a `v*` tag push | The plugin release cut. See [Plugin releases](#plugin-releases). |
@@ -158,6 +159,23 @@ claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-withou
 ```
 
 Pass no `--trust-plugin`, `--allow-real-servers` or `--allow-tools` grant unless the run owner approves it.
+
+### Eval history
+
+Each pass is recorded so the next one can be compared with it. Run the pass with `--output-dir`, then record it with the skills commit the pass ran from:
+
+```sh
+claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-without --threshold 1.0 \
+  --model claude-opus-5-5 --judge-model claude-opus-5-5 --output-dir evals/results/<commit>
+scripts/eval-history record evals/results/<commit> --commit <commit>
+scripts/eval-history compare <older pass> <newer pass>
+```
+
+`record` reads every `aggregate-result.json` under the directory, so it takes one full-suite output directory or one per case, as targeted lanes write. It refuses a partial run, a case that appears twice and a mix of models. It writes `evals/history/<start>Z-<commit>.jsonl`, one JSON line per case, with the pass ID, case, skills commit, the sha256 of the plugin zip that `scripts/kit-release build --commit` writes for that commit, the date, the model, the number of runs, passes and errored runs, and the graders that failed in any run. Only the plugin arm counts; the `without` arm of `--ablation with-without` is the no-plugin baseline. Recording the same results again rewrites the same file. The commit must be in this repository, and the pass must run from a clean checkout of it, because the zip hash comes from the commit, not the files the pass ran.
+
+`compare` takes a pass file or any part of its name that matches one pass, such as a commit. It prints each case as `pass` or `fail` in both, `fixed` or `broke` when it flipped, or `new` or `gone` when only one pass ran it, with passes over runs and the failing graders on each side, then each pass's total and the count per state. A case passes when every run passed, the `--threshold 1.0` rule.
+
+History is committed under `evals/history/`, unlike `evals/results/`. A full pass is about 75 lines and 25 KB, while its results directory holds every transcript and stays on the VM. Committed history survives the VM and is reviewed with the change it measures. One file per pass means two branches that record passes never conflict. The first full pass after ME-900, ME-902 and ME-901 merge is the first recorded baseline.
 
 ### Progress markers
 

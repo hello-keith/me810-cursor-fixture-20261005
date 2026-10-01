@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""Keep every `claude plugin eval` pass and compare two of them.
+
+record <results-dir> --commit REV  writes evals/history/<pass>.jsonl, one line per case, from every
+                                   aggregate-result.json under the --output-dir of a pass
+compare <a> <b>                    prints each case as pass, fail, fixed, broke, new or gone between two
+                                   recorded passes, then totals; <a> and <b> are a pass file or part of its name
+"""
+
+import argparse
+import hashlib
+import json
+import sys
+from importlib.machinery import SourceFileLoader
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+HISTORY = ROOT / "evals" / "history"
+KIT = SourceFileLoader("kit_release", str(ROOT / "scripts" / "kit-release")).load_module()
+
+
+class HistoryError(Exception):
+    pass
+
+
+def plugin_sha256(root, commit):
+    """sha256 of the plugin zip `scripts/kit-release build --commit` writes for this commit."""
+    return hashlib.sha256(KIT.build_archive(KIT.source_files(root, commit))).hexdigest()
+
+
+def pass_lines(results_dir, commit, plugin_sha):
+    paths = sorted(Path(results_dir).rglob("aggregate-result.json"))
+    if not paths:
+        raise HistoryError(f"{results_dir}: no aggregate-result.json")
+    results = [json.loads(path.read_text()) for path in paths]
+    for path, result in zip(paths, results):
+        if result.get("partial"):
+            raise HistoryError(f"{path}: partial run, rerun it before recording")
+    models = {result["suite"].get("modelOverride") for result in results}
+    if len(models) != 1:
+        raise HistoryError(f"{results_dir}: one pass has one model, found {sorted(map(str, models))}")
+    (model,) = models
+    started = min(result["startedAt"] for result in results)
+    pass_id = f"{started[:16].replace(':', '')}Z-{commit[:7]}"
+    lines = {}
+    for path, result in zip(paths, results):
+        for case in result["cases"]:
+            if case["name"] in lines:
+                raise HistoryError(f"{path}: {case['name']} appears twice in {results_dir}")
+            # The without arm is the no-plugin baseline; history tracks the plugin.
+            runs = case["arms"]["with"]
+            lines[case["name"]] = {
+                "pass": pass_id,
+                "case": case["name"],
+                "skills_commit": commit,
+                "plugin_sha256": plugin_sha,
+                "date": started[:10],
+                "model": model,
+                "runs": len(runs),
+                "passes": sum(run["passed"] is True for run in runs),
+                "errors": sum(run.get("error") is not None for run in runs),
+                "failing_graders": sorted({grader["name"] for run in runs for grader in run["graders"]
+                                           if grader.get("passed") is False}),
+            }
+    return pass_id, [lines[name] for name in sorted(lines)]
+
+
+def record(results_dir, rev, root, history):
+    commit = KIT.git(root, "rev-parse", "--verify", f"{rev}^{{commit}}").decode().strip()
+    pass_id, lines = pass_lines(results_dir, commit, plugin_sha256(root, commit))
+    history.mkdir(parents=True, exist_ok=True)
+    path = history / f"{pass_id}.jsonl"
+    path.write_text("".join(json.dumps(line) + "\n" for line in lines))
+    passed = sum(passes(line) for line in lines)
+    print(f"{path}: {len(lines)} cases, {passed} pass")
+
+
+def load_pass(selector, history):
+    if Path(selector).is_file():
+        path = Path(selector)
+    else:
+        matches = [path for path in sorted(history.glob("*.jsonl")) if selector in path.stem]
+        if len(matches) != 1:
+            names = ", ".join(path.stem for path in matches) or "none"
+            raise HistoryError(f"{selector}: matches {len(matches)} passes in {history} ({names})")
+        path = matches[0]
+    return path.stem, {line["case"]: line for line in map(json.loads, path.read_text().splitlines())}
+
+
+def passes(line):
+    return line["runs"] > 0 and line["passes"] == line["runs"]
+
+
+STATES = {(True, True): "pass", (False, False): "fail", (False, True): "fixed", (True, False): "broke"}
+
+
+def show(line):
+    if line is None:
+        return "-"
+    failing = " ".join(line["failing_graders"])
+    errors = f" errors={line['errors']}" if line["errors"] else ""
+    return f"{line['passes']}/{line['runs']}" + (f" [{failing}]" if failing else "") + errors
+
+
+def compare(a, b, history):
+    a_id, a_cases = load_pass(a, history)
+    b_id, b_cases = load_pass(b, history)
+    counts = dict.fromkeys(("pass", "fail", "fixed", "broke", "new", "gone"), 0)
+    for case in sorted(a_cases.keys() | b_cases.keys()):
+        old, new = a_cases.get(case), b_cases.get(case)
+        state = "new" if old is None else "gone" if new is None else STATES[passes(old), passes(new)]
+        counts[state] += 1
+        print(f"{state:<5}  {case}  {show(old)} -> {show(new)}")
+    for name, cases in ((a_id, a_cases), (b_id, b_cases)):
+        print(f"{name}: {sum(map(passes, cases.values()))}/{len(cases)} cases pass")
+    print(", ".join(f"{count} {state}" for state, count in counts.items()))
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--history", type=Path, default=HISTORY, help="history directory (default evals/history)")
+    commands = parser.add_subparsers(dest="command", required=True)
+    sub = commands.add_parser("record", help="record a pass from a claude plugin eval --output-dir")
+    sub.add_argument("results_dir", type=Path)
+    sub.add_argument("--commit", required=True, help="skills commit the pass ran from")
+    sub.add_argument("--root", type=Path, default=ROOT, help="repository holding that commit")
+    sub = commands.add_parser("compare", help="compare two recorded passes")
+    sub.add_argument("a")
+    sub.add_argument("b")
+    args = parser.parse_args(argv)
+    try:
+        if args.command == "record":
+            record(args.results_dir, args.commit, args.root, args.history)
+        else:
+            compare(args.a, args.b, args.history)
+    except (HistoryError, KIT.KitError) as error:
+        print(f"eval-history: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
