@@ -79,6 +79,8 @@ Write each answer into the Decisions log as it's given, with its source and the 
 
 When the developer uses a word that means something else in Straddle, ask what they mean, use Straddle's term from then on, and add the settled term to the Glossary. "Refund" is a real Straddle operation: `refundCharge` returns money from a `paid` charge as a payout linked to it. It isn't cancelling a charge, which works only before `pending`, and it isn't a return (`reversed`), which the customer's bank starts. "Account" can mean the app's user, a Straddle customer, or an embedded account.
 
+A question a correction raises, such as which Straddle operation the developer means by a word, is asked in that same reply's round like any other question: numbered, with a `Recommended:` answer and its reason, and added to the Decisions log as `open`. Don't leave it for a later round.
+
 ## Finishing the interview
 
 When the frontier is empty, summarize the shared understanding: the decisions, each `assumption`, and the Glossary. Ask the developer to confirm it or correct it, and go to step 2 only after they confirm. When the log already settles every branch and the developer asks you to write the plan, that's their confirmation.
