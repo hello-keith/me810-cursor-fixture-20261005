@@ -15,10 +15,11 @@ Native installation in each client has not been accepted yet. The commands below
 | `.codex-plugin/plugin.json` | Codex | The whole Codex manifest: metadata, `skills`, both MCP servers in Codex's form with `bearer_token_env_var` on `straddle-api`, and the `interface` block with PNG assets. The privacy and terms URLs are Straddle's published [Privacy Policy](https://legal.straddle.com/legal/legal/privacy-policy) and [Straddle Services Agreement](https://legal.straddle.com/legal/legal/straddle-services-agreement), both listed in `legal.straddle.com/sitemap.xml`. |
 | `.cursor-plugin/plugin.json` | Cursor | Metadata, `logo`, and the `STRADDLE_API_KEY` variable prompt. |
 | `assets/` | Codex and Cursor | `logo.svg` is the published Straddle docs mark (`straddle-openapi/assets/favicon.svg` at `d571b47`). `logo.png` (512 px) and `icon.png` (256 px) are rendered from it with `@resvg/resvg-js` 2.6.2. |
-| `evals/` | `claude plugin eval` | Eval cases per skill, plus MCP mocks. |
+| `evals/` | `claude plugin eval` and `scripts/eval-history` | Eval cases per skill, MCP mocks, and recorded pass history. |
 | `scripts/validate-package` | CI and authors | Package validation and the skill policy lint. |
 | `scripts/check-contract-tokens` | CI and authors | Checks that every backticked status, field, operation, and event in the product-model references in `skills/straddle-best-practices/references/` exists in the published API contract that `kit/release-inputs.json` pins. `--contract` checks a local contract instead. |
 | `scripts/kit-release` | CI and the release cut | Builds the checksummed plugin archive, and generates and checks `kit/manifest.yaml`. See [Release manifest and plugin archive](#release-manifest-and-plugin-archive). |
+| `scripts/eval-history` | Whoever runs a model eval pass | Records each `claude plugin eval` pass in `evals/history/` and compares two recorded passes. See [Eval history](#eval-history). |
 | `kit/release-inputs.json` | `scripts/kit-release` | Hand-maintained release facts: released CLI, SDK, contract and hosted MCP records, the Wizard artifact and the plugin versions it accepts, client observations and the open publication gates. |
 | `kit/manifest.yaml` | Release acceptance (ME-659), and published with each plugin release. The Wizard doesn't read it. | Generated at the release cut. Every version and digest, minimum CLI and SDK versions, and install, update, remove and validation instructions per client. Between releases it describes the last cut, not the current source. |
 | `.github/workflows/release.yml` | GitHub Actions, on a `v*` tag push | The plugin release cut. See [Plugin releases](#plugin-releases). |
@@ -116,7 +117,7 @@ python3 -m unittest discover -s tests -v
 
 The package checks validate `mcp.json`, and `plugin.json`'s metadata fields, against the vendored Agent Plugins 1.0.0 schemas in `scripts/schemas/`. They also check the fixed MCP servers and credential routes, name and version agreement across the manifests, the Codex `interface` fields, that PNG assets are square, the Cursor variables schema, all nine required skills, and eval case layout. They fetch the Codex `websiteURL`, `privacyPolicyURL` and `termsOfServiceURL` and require HTTP 200, like Markdown links. They report missing skills and missing Codex URLs as failures, because both are real release requirements.
 
-CI runs Markdown lint, the validator and kit-release tests, `scripts/check-contract-tokens` against the pinned published contract, `scripts/validate-package`, `scripts/kit-release build` (the plugin packs), and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job on every run. It doesn't check `kit/manifest.yaml` or the recorded Wizard, so a skills-only change passes without a Wizard change. Those checks run at the release cut.
+CI runs Markdown lint, the unit tests, `scripts/check-contract-tokens` against the pinned published contract, `scripts/validate-package`, `scripts/kit-release build` (the plugin packs), and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job on every run. It doesn't check `kit/manifest.yaml` or the recorded Wizard, so a skills-only change passes without a Wizard change. Those checks run at the release cut.
 
 ### Skill policy lint (ME-816)
 
@@ -159,6 +160,23 @@ claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-withou
 
 Pass no `--trust-plugin`, `--allow-real-servers` or `--allow-tools` grant unless the run owner approves it.
 
+### Eval history
+
+Each pass is recorded so the next one can be compared with it. Run the pass with `--output-dir`, then record it with the skills commit the pass ran from:
+
+```sh
+claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-without --threshold 1.0 \
+  --model claude-opus-5-5 --judge-model claude-opus-5-5 --output-dir evals/results/<commit>
+scripts/eval-history record evals/results/<commit> --commit <commit>
+scripts/eval-history compare <older pass> <newer pass>
+```
+
+`record` reads every `aggregate-result.json` under the directory, so it takes one full-suite output directory or one per case, as targeted lanes write. It refuses a partial run (naming its `partialReason`), an `aggregate-result.json` it can't read, a case that appears twice, and a mix of models or of judge models, naming the files involved. It writes `evals/history/<startedAt>-<commit>.jsonl`, such as `2026-10-01T001820.442Z-72a4d05.jsonl`: the earliest `startedAt` keeps its milliseconds, because targeted lanes start milliseconds apart. Each case gets one JSON line with the pass ID, case, skills commit, the sha256 of the plugin zip that `scripts/kit-release build --commit` writes for that commit, the date, the model, the judge model, the Claude Code version, the number of runs, passes and errored runs, and the graders that failed in any run. Only the plugin arm counts; the `without` arm of `--ablation with-without` is the no-plugin baseline. Recording the same results again leaves the file as it is, and `record` refuses to overwrite a pass file that holds different results. The commit must be in this repository, and the pass must run from a clean checkout or export of it, because the zip hash comes from the commit, not the files the pass ran.
+
+`compare` takes a pass file or any part of its name that matches one pass, such as a commit. It prints each case as `pass` or `fail` in both, `fixed` or `broke` when it flipped, or `new` or `gone` when only one pass ran it, with passes over runs and the failing graders on each side, then each pass's total and the count per state. A case passes when every run passed, the `--threshold 1.0` rule.
+
+History is committed under `evals/history/`, unlike `evals/results/`. A full pass is about 75 lines and 30 KB, while its results directory holds every transcript and stays on the VM. Committed history survives the VM and is reviewed with the change it measures. One file per pass means two branches that record passes never conflict. The first full pass after ME-900, ME-902 and ME-901 merge is the first recorded baseline.
+
 ### Progress markers
 
 The `STRADDLE_PROGRESS` lines a skill prints when it enters a step are best-effort in native clients, and no repository check or release gate depends on them. They show roughly where a run went, but they aren't evidence that a step finished, that the developer approved anything, or that a run passed. Deterministic progress is the Wizard's job (ME-667), which reports it from client events. Where a client doesn't expose those events, report progress there as unsupported or unverified rather than inferring it from markers. Content, safety, approval, abort handling, a truthful final handoff, native-client verification, and the walkthrough and publication approval all remain release requirements. Since ME-900 each marker line is followed by one plain sentence for the developer; the marker line itself is unchanged.
@@ -184,6 +202,14 @@ During `straddle-migrate` step 2, Bash is limited to the bounded read-only local
 ### First-step configuration check (ME-898)
 
 `straddle-get-started` and `straddle-migrate` begin like Setup: step 1 allows Bash only for `straddle auth status --agent`, `printenv STRADDLE_ENVIRONMENT` and `printenv STRADDLE_BASE_URL`, which send no Straddle request. When the key or an explicit Sandbox environment is missing, the skill names it, asks for it or points to `straddle-setup`, and ends with the `blocked` handoff before anything else. The `*-missing-key` and `*-environment-not-explicit` cases for both skills cover that stop. The other Get Started and Migrate prompts paste configured `auth status` and `STRADDLE_ENVIRONMENT` output, so they still exercise the configured path.
+
+### Plan interview (ME-901)
+
+Plan step 1 is an interview in rounds, forked from mattpocock/skills `grilling` and `domain-modeling` at `d81f3a1` (MIT) into [`skills/straddle-plan/references/interview.md`](../skills/straddle-plan/references/interview.md), with the notice beside it and in `third_party/LICENSES.md`. It reads the repository first, then asks the whole frontier of a design tree seeded with Straddle's decisions as numbered questions (`Q1`, then `Recommended:` and a reason), and waits. Facts are the agent's job and decisions the developer's. Each answer, `assumption` and settled term goes straight into the plan's Decisions log and Glossary, not into `GLOSSARY.md` or ADR files in the developer's repository, and a new session resumes from that log. The plan is written only once the frontier is empty and the developer confirms, tells Plan to take its recommendations, or says they can't answer more now, which leaves the open questions `Unresolved`. The template adds Lifecycle handling, and its Verification rows come from the Sandbox outcomes scenario matrix. The `straddle-plan-interview-*` cases resume a `context.history_file` transcript at each point of the interview. A case that gives Plan its decisions in one message and expects a written plan says one of those last two things.
+
+`claude plugin eval` resumes `history.jsonl` verbatim, so the skill's base directory in the transcript has to be a path where the plugin under test is. The eval loads the plugin from the tree being evaluated, and the run's `HOME` is a fresh temporary directory, so a transcript can't hold that absolute path. The resumed Plan cases' transcripts load the skill from `~/.claude/plugins/cache/straddle/straddle/0.1.0`, where an installed plugin lives, and each case's scaffold links that directory to the plugin under test. Before this, the transcripts named `/home/dev/.claude/plugins/cache/...`, which no eval machine has, and every read of a reference in a resumed run was denied ("running in don't ask mode"), while fresh runs got the real path from the Skill tool and read the same files.
+
+The transcripts also hold every skill file Plan loaded or read, as it was then: `SKILL.md` (the skill load message), `steps/01-decisions.md`, and `references/interview.md`. A change to any of them updates that message or tool result in each resumed case's `history.jsonl`. `straddle-plan-interview-missing-reference` links nothing, deletes the harness's own plugin copy under the run's config directory, and writes a project `.claude/settings.json` that denies reading any `skills/straddle-best-practices/` or `skills/straddle-plan/` path, so every copy of a reference is unreadable. Its `no-reference-content` grader fails a run whose trace shows any successful access to a reference: a Read of one at any offset, or a Grep or Glob whose results name one. That tells "couldn't read" from "read a copy".
 
 ### Plan handoffs into Integrate and Test
 

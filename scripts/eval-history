@@ -1,0 +1,164 @@
+#!/usr/bin/env python3
+"""Keep every `claude plugin eval` pass and compare two of them.
+
+record <results-dir> --commit REV  writes evals/history/<pass>.jsonl, one line per case, from every
+                                   aggregate-result.json under the --output-dir of a pass
+compare <a> <b>                    prints each case as pass, fail, fixed, broke, new or gone between two
+                                   recorded passes, then totals; <a> and <b> are a pass file or part of its name
+"""
+
+import argparse
+import hashlib
+import json
+import sys
+from importlib.machinery import SourceFileLoader
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+HISTORY = ROOT / "evals" / "history"
+KIT = SourceFileLoader("kit_release", str(ROOT / "scripts" / "kit-release")).load_module()
+
+
+class HistoryError(Exception):
+    pass
+
+
+def plugin_sha256(root, commit):
+    """sha256 of the plugin zip `scripts/kit-release build --commit` writes for this commit."""
+    return hashlib.sha256(KIT.build_archive(KIT.source_files(root, commit))).hexdigest()
+
+
+def read_aggregate(path):
+    """startedAt, model, judge model, Claude version and [(case, run counts)] from one aggregate-result.json."""
+    try:
+        result = json.loads(path.read_text())
+        if result.get("partial"):
+            raise HistoryError(f"{path}: partial run ({result.get('partialReason')}), rerun it before recording")
+        cases = []
+        for case in result["cases"]:
+            # The without arm is the no-plugin baseline; history tracks the plugin.
+            runs = case["arms"]["with"]
+            cases.append((case["name"], {
+                "runs": len(runs),
+                "passes": sum(run["passed"] is True for run in runs),
+                "errors": sum(run.get("error") is not None for run in runs),
+                "failing_graders": sorted({grader["name"] for run in runs for grader in run["graders"]
+                                           if grader.get("passed") is False}),
+            }))
+        return {"started": result["startedAt"], "model": result["suite"].get("modelOverride"),
+                "judge_model": result["suite"].get("judgeModel"), "claude_version": result.get("claudeVersion"),
+                "cases": cases}
+    except (OSError, json.JSONDecodeError, KeyError) as error:
+        raise HistoryError(f"{path}: can't read this aggregate result ({type(error).__name__}: {error})") from None
+
+
+def one(results_dir, aggregates, key):
+    found = {}
+    for path, aggregate in aggregates.items():
+        found.setdefault(aggregate[key], []).append(str(path))
+    if len(found) != 1:
+        listing = "; ".join(f"{value} in {', '.join(paths)}" for value, paths in found.items())
+        raise HistoryError(f"{results_dir}: one pass has one {key.replace('_', ' ')}, found {listing}")
+    return next(iter(found))
+
+
+def pass_lines(results_dir, commit, plugin_sha):
+    paths = sorted(Path(results_dir).rglob("aggregate-result.json"))
+    if not paths:
+        raise HistoryError(f"{results_dir}: no aggregate-result.json")
+    aggregates = {path: read_aggregate(path) for path in paths}
+    model, judge_model = (one(results_dir, aggregates, key) for key in ("model", "judge_model"))
+    started = min(aggregate["started"] for aggregate in aggregates.values())
+    # Full startedAt precision: targeted lanes start within milliseconds of each other.
+    pass_id = f"{started.replace(':', '')}-{commit[:7]}"
+    lines, seen = {}, {}
+    for path, aggregate in aggregates.items():
+        for name, counts in aggregate["cases"]:
+            if name in seen:
+                raise HistoryError(f"{name} appears twice in {results_dir}: {seen[name]} and {path}")
+            seen[name] = path
+            lines[name] = {"pass": pass_id, "case": name, "skills_commit": commit, "plugin_sha256": plugin_sha,
+                           "date": started[:10], "model": model, "judge_model": judge_model,
+                           "claude_version": aggregate["claude_version"], **counts}
+    return pass_id, [lines[name] for name in sorted(lines)]
+
+
+def record(results_dir, rev, root, history):
+    commit = KIT.git(root, "rev-parse", "--verify", f"{rev}^{{commit}}").decode().strip()
+    pass_id, lines = pass_lines(results_dir, commit, plugin_sha256(root, commit))
+    text = "".join(json.dumps(line) + "\n" for line in lines)
+    path = history / f"{pass_id}.jsonl"
+    if path.exists() and path.read_text() != text:
+        raise HistoryError(f"{path}: already holds different results for pass {pass_id}, not overwriting it")
+    history.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
+    passed = sum(passes(line) for line in lines)
+    print(f"{path}: {len(lines)} cases, {passed} pass")
+
+
+def load_pass(selector, history):
+    if Path(selector).is_file():
+        path = Path(selector)
+    else:
+        matches = [path for path in sorted(history.glob("*.jsonl")) if selector in path.stem]
+        if len(matches) != 1:
+            names = ", ".join(path.stem for path in matches) or "none"
+            raise HistoryError(f"{selector}: matches {len(matches)} passes in {history} ({names})")
+        path = matches[0]
+    return path.stem, {line["case"]: line for line in map(json.loads, path.read_text().splitlines())}
+
+
+def passes(line):
+    return line["runs"] > 0 and line["passes"] == line["runs"]
+
+
+STATES = {(True, True): "pass", (False, False): "fail", (False, True): "fixed", (True, False): "broke"}
+
+
+def show(line):
+    if line is None:
+        return "-"
+    failing = " ".join(line["failing_graders"])
+    errors = f" errors={line['errors']}" if line["errors"] else ""
+    return f"{line['passes']}/{line['runs']}" + (f" [{failing}]" if failing else "") + errors
+
+
+def compare(a, b, history):
+    a_id, a_cases = load_pass(a, history)
+    b_id, b_cases = load_pass(b, history)
+    counts = dict.fromkeys(("pass", "fail", "fixed", "broke", "new", "gone"), 0)
+    for case in sorted(a_cases.keys() | b_cases.keys()):
+        old, new = a_cases.get(case), b_cases.get(case)
+        state = "new" if old is None else "gone" if new is None else STATES[passes(old), passes(new)]
+        counts[state] += 1
+        print(f"{state:<5}  {case}  {show(old)} -> {show(new)}")
+    for name, cases in ((a_id, a_cases), (b_id, b_cases)):
+        print(f"{name}: {sum(map(passes, cases.values()))}/{len(cases)} cases pass")
+    print(", ".join(f"{count} {state}" for state, count in counts.items()))
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--history", type=Path, default=HISTORY, help="history directory (default evals/history)")
+    commands = parser.add_subparsers(dest="command", required=True)
+    sub = commands.add_parser("record", help="record a pass from a claude plugin eval --output-dir")
+    sub.add_argument("results_dir", type=Path)
+    sub.add_argument("--commit", required=True, help="skills commit the pass ran from")
+    sub.add_argument("--root", type=Path, default=ROOT, help="repository holding that commit")
+    sub = commands.add_parser("compare", help="compare two recorded passes")
+    sub.add_argument("a")
+    sub.add_argument("b")
+    args = parser.parse_args(argv)
+    try:
+        if args.command == "record":
+            record(args.results_dir, args.commit, args.root, args.history)
+        else:
+            compare(args.a, args.b, args.history)
+    except (HistoryError, KIT.KitError) as error:
+        print(f"eval-history: {error}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
