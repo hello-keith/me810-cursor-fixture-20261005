@@ -29,7 +29,7 @@ When `straddle-integration-plan.md` doesn't exist yet, create it with the title,
 
 ## The design tree
 
-Seed the tree with these decisions. A branch opens once the decisions it hangs off are settled. Skip the branches the answers rule out, such as payouts for a charges-only integration or onboarding for a direct one, and add a branch for anything the repository makes risky, such as existing provider code or orders fulfilled before payment.
+Seed the tree with these decisions. A branch opens once the decisions it hangs off are settled. Skip the branches the answers rule out, such as payouts for a charges-only integration or onboarding for a direct one, and add a branch for anything the repository makes risky, such as existing provider code, orders fulfilled before payment, or data kept only in memory. A seeded branch whose answer depends on an open risk branch opens after it, such as Duplicate events while where the app stores data durably is open; name it in the reply as a later round's question.
 
 | Decision | Opens after | What to settle | Reference |
 | --- | --- | --- | --- |
@@ -49,7 +49,7 @@ Seed the tree with these decisions. A branch opens once the decisions it hangs o
 | Notification path | nothing | webhook endpoint, FIFO endpoint, or polling endpoint | [notifications](../../straddle-best-practices/references/notifications.md) |
 | Duplicate events | notification path | where event IDs are stored so a repeat or redelivery is ignored | [receiving-webhooks](../../straddle-best-practices/references/receiving-webhooks.md) |
 | App behavior per status | products, notification path | what the app does on `paid`, `failed`, holds, and `reversed` after `paid`, such as an R01 after the order shipped | [charges](../../straddle-best-practices/references/charges.md), [returns and disputes](../../straddle-best-practices/references/returns-and-disputes.md) |
-| Refunds and resubmits | app behavior per status | whether the app refunds a `paid` charge (`refundCharge`, a payout linked to the charge) and when it resubmits (`insufficient_funds` only, which is R01 or R09) | [refunds and resubmits](../../straddle-best-practices/references/refunds-and-resubmits.md) |
+| Refunds and resubmits | app behavior per status | whether the app refunds a `paid` charge (`refundCharge`, a payout linked to the charge) and when it resubmits (`insufficient_funds` only: an R01 or R09 return, or a failed balance check, which is `failed` with `source` `watchtower` and no return code) | [refunds and resubmits](../../straddle-best-practices/references/refunds-and-resubmits.md), [charges](../../straddle-best-practices/references/charges.md) |
 | Reconciliation | products | how funding events are matched to the bank statement and to your orders | [funding and reconciliation](../../straddle-best-practices/references/funding-and-reconciliation.md) |
 
 Two product rules are not decisions. Don't ask them:

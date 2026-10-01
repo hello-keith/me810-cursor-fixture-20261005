@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# The rm -rf lines below delete plugin copies under $HOME and the config directory. Refuse unless both are inside this
+# eval run's temp directory (/tmp/claude-eval-<id>), so a hand run can't delete the developer's installed plugin.
+run_dir=$(dirname "$HOME")
+config_dir=${CLAUDE_CONFIG_DIR:-$run_dir/config}
+case "$run_dir" in */claude-eval-*) ;; *) echo "scaffold: HOME=$HOME is not in an eval run's temp directory" >&2; exit 1 ;; esac
+case "$config_dir" in "$run_dir"/*) ;; *) echo "scaffold: $config_dir is outside $run_dir" >&2; exit 1 ;; esac
 mkdir -p src
 cat > package.json <<'JSON'
 {
@@ -76,7 +82,7 @@ npm install --ignore-scripts --no-audit --no-fund --silent @straddlecom/straddle
 rm -rf "$HOME/.claude/plugins/cache/straddle/straddle/0.1.0"
 # Other copies stay unreadable too: the plugin under test and the harness's own copy under the run's config directory
 # (/tmp/claude-eval-<id>/config/plugins/cache/straddle/...), wherever they are.
-rm -rf "${CLAUDE_CONFIG_DIR:-$(dirname "$HOME")/config}/plugins/cache/straddle"
+rm -rf "$config_dir/plugins/cache/straddle"
 mkdir -p .claude
 cat > .claude/settings.json <<'JSON'
 {
