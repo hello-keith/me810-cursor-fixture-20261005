@@ -81,6 +81,8 @@ const BASE_URLS = {
   sandbox: "https://sandbox.straddle.com",
   production: "https://production.straddle.com",
 };
+// An explicit localhost STRADDLE_BASE_URL is the offline synthetic upstream; any other value leaves the environment's URL.
+const LOCALHOST = /^http:\/\/(127\.0\.0\.1|localhost):\d+\/?$/;
 
 // Missing configuration is an error before any request, never a silent no-op.
 export function loadStraddleConfig(env = process.env) {
@@ -88,8 +90,8 @@ export function loadStraddleConfig(env = process.env) {
   if (!env.STRADDLE_API_KEY) missing.push("STRADDLE_API_KEY");
   if (!env.STRADDLE_ENVIRONMENT) missing.push("STRADDLE_ENVIRONMENT");
   if (missing.length) throw new StraddleConfigError(`Straddle is not configured: missing ${missing.join(", ")}`);
-  const baseURL = BASE_URLS[env.STRADDLE_ENVIRONMENT];
-  if (!baseURL) throw new StraddleConfigError(`STRADDLE_ENVIRONMENT must be sandbox or production`);
+  if (!BASE_URLS[env.STRADDLE_ENVIRONMENT]) throw new StraddleConfigError(`STRADDLE_ENVIRONMENT must be sandbox or production`);
+  const baseURL = LOCALHOST.test(env.STRADDLE_BASE_URL ?? "") ? env.STRADDLE_BASE_URL : BASE_URLS[env.STRADDLE_ENVIRONMENT];
   return { apiKey: env.STRADDLE_API_KEY, environment: env.STRADDLE_ENVIRONMENT, baseURL };
 }
 EOF_4
@@ -188,6 +190,14 @@ test("marketplace customer create omits Straddle-Account-Id and sends an idempot
   assert.equal(r.calls[0].headers.get("straddle-account-id"), null);
   assert.equal(r.calls[0].headers.get("idempotency-key"), "cust-buyer-001");
   assert.match(r.calls[0].url, /^https:\/\/sandbox\.straddle\.com\/v1\/customers/);
+});
+
+test("a localhost STRADDLE_BASE_URL is the request target; any other host is not", async () => {
+  const r = recorder();
+  await createBuyer(createStraddleClient({ env: { ...ENV, STRADDLE_BASE_URL: "http://127.0.0.1:45871" }, fetch: r.fetch }), buyer);
+  await createBuyer(createStraddleClient({ env: { ...ENV, STRADDLE_BASE_URL: "https://example.com" }, fetch: r.fetch }), buyer);
+  assert.match(r.calls[0].url, /^http:\/\/127\.0\.0\.1:45871\/v1\/customers/);
+  assert.match(r.calls[1].url, /^https:\/\/sandbox\.straddle\.com\/v1\/customers/);
 });
 
 test("seller charges carry the selected account, switching A to B", async () => {
