@@ -15,7 +15,7 @@ Native installation in each client has not been accepted yet. The commands below
 | `.codex-plugin/plugin.json` | Codex | The whole Codex manifest: metadata, `skills`, both MCP servers in Codex's form with `bearer_token_env_var` on `straddle-api`, and the `interface` block with PNG assets. The privacy and terms URLs are Straddle's published [Privacy Policy](https://legal.straddle.com/legal/legal/privacy-policy) and [Straddle Services Agreement](https://legal.straddle.com/legal/legal/straddle-services-agreement), both listed in `legal.straddle.com/sitemap.xml`. |
 | `.cursor-plugin/plugin.json` | Cursor | Metadata, `logo`, and the `STRADDLE_API_KEY` variable prompt. |
 | `assets/` | Codex and Cursor | `logo.svg` is the published Straddle docs mark (`straddle-openapi/assets/favicon.svg` at `d571b47`). `logo.png` (512 px) and `icon.png` (256 px) are rendered from it with `@resvg/resvg-js` 2.6.2. |
-| `evals/` | `claude plugin eval` | Eval cases per skill, plus MCP mocks. |
+| `evals/` | `claude plugin eval` and `scripts/eval-history` | Eval cases per skill, MCP mocks, and recorded pass history. |
 | `scripts/validate-package` | CI and authors | Package validation and the skill policy lint. |
 | `scripts/check-contract-tokens` | CI and authors | Checks that every backticked status, field, operation, and event in the product-model references in `skills/straddle-best-practices/references/` exists in the published API contract that `kit/release-inputs.json` pins. `--contract` checks a local contract instead. |
 | `scripts/kit-release` | CI and the release cut | Builds the checksummed plugin archive, and generates and checks `kit/manifest.yaml`. See [Release manifest and plugin archive](#release-manifest-and-plugin-archive). |
@@ -117,7 +117,7 @@ python3 -m unittest discover -s tests -v
 
 The package checks validate `mcp.json`, and `plugin.json`'s metadata fields, against the vendored Agent Plugins 1.0.0 schemas in `scripts/schemas/`. They also check the fixed MCP servers and credential routes, name and version agreement across the manifests, the Codex `interface` fields, that PNG assets are square, the Cursor variables schema, all nine required skills, and eval case layout. They fetch the Codex `websiteURL`, `privacyPolicyURL` and `termsOfServiceURL` and require HTTP 200, like Markdown links. They report missing skills and missing Codex URLs as failures, because both are real release requirements.
 
-CI runs Markdown lint, the validator and kit-release tests, `scripts/check-contract-tokens` against the pinned published contract, `scripts/validate-package`, `scripts/kit-release build` (the plugin packs), and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job on every run. It doesn't check `kit/manifest.yaml` or the recorded Wizard, so a skills-only change passes without a Wizard change. Those checks run at the release cut.
+CI runs Markdown lint, the unit tests, `scripts/check-contract-tokens` against the pinned published contract, `scripts/validate-package`, `scripts/kit-release build` (the plugin packs), and `claude plugin validate --strict` from Claude Code 2.1.283. It also runs the `fixtures/account-scope` corpus job on every run. It doesn't check `kit/manifest.yaml` or the recorded Wizard, so a skills-only change passes without a Wizard change. Those checks run at the release cut.
 
 ### Skill policy lint (ME-816)
 
