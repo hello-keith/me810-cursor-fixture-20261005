@@ -6,4 +6,4 @@ max_turns: 30
 timeout_seconds: 900
 allowed_tools: [Read, Glob, Grep, Skill, Bash, Edit, Write]
 ---
-I've read straddle-integration-plan.md and it looks right. The plan is approved.
+I've read the Straddle integration plan you wrote, straddle-integration-plan.md, and it looks right. The plan is approved; record my approval with straddle-plan.
