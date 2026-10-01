@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# The rm -rf lines below delete plugin copies under $HOME and the config directory. Refuse unless both are inside this
-# eval run's temp directory (/tmp/claude-eval-<id>), so a hand run can't delete the developer's installed plugin.
-run_dir=$(dirname "$HOME")
-config_dir=${CLAUDE_CONFIG_DIR:-$run_dir/config}
-case "$run_dir" in */claude-eval-*) ;; *) echo "scaffold: HOME=$HOME is not in an eval run's temp directory" >&2; exit 1 ;; esac
-case "$config_dir" in "$run_dir"/*) ;; *) echo "scaffold: $config_dir is outside $run_dir" >&2; exit 1 ;; esac
+# The rm -rf lines below delete plugin copies under $HOME and the config directory. Refuse unless each one is inside this
+# eval run's temp directory (/tmp/claude-eval-<id>), so a hand run can't delete the developer's installed plugin. Paths are
+# compared after cd -P resolves `..` and every symlinked ancestor; rm -rf never follows the final component.
+run_root=$(cd "$(dirname "$HOME")" && pwd -P)
+case "$run_root" in */claude-eval-*) ;; *) echo "scaffold: HOME=$HOME is not in an eval run's temp directory" >&2; exit 1 ;; esac
+remove_in_run() {
+  local parent
+  parent=$(cd "$(dirname "$1")" 2>/dev/null && pwd -P) || return 0
+  case "$parent/" in "$run_root"/*) rm -rf "${parent:?}/$(basename "$1")" ;; *) echo "scaffold: $1 resolves outside $run_root" >&2; exit 1 ;; esac
+}
 mkdir -p src
 cat > package.json <<'JSON'
 {
@@ -79,10 +83,10 @@ PLAN
 npm install --ignore-scripts --no-audit --no-fund --silent @straddlecom/straddle@1.0.4
 # history.jsonl loaded the skill from ~/.claude/plugins/cache/straddle/straddle/0.1.0. Unlike the other resumed cases,
 # nothing is linked there, so every read of the skill's references fails, as it would after the plugin was removed.
-rm -rf "$HOME/.claude/plugins/cache/straddle/straddle/0.1.0"
+remove_in_run "$HOME/.claude/plugins/cache/straddle/straddle/0.1.0"
 # Other copies stay unreadable too: the plugin under test and the harness's own copy under the run's config directory
 # (/tmp/claude-eval-<id>/config/plugins/cache/straddle/...), wherever they are.
-rm -rf "$config_dir/plugins/cache/straddle"
+remove_in_run "${CLAUDE_CONFIG_DIR:-$run_root/config}/plugins/cache/straddle"
 mkdir -p .claude
 cat > .claude/settings.json <<'JSON'
 {
