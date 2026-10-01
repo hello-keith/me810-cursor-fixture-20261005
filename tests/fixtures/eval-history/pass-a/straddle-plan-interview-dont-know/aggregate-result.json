@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.286",
+  "startedAt": "2026-10-01T00:18:20.442Z",
+  "durationSeconds": 78,
+  "partial": false,
+  "suite": {
+    "ablation": "none",
+    "modelOverride": "claude-opus-5-5",
+    "judgeModel": "claude-opus-5-5",
+    "caseFilter": "straddle-plan-interview-dont-know",
+    "threshold": 1
+  },
+  "cases": [
+    {
+      "name": "straddle-plan-interview-dont-know",
+      "dir": "evals/straddle-plan-interview-dont-know",
+      "runsPerCase": 3,
+      "arms": {
+        "with": [
+          {
+            "score": 0.75,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "assumption-recorded",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "explains-assumption",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": false,
+            "error": "timed out after 300s",
+            "graders": []
+          },
+          {
+            "score": 0.75,
+            "passed": false,
+            "error": null,
+            "graders": [
+              {
+                "name": "assumption-recorded",
+                "passed": false,
+                "weight": 1,
+                "explanation": "judge votes: FAIL FAIL FAIL",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "explains-assumption",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-execute-request",
+                "passed": true,
+                "weight": 1,
+                "explanation": "mcp__plugin_straddle_straddle-api__execute-request called 0x (expected 0..0)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "no-handoff",
+                "passed": true,
+                "weight": 1,
+                "explanation": "pattern absent as expected",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}
