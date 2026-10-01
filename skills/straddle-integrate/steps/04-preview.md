@@ -48,11 +48,17 @@ Rules for the table:
 
 When step 1 recorded **configured** and a row uses the CLI, run it with `--dry-run --agent` and show the result under the table. A dry run is not a substitute for the preview.
 
-Beside the table, show the rows as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md), inline in your reply; write no file. It shows which returned ID feeds which row, and which account each row runs as, by row number. The visual adds nothing the table doesn't say, and the developer approves the table.
+Beside the table, show the rows as one small visual, following [show-me.md](../../straddle-best-practices/references/show-me.md), inline in your reply; write no file. It shows which returned ID feeds which row, and which account each row runs as, by the table's row numbers. It names only operations, accounts, external IDs and values that are in the table, in the table's numbering, and adds nothing the table doesn't say. The developer approves the table.
 
 ## Ask for approval
 
-Frame the question in a plain sentence or two in the [Straddle voice](../../straddle-best-practices/references/voice.md), such as "Here's what I'll send to Sandbox. Nothing runs until you say yes." Then ask one question: approve these exact rows, yes or no. Ask for a one-time yes, not a standing grant, and record which kind was given, as [Preview and approval](../../straddle-best-practices/references/writes-and-approval.md#preview-and-approval) says. Right after a yes, run the `date` command above and record its output as the approval time.
+The reply that asks for approval is one message with these three parts, in this order, even when you showed some of them earlier in the session:
+
+1. The whole preview from [Build the preview](#build-the-preview): its header lines, the full table with every row and all eight columns, any dry-run output, and the lines under it. Never a shortened table, a summary, or a pointer to an earlier message.
+2. The one visual described above, right after the table.
+3. The approval question. Frame it in a plain sentence or two in the [Straddle voice](../../straddle-best-practices/references/voice.md), such as "Here's what I'll send to Sandbox. Nothing runs until you say yes." Then ask one question: approve these exact rows, yes or no.
+
+Ask for a one-time yes, not a standing grant, and record which kind was given, as [Preview and approval](../../straddle-best-practices/references/writes-and-approval.md#preview-and-approval) says. Right after a yes, run the `date` command above and record its output as the approval time.
 
 Only a yes given after this exact preview counts. These do not count:
 
