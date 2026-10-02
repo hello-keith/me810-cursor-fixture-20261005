@@ -46,8 +46,8 @@ Identity reason codes (I-codes, and R-codes from the reputation check such as R1
 - On `rejected`, don't create paykeys or payments, and show the customer a neutral message, never the scores or codes.
 - For businesses, collect the KYB fields and representatives up front, and expect more modules in the breakdown.
 - Keep PII server-side: send `dob`, `ssn`, and `ein` from your backend, never log them, and don't store them unless you must. Use unmasked reads only when a person needs them, and keep their output out of logs.
-- Keep one customer per person. Link your user to the customer by `external_id`, and store the customer `id`.
-- Guest checkout can't create a customer per checkout, because a returning shopper's email already belongs to a customer, so the second create fails with `422`. It also can't reuse the customer whose email the shopper typed: anyone who types another shopper's email would inherit that shopper's verified identity and their paykeys. Reuse an existing customer only after the shopper proves they own the email, by logging in or by entering a code you emailed them; a first-time email creates a new customer. Reuse by typed email alone is acceptable only as a Sandbox test convenience, gated to Sandbox in code.
+- Keep one customer per user of your app, keyed by your app's own user ID. Set the customer's `external_id` to that ID when you create it, store the customer `id` against the user, and reuse that customer when the user pays again. To find a customer whose `id` you didn't store, use `listCustomers` filtered by `external_id`.
+- Never create a customer per checkout or order, and don't key one only on an email typed at checkout. A customer's email is unique on the account, so a second create with an email that already has a customer fails with `422`. How your app identifies its users, by a login, an account, or its own guest record, is your app's decision.
 
 ## Events and Sandbox outcomes
 
