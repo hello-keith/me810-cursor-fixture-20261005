@@ -15,7 +15,7 @@ A funding event is money actually moving between Straddle and the account's link
 
 A funding event has `id`, `amount` (cents), `payment_count`, `transfer_date`, `trace_ids`, `trace_numbers`, `status`, `status_details`, `status_history`, and `linked_bank_account_details`. Each charge and payout lists the funding events that included it in `funding_ids`. The contract marks `trace_numbers` required, but Sandbox omits it (see [Events and Sandbox outcomes](#events-and-sandbox-outcomes)).
 
-`listFundingEventPayments` breaks a funding event into its payments. Each has `payment_type`, `payment_amount`, `funding_amount` (the part of the payment in this event), `reason` (`credit`, `debit`, `reversal`, or `failed`), `status`, `external_id`, `trace_ids`, and `metadata` when you send `include_metadata`. Observed in Sandbox: `funding_amount` is signed, and the response omits `external_id`.
+`listFundingEventPayments` breaks a funding event into its payments. Each has `payment_type`, `payment_amount`, `funding_amount` (the part of the payment in this event), `reason` (`credit`, `debit`, `reversal`, or `failed`), `status`, `external_id`, `trace_ids`, and `metadata` when you send `include_metadata`. Observed in Sandbox: `funding_amount` is signed, and the response omits `external_id`, though the contract marks `external_id` required.
 
 ## States and transitions
 
@@ -38,9 +38,9 @@ For reporting across payments, `listPayments` searches charges and payouts toget
 - Record each payment's `funding_ids` as they arrive, and treat a payment as settled in your books only when its funding event is.
 - On each funding event, fetch its payments once with `listFundingEventPayments`, match them to your records by payment `id` (not `external_id`, which Sandbox omits here), and post the event `amount` against the bank line by funding event `id`.
 - Expect a `reversed` charge to come back as a `charge_reversal` withdrawal or as a negative `reversal` line inside a later `charge_deposit`, and a `payout_withdrawal` before a payout is sent. Keep enough funds in the linked bank account for both.
-- Sum `funding_amount` with its sign: in a `charge_deposit`, the `credit` lines plus the negative `reversal` lines add up to `amount`.
+- Net each funding event's payments by `reason`, using the size of `funding_amount`: in a `charge_deposit`, `credit` lines add, `reversal` lines subtract, and `failed` lines count 0; in a `charge_reversal` withdrawal, the `reversal` lines make up the amount withdrawn. The net equals the event `amount` unless a fee was netted in. Observed in Sandbox, a `reversal` line's `funding_amount` is negative, but the contract gives it no sign, so don't build on it.
 - Expect payments with `funding_amount` `0` and `reason` `failed` inside a deposit, and one payment spread across events.
-- Don't assume a funding event has `trace_numbers` or `trace_ids`. Key on the funding event `id` and use a trace number only when one is present.
+- Don't assume a funding event has `trace_numbers` or a trace in `trace_ids`. Key on the funding event `id`, and use a trace number only when one is present: in `trace_numbers`, in `trace_ids`, or in the nullable `trace_number` on `listFundingEvents` results.
 - Reconcile by business day, not by calendar day, and allow for funding timing that differs per account.
 
 ## Events and Sandbox outcomes
@@ -49,7 +49,7 @@ For reporting across payments, `listPayments` searches charges and payouts toget
 - Sandbox: `simulateFundingEvent` with `funding_event_job_type` `charges` or `payouts` makes a funding event for the account's unfunded activity. It's account-wide, so it includes other testers' payments on the same account.
 - Observed in Sandbox on 2026-09-30: a charges simulation made a `charge_deposit` that was `pending` with the next day's `transfer_date`. It held 10 payments: paid charges and charges still `pending` as `credit` with their full amount, and failed charges as `failed` with `funding_amount` `0`. No `charge_reversal` appeared within 15 minutes of the reversals. A payouts simulation made a `payout_withdrawal` that stayed `pending` ([payouts.md](payouts.md#events-and-sandbox-outcomes)).
 - Observed in Sandbox on 2026-10-02 (TypeScript SDK 1.0.4), from a back office that lists funding events and their payments:
-  - Funding event list and retrieve responses omitted `trace_numbers`, though the contract and the SDK types mark it required, so code that trusted the types crashed reading its length. Some events carried the trace in `trace_ids`, under the key TraceId, which the contract doesn't define. Others had neither.
-  - `funding_amount` was signed. A `reversal` line was negative, also inside a `charge_deposit`, where it was netted against the `credit` lines instead of arriving as a separate `charge_reversal`.
+  - Funding event list and retrieve responses omitted `trace_numbers`, though the contract and the SDK types mark it required, so code that trusted the types crashed reading its length. Some events carried the trace in `trace_ids`, under TraceId, a key the contract doesn't name. Others had no trace in either.
+  - `funding_amount` was signed: a `reversal` line was negative in a `charge_reversal`, and inside a `charge_deposit` too, where it was netted against the `credit` lines instead of arriving as a separate `charge_reversal`.
   - `listFundingEventPayments` returned no `external_id`. Join its payments to your records by payment `id`.
 - The simulation's timing decides whether a reversal outcome reaches `paid` first. See [sandbox-outcomes.md](sandbox-outcomes.md#funding-and-account-simulations).
