@@ -33,7 +33,7 @@ When either is missing, stop here, before the list below or any other tool call.
 | Environment, unset | **Blocking configuration failure: environment not explicitly selected (`STRADDLE_ENVIRONMENT` is not set).** | `export STRADDLE_ENVIRONMENT=sandbox`. Confirming Sandbox in chat is enough. |
 | Environment, not Sandbox | **Blocking configuration failure: environment is not Sandbox (`STRADDLE_ENVIRONMENT` must be `sandbox`).** | `export STRADDLE_ENVIRONMENT=sandbox` and `unset STRADDLE_BASE_URL`. |
 
-Then give that fix in one or two sentences, or offer [straddle-setup](../../straddle-setup/SKILL.md). Don't preview what comes after the check: no repository plan and no product, integration, SDK, or notification questions. Print the `blocked` handoff and end the turn. When the developer says it is set, run this check again.
+Then give that fix in one or two sentences, or offer [straddle-setup](../../straddle-setup/SKILL.md). Print the `blocked` handoff and end the turn. When the developer says it is set, run this check again.
 
 ## Stated decisions
 
