@@ -151,25 +151,28 @@ A case that has to start from an earlier conversation sets `context.history_file
 
 Integrate and Test accept a plan's approval from an earlier session only when its `Approval` line's sha256 matches the plan ([Recorded approval](../skills/straddle-integrate/steps/01-begin.md#recorded-approval), ME-894). Since ME-900 the migration plan records its approval in the same two lines with the same hash command, run on `straddle-migration-plan.md`. So every scaffold whose plan is `Approved` records that hash. After editing such a plan, recompute it with the command there, or the case silently becomes an unapproved-plan case. `straddle-test-plan-edited-after-approval` is that case on purpose.
 
-Model evals run on the existing exe.dev VM with the Claude Code login already approved there, not in GitHub CI, which stays deterministic. The approved model and judge are both `claude-opus-5-5`. The command keeps real MCP servers off, and reports stay local:
+Model evals run on the existing exe.dev VM with the Claude Code login already approved there, not in GitHub CI, which stays deterministic. The approved model and judge are both `claude-opus-5-5`. Every run uses the same base command, so results compare; only `--case`, `--allow-tools` and `--output-dir` vary. Run it from a fresh `git archive <commit>` tree of the skills commit under test for each pass, never a working copy or a tree an earlier pass used: cases with `context.history_file` write their session transcript into their case directory in that tree. The command keeps real MCP servers off, and reports stay local:
 
 ```sh
-claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-without --threshold 1.0 \
-  --model claude-opus-5-5 --judge-model claude-opus-5-5
+claude plugin eval . --no-publish --mocks record --runs 3 --ablation none --trust-plugin --scaffold \
+  --model claude-opus-5-5 --judge-model claude-opus-5-5 --threshold 1.0 -j 3
 ```
 
-Pass no `--trust-plugin`, `--allow-real-servers` or `--allow-tools` grant unless the run owner approves it.
+Run each case on its own with `--case <name>`, adding `--allow-tools` with the gated tools (`Bash`, `Write`, `Edit`) in that case's `allowed_tools`, and leaving it out when the case lists none of them. One invocation for the whole suite would need the union of every case's grants. `--ablation none` matters: under the default with/without ablation, graders that only apply with the plugin aren't scored, so a failing run can still print 1.00. Pass no `--allow-real-servers` or other `--allow-tools` grant unless the run owner approves it.
 
 The eval's OS sandbox lets a run read its own scratch directories, the plugin, and the directories on the runner's `PATH` outside the system ones, but not their parents. On the VM, Node is installed under `~/.local/node`, and `npm` is a symlink from `~/.local/node/bin` into `~/.local/node/lib`, so with only `~/.local/node/bin` on `PATH` every case's `npm test` fails with `npm: command not found` and its test evidence can't report counts (ME-916). Run the evals there with `export PATH="$HOME/.local/node/bin:$HOME/.local/node:$HOME/.local/bin:$PATH"`, which keeps `node` first and lets the sandbox read npm's `lib`.
 
 ### Eval history
 
-Each pass is recorded so the next one can be compared with it. Run the pass with `--output-dir`, then record it with the skills commit the pass ran from:
+Each pass is recorded so the next one can be compared with it. Run every case with `--output-dir <results>/<commit>/<case>` from the exported tree, then record the pass from the skills Git checkout, not the export: `eval-history` looks the commit up with `git`, and an export has no `.git`. Pass the results directory as an absolute path:
 
 ```sh
-claude plugin eval . --no-publish --mocks record --runs 3 --ablation with-without --threshold 1.0 \
-  --model claude-opus-5-5 --judge-model claude-opus-5-5 --output-dir evals/results/<commit>
-scripts/eval-history record evals/results/<commit> --commit <commit>
+# in the git-archive tree, once per case
+claude plugin eval . --no-publish --mocks record --runs 3 --ablation none --trust-plugin --scaffold \
+  --model claude-opus-5-5 --judge-model claude-opus-5-5 --threshold 1.0 -j 3 \
+  --case <case> [--allow-tools <gated tools>] --output-dir <results>/<commit>/<case>
+# in the skills checkout
+scripts/eval-history record <results>/<commit> --commit <commit>
 scripts/eval-history compare <older pass> <newer pass>
 ```
 
@@ -177,7 +180,7 @@ scripts/eval-history compare <older pass> <newer pass>
 
 `compare` takes a pass file or any part of its name that matches one pass, such as a commit. It prints each case as `pass` or `fail` in both, `fixed` or `broke` when it flipped, or `new` or `gone` when only one pass ran it, with passes over runs and the failing graders on each side, then each pass's total and the count per state. A case passes when every run passed, the `--threshold 1.0` rule.
 
-History is committed under `evals/history/`, unlike `evals/results/`. A full pass is about 75 lines and 30 KB, while its results directory holds every transcript and stays on the VM. Committed history survives the VM and is reviewed with the change it measures. One file per pass means two branches that record passes never conflict. The first full pass after ME-900, ME-902 and ME-901 merge is the first recorded baseline.
+History is committed under `evals/history/`, unlike `evals/results/`. A full pass is about 83 lines and 35 KB, while its results directory holds every transcript and stays on the VM. Committed history survives the VM and is reviewed with the change it measures. One file per pass means two branches that record passes never conflict. The first recorded baseline is `2026-10-01T094527.218Z-be5cd6c`, the full 83-case pass at `be5cd6c`, recorded from one output directory per case.
 
 ### Progress markers
 
