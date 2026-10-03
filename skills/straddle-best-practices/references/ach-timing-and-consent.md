@@ -24,7 +24,7 @@ Same-day ACH makes a payment effective the day it's sent, but its funding event 
 
 How long each step takes:
 
-- **Production, from Straddle's docs:** ACH processing takes one to three business days. The customer's bank has two business days for most returns, and ACH debits stay reversible for up to 60 days, so `paid` → `reversed` can come weeks later.
+- **Production:** a payment clears and Straddle funds the merchant within one business day. Returns run on their own clock after `paid`, from Straddle's docs: the customer's bank has two business days for most returns, and ACH debits stay reversible for up to 60 days, so `paid` → `reversed` can come weeks later.
 - **Observed in Sandbox on 2026-09-30:** `created` → `scheduled` in about 5 seconds, `pending` about 50 seconds after creation, `paid` or `failed` about 2 minutes after creation, and a reversal about 5 minutes after `pending`. Sandbox processes simulated payments about once a minute. Never use these numbers as production timeouts.
 
 Consent types and the ACH SEC codes they correspond to, from Straddle's docs:
@@ -41,7 +41,7 @@ For recurring charges, a standing authorization lets the customer approve future
 ## What your app must handle
 
 - Compute `payment_date` in US Eastern time, and show the customer when the debit happens.
-- Show `pending` as "processing" for one to three business days, and never promise same-day funds.
+- Show `pending` as "processing" and tell the customer the payment clears within one business day. Never promise same-day funds.
 - Keep a charge's goods or access reversible until the dispute window has passed, when your risk allows.
 - Set `consent_type` from how you really collected consent, and keep the evidence: the consent text, time, IP address (also sent as `device.ip_address`), and the customer's identity. It's what you upload as proof of authorization in a dispute ([returns-and-disputes.md](returns-and-disputes.md)).
 - For subscriptions and saved bank accounts, store the standing authorization and its revocation, and stop debiting after an R07 (authorization revoked).
