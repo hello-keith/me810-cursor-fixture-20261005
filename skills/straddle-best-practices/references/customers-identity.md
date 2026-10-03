@@ -42,7 +42,7 @@ Identity reason codes (I-codes, and R-codes from the reputation check such as R1
 ## What your app must handle
 
 - Wait for `verified` before you create paykeys or payments for the customer. Straddle's docs say payments for a customer or paykey under review can be held with `risk_review`. The wait governs every alternative you suggest too: no bank link or paykey and no payment of any size, such as a capped first payment, until the customer is `verified`.
-- Decide who reviews. If your team decides, build a queue for `review` customers that shows the module decisions, scores, `codes` with their `messages`, and watchlist matches, and records who decided and why before calling `setCustomerVerificationDecision`.
+- Decide who reviews. If your team decides, build a queue for `review` customers that shows the module decisions, scores, `codes` with their `messages`, and watchlist matches, and records who decided and why before calling `setCustomerVerificationDecision`, which works only while the customer's `status` is `review` (above).
 - On `rejected`, don't create paykeys or payments, and show the customer a neutral message, never the scores or codes.
 - For businesses, collect the KYB fields and representatives up front, and expect more modules in the breakdown.
 - Keep PII server-side: send `dob`, `ssn`, and `ein` from your backend, never log them, and don't store them unless you must. Use unmasked reads only when a person needs them, and keep their output out of logs.
