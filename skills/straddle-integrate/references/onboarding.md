@@ -17,7 +17,7 @@ Until Onboarding V2, API-created accounts satisfy the platform acceptance step. 
 The customer-facing path is Straddle's hosted onboarding form in an iframe. A person fills in the form. The platform's code does not complete it.
 
 - Build the iframe `src` from the current hosted onboarding guide. At the time of writing it is `https://go.straddle.com/account?...&embed=1&platform.id=<platform id>&env=sandbox&external.id=<your account external ID>`, loaded by the guide's `https://forms.straddle.com/embed.js` script. Check the guide before copying parameters.
-- `env=sandbox` for integration work. Production needs the developer's own separate decision.
+- `env=sandbox` for integration work, written literally into the iframe URL in the file that renders it, or guarded in that same file so rendering fails unless the value is `sandbox`. Never take it from an environment helper or setting that could hold another value. Production needs the developer's own separate production authorization, outside this integration.
 - An external ID is required by this kit, even though the guide marks it optional, because it is how the platform finds the account later. It is `external.id` in the guide's URL parameters and `externalId` in the build plan. Generate it server-side, store it with the platform's own record, and never put a secret or personal data in it.
 - The platform ID comes from configuration, not source code.
 - Do not use the React embed wrapper or copy `straddleio/embed` into the repository. It returns with Onboarding V2.
