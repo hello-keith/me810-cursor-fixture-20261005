@@ -13,21 +13,54 @@ EOF_1
 cat > README.md <<'EOF_2'
 # Dues
 
-Small service that collects club membership dues. Straddle Pay by Bank is being added as a direct integration.
+Small service that collects club membership dues. Members pay by check today; Straddle Pay by Bank is being added as a direct integration.
 EOF_2
 cat > dues/straddle_client.py <<'EOF_3'
 """Straddle client factory (implemented by Integrate)."""
 EOF_3
 cat > dues/payments.py <<'EOF_4'
-"""Dues charges through Straddle (implemented by Integrate)."""
+"""Dues payments. Members pay by check today; Straddle charges are added by Integrate."""
+
+
+def record_check(ledger, member_external_id, amount_cents, check_number):
+    """Record a paper check against a member. A check number is recorded once."""
+    if amount_cents <= 0:
+        raise ValueError("a check must be for a positive amount")
+    if any(entry["check_number"] == check_number for entry in ledger):
+        raise ValueError(f"check {check_number} is already recorded")
+    ledger.append({"member": member_external_id, "amount_cents": amount_cents, "check_number": check_number})
+
+
+def balance_due(ledger, member_external_id, dues_cents):
+    """What the member still owes this period after their recorded checks, never below zero."""
+    paid = sum(entry["amount_cents"] for entry in ledger if entry["member"] == member_external_id)
+    return max(dues_cents - paid, 0)
 EOF_4
+cat > tests/test_payments.py <<'EOF_6'
+import unittest
+
+from dues.payments import balance_due, record_check
+
+
+class CheckPaymentTest(unittest.TestCase):
+    def test_checks_reduce_the_balance(self):
+        ledger = []
+        record_check(ledger, "member-0001", 5000, "1042")
+        self.assertEqual(balance_due(ledger, "member-0001", 12000), 7000)
+
+    def test_a_check_number_is_recorded_once(self):
+        ledger = []
+        record_check(ledger, "member-0001", 5000, "1042")
+        with self.assertRaises(ValueError):
+            record_check(ledger, "member-0002", 5000, "1042")
+EOF_6
 cat > straddle-integration-plan.md <<'EOF_5'
 # Straddle integration plan
 
 ## Status
 
 - Plan state: Approved
-- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 1b3340328881ff7594f759bfad05bf72eb188aa503e668d9db893b99c7af60ee
+- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 4e53c8e6d6db93c4af6f63558a058bfc6696ca2fc940d1792e19215ab06195b6
 - Last reviewed: 2026-09-28
 - Repository and branch: dues, main
 - Straddle skills version: 0.1.0
@@ -52,9 +85,9 @@ Collect club membership dues by bank account. One club, one Straddle account (di
 
 - Language, framework, package manager: Python 3.12, no framework, pip with requirements.txt and a .venv
 - Test command: `python -m unittest discover -s tests -v`
-- Existing payment or bank-linking providers to keep: none
+- Existing payment or bank-linking providers to keep: check payments in dues/payments.py (`record_check`, `balance_due`), unchanged
 - Entry points where Straddle calls belong: dues/straddle_client.py, dues/payments.py
-- Existing tests to extend: none yet
+- Existing tests to extend: none; tests/test_payments.py covers check payments, stays unchanged and must keep passing
 
 ## Application flow
 
@@ -92,8 +125,8 @@ Collect club membership dues by bank account. One club, one Straddle account (di
 
 | File | Existing or new | Change | Behavior proved | Test |
 | --- | --- | --- | --- | --- |
-| dues/straddle_client.py | existing (stub) | build the SDK client from STRADDLE_API_KEY and STRADDLE_ENVIRONMENT, configuration error when either is missing | zero requests on missing configuration | tests/test_straddle.py |
-| dues/payments.py | existing (stub) | `charge_dues(client, member_external_id, paykey_token, amount_cents, ip)` creating the charge with external ID and a 10-40 character idempotency key | key and external ID on every create | tests/test_straddle.py |
+| dues/straddle_client.py | existing (stub) | `build_client()` builds the SDK client from STRADDLE_API_KEY and STRADDLE_ENVIRONMENT in the process environment, raising `ConfigurationError` (defined there) when either is missing | zero requests on missing configuration | tests/test_straddle.py |
+| dues/payments.py | existing | add `charge_dues(client, member_external_id, paykey_token, amount_cents, ip)` creating the charge with external ID and a 10-40 character idempotency key; `record_check` and `balance_due` stay as they are | key and external ID on every create; check payments unchanged | tests/test_straddle.py |
 | tests/test_straddle.py | new | unit tests with the SDK's HTTP client stubbed, no network | configuration error, idempotency key, external ID | itself |
 
 ## Future Sandbox writes
