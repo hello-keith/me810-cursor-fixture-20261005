@@ -21,7 +21,7 @@ Then find the facts yourself, before you ask anything:
 - **The repository.** Agent instructions, manifests and lockfiles, the installed Straddle SDK and its version, existing payment or bank-linking providers, the user, order, and account models, the routes and handlers where payments belong, any webhook handler, and the tests.
 - **The product model.** The best-practices reference for each branch in play, from the table below.
 
-If a reference can't be read, because it's missing or the read is denied, name it in your reply and ask for it back. Don't state its product facts from memory, and don't reopen or change an answer the developer already gave or accepted because of it.
+If a reference can't be read, because it's missing or the read is denied, name it in your reply and ask for it back. Don't state its product facts from memory, and don't reopen or change an answer the developer already gave or accepted because of it. The branches that need it wait, because their `Recommended:` reasons would have to come from memory: don't ask them this round. Add each to the Decisions log with no number, the answer `open (round N)` for the next round, and the unreadable reference in Why, and list them in your reply. Ask them in the first round after the reference can be read.
 
 A decision the repository or Setup settles goes into the Decisions log with its `file:line` or `Setup` as the source, and is not asked. The framework or language alone settles none of them. If the repository already pins a retired SDK release, such as PyPI `straddle` 0.x, the SDK decision is the move to the version in the best-practices table.
 
@@ -59,7 +59,7 @@ Two product rules are not decisions. Don't ask them:
 
 ## Asking a round
 
-- Ask every frontier question at once, in the format in [interview.md](../references/interview.md): one question for each open branch. Don't fold a branch into another branch's question, and don't hold back a branch whose prerequisites are settled. Number them `Q1`, `Q2`, and on, continuing the Decisions log's numbering across rounds.
+- Ask every frontier question at once, in the format in [interview.md](../references/interview.md): one question for each open branch. Don't fold a branch into another branch's question, and don't hold back a branch whose prerequisites are settled, unless its reference can't be read. Number them `Q1`, `Q2`, and on, continuing the Decisions log's numbering across rounds.
 - Give each question a `Recommended:` answer and a one-line reason from the repository or the reference. Read each branch's reference before you ask it, in every round. A recommendation is advice. The developer still decides.
 - Offer only what Straddle supports. When the developer wants to learn a status by reading a charge or payout again and again, explain that the polling endpoint is the supported way to pull events, and offer it. Do not plan a read loop.
 - Show a picture with [show-me.md](../../straddle-best-practices/references/show-me.md) when it settles a question faster than prose, such as a sequence of `paid` and then `reversed` after the order shipped.
@@ -72,7 +72,7 @@ Write each answer into the Decisions log as it's given, with its source and the 
 | The developer | Record |
 | --- | --- |
 | answers | their answer, source `developer`, and their reason or the one it rests on |
-| accepts your recommendations, for some questions or all of them | each recommended answer, source `developer, accepted recommendation` |
+| accepts your recommendations, for some questions or all of them | each recommended answer in full, as you gave it, source `developer, accepted recommendation`. Don't move part of it to a later question: when an accepted answer already says when to resubmit, the Refunds and resubmits branch keeps that and asks only what's still open. |
 | doesn't know | explain the choice in a sentence or two, then record your recommendation with source `assumption`, and say so. It's listed again when you summarize, for the developer to confirm or change. |
 | gives an answer that contradicts the product model or the code | nothing yet. Say what the reference or the code says, with its link or `file:line`, and ask that question again in this reply's round, with a corrected recommendation. |
 | hasn't decided, and can't answer now | `Unresolved`, and add it to Unresolved decisions with your recommendation |
