@@ -11,6 +11,8 @@ A create needs `name`, `type`, `email`, `phone` (E.164), and `device.ip_address`
 - **Individuals (KYC):** `dob` and `ssn`.
 - **Businesses (KYB):** `ein` and `legal_business_name`, plus optional `website` and `representatives` (each with `name`, `email`, `phone`).
 
+`email` is unique on the account: a create with an email another customer already has fails. Observed in Sandbox on 2026-10-01: `422`, `type` `/validation_error`, `detail` "Email '`<email>`' already exists and must be unique.", with an empty `items` list. Straddle's API reference shows the same rule in its error example, as a `400` whose item is "customer.email", "Email address must be unique." So a customer is one person, not one order or checkout.
+
 Responses mask `compliance_profile`. `getUnmaskedCustomer` returns it unmasked, but only when Straddle has enabled unmasking for the account (`allow_data_unmask` in the account settings' `configuration`). It's one of the operations that run only through the SDK or CLI after approval ([writes-and-approval.md](writes-and-approval.md)). So is `deleteCustomer`, which is for regulatory or privacy requests only and can't be undone.
 
 ## States and transitions
@@ -39,12 +41,13 @@ Identity reason codes (I-codes, and R-codes from the reputation check such as R1
 
 ## What your app must handle
 
-- Wait for `verified` before you create paykeys or payments for the customer. Straddle's docs say payments for a customer or paykey under review can be held with `risk_review`.
-- Decide who reviews. If your team decides, build a queue for `review` customers that shows the module decisions, scores, `codes` with their `messages`, and watchlist matches, and records who decided and why before calling `setCustomerVerificationDecision`.
+- Wait for `verified` before you create paykeys or payments for the customer. Straddle's docs say payments for a customer or paykey under review can be held with `risk_review`. The wait governs every alternative you suggest too: no bank link or paykey and no payment of any size, such as a capped first payment, until the customer is `verified`.
+- Decide who reviews. If your team decides, build a queue for `review` customers that shows the module decisions, scores, `codes` with their `messages`, and watchlist matches, and records who decided and why before calling `setCustomerVerificationDecision`, which works only while the customer's `status` is `review` (above).
 - On `rejected`, don't create paykeys or payments, and show the customer a neutral message, never the scores or codes.
 - For businesses, collect the KYB fields and representatives up front, and expect more modules in the breakdown.
 - Keep PII server-side: send `dob`, `ssn`, and `ein` from your backend, never log them, and don't store them unless you must. Use unmasked reads only when a person needs them, and keep their output out of logs.
-- Keep your user linked to the customer by `external_id`, and store the customer `id`.
+- Keep one customer per user of your app, keyed by your app's own user ID. Set the customer's `external_id` to that ID when you create it, store the customer `id` against the user, and reuse that customer when the user pays again. To find a customer whose `id` you didn't store, use `listCustomers` filtered by `external_id`.
+- Never create a customer per checkout or order, because a customer's email is unique on the account (above). Don't key a customer on an email typed at checkout when there's no app user behind it. How your app identifies its users, by a login, an account, or its own guest record, is your app's decision, and if its own user ID is an email, that's its call.
 
 ## Events and Sandbox outcomes
 

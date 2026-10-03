@@ -33,7 +33,7 @@ Test charge: <charge ID> | none
 - Environment: sandbox, <base URL> | configuration error: <what is missing>
 - Target: Straddle Sandbox | offline synthetic localhost <base URL>: offline synthetic proof, not live Straddle Sandbox proof
 - SDK: <package> <version>. CLI: <version or not used>
-- Notification path: <webhook | FIFO | polling endpoint>
+- Notification path: <webhook | FIFO | polling endpoint>, <what it receives with, from Endpoint types: verified deliveries, FIFO batches, or the polling consumer ID and committed offsets>, wait limit ten minutes
 - Sandbox write approval: one-time | standing (<client and where it saved the rule>) | none
 
 ### Offline checks
@@ -67,7 +67,7 @@ For a paykey, the resources table records its ID and status, never the token.
 
 Write "None" for empty sections. Do not describe a scenario that did not run as passed. For an offline synthetic target, the server-side resources section lists synthetic upstream records only, and notification and lifecycle scenarios such as `paid`, the `R01` return, or delivered events are `not run: offline synthetic target`.
 
-Tell the developer the result, the path, and what's next in two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md), leading with what passed and naming what didn't run and why. Then print:
+Tell the developer the result, the path, and what's next in two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md), leading with what passed and naming what didn't run and why. When a lifecycle scenario didn't run, also name the notification path its transitions must arrive through, what that path receives them with ([Endpoint types](../../straddle-best-practices/references/receiving-webhooks.md#endpoint-types)), such as the polling endpoint's consumer ID and committed offsets, and the ten-minute wait limit. Then print:
 
 ```markdown
 ## Verify before merging

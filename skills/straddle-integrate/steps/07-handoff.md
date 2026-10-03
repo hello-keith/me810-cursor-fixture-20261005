@@ -52,6 +52,8 @@ Sandbox write approval: one-time | standing (<client and where it saved the rule
 ## Next
 ```
 
+In `## Next` and in the handoff line's report, state routes by the same rules as the run: each of the fourteen operations in [writes-and-approval.md](../../straddle-best-practices/references/writes-and-approval.md), every `DELETE` included, runs only through the SDK or CLI after a preview, and while configuration is unconfirmed, neither offers a Straddle API request, not even a permitted read through `execute-request`.
+
 Sanitize the file the way Test sanitizes evidence: IDs, external IDs, idempotency keys, statuses, and HTTP status codes are fine. Never write a key, signing secret, token, paykey value, unmasked data, or personal data.
 
 End the reply with:
