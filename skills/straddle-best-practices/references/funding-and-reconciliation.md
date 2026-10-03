@@ -19,9 +19,9 @@ A funding event has `id`, `amount` (cents), `payment_count`, `transfer_date`, `t
 
 ## States and transitions
 
-A funding event uses the payment statuses: typically `created`, then `pending` while the transfer is in flight, then `paid`. Its timing comes from the account's `funding_time`, which Straddle sets in the account settings (`immediate`, `next_day`, `one_day`, `two_day`, `three_day`, `four_day`, or `five_day`). Straddle's docs give one business day as the default:
+A funding event uses the payment statuses: typically `created`, then `pending` while the transfer is in flight, then `paid`. Its timing comes from the account's `funding_time`, which Straddle sets in the account settings (`immediate`, `next_day`, `one_day`, `two_day`, `three_day`, `four_day`, or `five_day`). Straddle funds in 24 hours by default, so the merchant is funded the next day:
 
-- Charges are funded after they settle, so a `charge_deposit` follows `paid`, and weekends and holidays push it later.
+- Charges are funded after they settle, so a `charge_deposit` follows `paid`. Straddle's docs add that weekends and holidays push it later.
 - Payouts are funded before they're sent: the `payout_withdrawal` comes first.
 - A return makes its own funding event later (`charge_reversal` or `payout_return`). It never edits the original deposit.
 
