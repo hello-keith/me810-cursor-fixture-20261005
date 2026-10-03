@@ -1,7 +1,7 @@
 ---
 name: interview
 description: Interview the developer in rounds until you share one understanding of the integration, and sharpen the terms you both use as you go.
-source: mattpocock/skills at d81f3a1 (MIT, Copyright (c) 2026 Matt Pocock; notice in third-party-licenses.md beside this file), the grilling skill (skills/productivity/grilling/SKILL.md) and the domain-modeling skill (skills/engineering/domain-modeling/SKILL.md) that its grill-with-docs skill runs together. Straddle's changes. Rounds use "Q1 … Recommended: …" with no emoji. The agent reads files itself instead of dispatching sub-agents. The glossary and the decision log live in straddle-integration-plan.md, not in GLOSSARY.md or docs/adr/ in the developer's repository, so ADRs and multi-context glossaries are dropped. Loaded by straddle-plan step 1; not a standalone skill.
+source: mattpocock/skills at d81f3a1 (MIT, Copyright (c) 2026 Matt Pocock; notice in third-party-licenses.md beside this file), the grilling skill (skills/productivity/grilling/SKILL.md) and the domain-modeling skill (skills/engineering/domain-modeling/SKILL.md) that its grill-with-docs skill runs together. Straddle's changes. Rounds use "Q<n> … Recommended: …", numbered across rounds, with no emoji. The agent reads files itself instead of dispatching sub-agents. The glossary and the decision log live in straddle-integration-plan.md, not in GLOSSARY.md or docs/adr/ in the developer's repository, so ADRs and multi-context glossaries are dropped. Loaded by straddle-plan step 1; not a standalone skill.
 ---
 
 # Interview
@@ -12,16 +12,16 @@ Interview the developer relentlessly until you reach a shared understanding. Map
 
 Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the developer's answers before the next round.
 
-Format a round like so:
+Format a round like so, where `n` continues the numbering of earlier rounds (after `Q4` comes `Q5`):
 
 ```text
-**Q1. <question title>**: <question body, might be multiple paragraphs, including multiple choices>
+**Q<n>. <question title>**: <question body, might be multiple paragraphs, including multiple choices>
 
 Recommended: <your recommended answer>, because <one-line reason>.
 
 ---
 
-**Q2. <question title>**: <question body, might be multiple paragraphs, including multiple choices>
+**Q<n+1>. <question title>**: <question body, might be multiple paragraphs, including multiple choices>
 
 Recommended: <your recommended answer>, because <one-line reason>.
 ```
