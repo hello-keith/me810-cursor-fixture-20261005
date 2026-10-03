@@ -21,7 +21,7 @@ Then find the facts yourself, before you ask anything:
 - **The repository.** Agent instructions, manifests and lockfiles, the installed Straddle SDK and its version, existing payment or bank-linking providers, the user, order, and account models, the routes and handlers where payments belong, any webhook handler, and the tests.
 - **The product model.** The best-practices reference for each branch in play, from the table below.
 
-If a reference can't be read, because it's missing or the read is denied, name it in your reply and ask for it back. Don't state its product facts from memory, and don't reopen or change an answer the developer already gave or accepted because of it.
+If a reference can't be read, because it's missing or the read is denied, name it in your reply and ask for it back. Don't state its product facts from memory, and don't reopen or change an answer the developer already gave or accepted because of it. Until you can read it, ask its branch from the repository and from what this step's design tree and product rules say, and nothing more: no dashboard features, timings, or statuses an operation needs.
 
 A decision the repository or Setup settles goes into the Decisions log with its `file:line` or `Setup` as the source, and is not asked. The framework or language alone settles none of them. If the repository already pins a retired SDK release, such as PyPI `straddle` 0.x, the SDK decision is the move to the version in the best-practices table.
 
@@ -72,7 +72,7 @@ Write each answer into the Decisions log as it's given, with its source and the 
 | The developer | Record |
 | --- | --- |
 | answers | their answer, source `developer`, and their reason or the one it rests on |
-| accepts your recommendations, for some questions or all of them | each recommended answer, source `developer, accepted recommendation` |
+| accepts your recommendations, for some questions or all of them | each recommended answer in full, as you gave it, source `developer, accepted recommendation`. Don't move part of it to a later question: when an accepted answer already says when to resubmit, the Refunds and resubmits branch keeps that and asks only what's still open. |
 | doesn't know | explain the choice in a sentence or two, then record your recommendation with source `assumption`, and say so. It's listed again when you summarize, for the developer to confirm or change. |
 | gives an answer that contradicts the product model or the code | nothing yet. Say what the reference or the code says, with its link or `file:line`, and ask that question again in this reply's round, with a corrected recommendation. |
 | hasn't decided, and can't answer now | `Unresolved`, and add it to Unresolved decisions with your recommendation |
