@@ -59,7 +59,7 @@ Two product rules are not decisions. Don't ask them:
 
 ## Asking a round
 
-- Ask every frontier question at once, in the format in [interview.md](../references/interview.md): one question for each open branch. Don't fold a branch into another branch's question, and don't hold back a branch whose prerequisites are settled, unless its reference can't be read. Number them `Q1`, `Q2`, and on, continuing the Decisions log's numbering across rounds.
+- Ask every frontier question at once, in the format in [interview.md](../references/interview.md): one question for each open branch. Don't fold a branch into another branch's question, and don't hold back a branch whose prerequisites are settled, unless its reference can't be read. Number them on from the highest question number in the Decisions log, starting at `Q1` only when it has none, and give each question the same number in your reply as in its Decisions log row.
 - Give each question a `Recommended:` answer and a one-line reason from the repository or the reference. Read each branch's reference before you ask it, in every round. A recommendation is advice. The developer still decides.
 - Offer only what Straddle supports. When the developer wants to learn a status by reading a charge or payout again and again, explain that the polling endpoint is the supported way to pull events, and offer it. Do not plan a read loop.
 - Show a picture with [show-me.md](../../straddle-best-practices/references/show-me.md) when it settles a question faster than prose, such as a sequence of `paid` and then `reversed` after the order shipped.
