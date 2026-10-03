@@ -47,7 +47,7 @@ Identity reason codes (I-codes, and R-codes from the reputation check such as R1
 - For businesses, collect the KYB fields and representatives up front, and expect more modules in the breakdown.
 - Keep PII server-side: send `dob`, `ssn`, and `ein` from your backend, never log them, and don't store them unless you must. Use unmasked reads only when a person needs them, and keep their output out of logs.
 - Keep one customer per user of your app, keyed by your app's own user ID. Set the customer's `external_id` to that ID when you create it, store the customer `id` against the user, and reuse that customer when the user pays again. To find a customer whose `id` you didn't store, use `listCustomers` filtered by `external_id`.
-- Never create a customer per checkout or order, and don't key one only on an email typed at checkout. A customer's email is unique on the account, so a second create with an email that already has a customer fails with `422`. How your app identifies its users, by a login, an account, or its own guest record, is your app's decision.
+- Never create a customer per checkout or order, because a customer's email is unique on the account (above). Don't key a customer on an email typed at checkout when there's no app user behind it. How your app identifies its users, by a login, an account, or its own guest record, is your app's decision, and if its own user ID is an email, that's its call.
 
 ## Events and Sandbox outcomes
 
