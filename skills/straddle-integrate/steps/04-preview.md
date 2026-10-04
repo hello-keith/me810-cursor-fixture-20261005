@@ -16,7 +16,7 @@ When step 1 recorded a **configuration error**, including an offline synthetic l
 
 ## Build the preview
 
-List every intended write in execution order, including every organization and account to reuse or create, and every excluded read (unmask or reveal) the approved plan lists. Write exact values, not placeholders, except for IDs that only a previous create in this run can return. Name those by the row they come from.
+List every intended write in execution order, including every organization and account to reuse or create, and every excluded read (unmask or reveal) the approved plan lists. Write exact values, not placeholders, except for IDs and paykey tokens that only an earlier row in this run can return. Name those by the row they come from.
 
 ```markdown
 ## Straddle Sandbox preview
@@ -43,7 +43,7 @@ Rules for the table:
 - **Idempotency key.** Write the key you will pass on every create. It must be 10 to 40 characters and derived as in [Idempotency by route](../references/execution-routes.md#idempotency-by-route). A CLI row is allowed only when the installed CLI lists `--idempotency-key` for that create. Otherwise the row uses the SDK. Never infer the key from `--dry-run` output, because the dry run does not print it.
 - **Paykey tokens.** A charge or payout row that uses a paykey created by an earlier row takes the full token from that row's `data.paykey`, never its `data.id`. It needs no other row. Name that row, never the token. Only a payment on an existing paykey whose token the app didn't keep depends on a `revealPaykey` or `getUnmaskedPaykey` row, an excluded operation (SDK or CLI) needing approval. See [Paykey tokens for charges and payouts](../references/execution-routes.md#paykey-tokens-for-charges-and-payouts).
 - **Sandbox outcomes.** Include the `config.sandbox_outcome` values the plan tests, such as `verified`, `active`, `paid`, and `reversed_insufficient_funds`.
-- **Payload.** Use synthetic, non-sensitive data. No real names, bank numbers, or keys. Write each row's payload in full, even where it repeats another row's, never "same as #6 except …". Only an ID that an earlier row returns is named by that row.
+- **Payload.** Use synthetic, non-sensitive data. No real names, bank numbers, or keys. Write each row's payload in full, even where it repeats another row's, never "same as #6 except …". Only an ID or a paykey token that an earlier row returns is named by that row.
 - **Offline synthetic target.** When step 1 recorded one, write the exact localhost base URL in place of the Sandbox URL, and list no API MCP verification reads, per [offline-synthetic-target.md](../references/offline-synthetic-target.md). An approval covers that target only. Switching between it and Straddle Sandbox changes the target and needs a new preview.
 
 When step 1 recorded **configured** and a row uses the CLI, run it with `--dry-run --agent` and show the result under the table. A dry run is not a substitute for the preview.
