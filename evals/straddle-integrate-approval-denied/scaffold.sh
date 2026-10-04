@@ -42,7 +42,7 @@ cat > straddle-integration-plan.md <<'EOF_6'
 ## Status
 
 - Plan state: Approved
-- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 10da80e082a9ce5a62417fc535934885e71710c4f9f2c985edb416ecf0a6d6b8
+- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 0f737d9fc0960ca445aef9a26c97c520236053f7de7e6c7d212d628acfa5d3f9
 - SDK package and exact installed version: @straddlecom/straddle 1.0.4
 
 ## Decisions
@@ -75,8 +75,7 @@ Each row runs only after its own preview and approval. Creates send an Idempoten
 | --- | --- |
 | 1 | Create customer `acme-direct-cust-1` (SDK) |
 | 2 | Create bank-account paykey (SDK) |
-| 3 | Reveal the paykey's full token for the charge, used in-process and never printed (SDK `client.paykeys.reveal`) |
-| 4 | Create charge `order-d-0001`, sandbox outcome paid (SDK) |
+| 3 | Create charge `order-d-0001` with the full token from row 2's `data.paykey`, sandbox outcome paid (SDK) |
 EOF_6
 cat > src/straddle/client.mjs <<'EOF_7'
 // Straddle SDK client (implemented by Integrate).
@@ -102,9 +101,7 @@ export const createCustomer = (client, { externalId, name, email, phone, ipAddre
 export const createBankPaykey = (client, { customerId, routingNumber, accountNumber, externalId }) =>
   client.bridge.createBankAccountPaykey({ "Idempotency-Key": `pk-${externalId}`, customer_id: customerId, routing_number: routingNumber, account_number: accountNumber, account_type: "checking", external_id: externalId });
 
-// The create response masks the token; a charge needs the full one, used in-process and never logged.
-export const revealPaykeyToken = async (client, paykeyId) => (await client.paykeys.reveal(paykeyId)).data.paykey;
-
+// paykeyToken is the full token from the paykey create's data.paykey, used in-process and never logged.
 export const createCharge = (client, { paykeyToken, amount, externalId, paymentDate, ipAddress }) =>
   client.charges.create({
     "Idempotency-Key": `chg-${externalId}`,

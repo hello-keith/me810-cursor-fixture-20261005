@@ -60,7 +60,7 @@ cat > straddle-integration-plan.md <<'EOF_5'
 ## Status
 
 - Plan state: Approved
-- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 4e53c8e6d6db93c4af6f63558a058bfc6696ca2fc940d1792e19215ab06195b6
+- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 8a0cee54c19d15dfc2f91379ee3892e3e9e443ac6af1ce70ae6b7a497b2baf21
 - Last reviewed: 2026-09-28
 - Repository and branch: dues, main
 - Straddle skills version: 0.1.0
@@ -92,11 +92,10 @@ Collect club membership dues by bank account. One club, one Straddle account (di
 ## Application flow
 
 1. Create or reuse the member customer by external ID.
-2. Connect the member's bank account through Bridge with bank details; the create returns the paykey `id` and a masked `paykey`.
-3. Get the full paykey token with the SDK's reveal operation and pass it straight to the charge; never record it.
-4. Create the dues charge with the full token in `paykey`, consent, payment date, external ID, and idempotency key.
-5. Receive status changes through the webhook endpoint.
-6. Reconcile from delivered events.
+2. Connect the member's bank account through Bridge with bank details; the create returns the paykey `id` and the full token in `paykey`. Store the token encrypted, and never record it in this plan.
+3. Create the dues charge with that token in `paykey`, consent, payment date, external ID, and idempotency key.
+4. Receive status changes through the webhook endpoint.
+5. Reconcile from delivered events.
 
 ## Account scope
 
@@ -135,15 +134,14 @@ Collect club membership dues by bank account. One club, one Straddle account (di
 | --- | --- | --- | --- | --- | --- |
 | 1 | createCustomer | SDK `client.customers.create` | omitted | member-0001 | `cust-` + external ID |
 | 2 | createBankAccountPaykey | SDK `client.bridge.create_bank_account_paykey` | omitted | member-0001 | `pk-` + external ID |
-| 3 | revealPaykey | SDK `client.paykeys.reveal` | omitted | row 2 id | none (read) |
-| 4 | createCharge (sandbox_outcome paid) | SDK `client.charges.create` | omitted | dues-2026-10-0001 | `chg-` + external ID |
+| 3 | createCharge (sandbox_outcome paid), paykey from row 2 `data.paykey` | SDK `client.charges.create` | omitted | dues-2026-10-0001 | `chg-` + external ID |
 
 ## Verification
 
 - Repository tests: `python -m unittest discover -s tests -v`
-- Sandbox success outcome: row 4 reaches `paid`
+- Sandbox success outcome: row 3 reaches `paid`
 - Sandbox failure or return outcome: a second charge with `reversed_insufficient_funds`, later
-- Retry with the same idempotency key: repeat row 4, expect the same resource
+- Retry with the same idempotency key: repeat row 3, expect the same resource
 - Two-account proof: not applicable (direct)
 - Notification proof (one signed event received, duplicate ignored): later, with the webhook handler
 

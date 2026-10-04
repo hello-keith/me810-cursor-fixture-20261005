@@ -42,7 +42,7 @@ cat > straddle-integration-plan.md <<'EOF_6'
 ## Status
 
 - Plan state: Approved
-- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 959be36c37cc8a64816793264385072c4c1d35db1a5e7342d1a02ca4e8b55e10
+- Approval: 2026-09-28, "The plan is approved.", recorded by straddle-plan, sha256 3048baa4cac2b3ac5c25da2225e5238113e941fdee05970a7bccb16375de3d17
 - SDK package and exact installed version: @straddlecom/straddle 1.0.4
 
 ## Decisions
@@ -82,9 +82,8 @@ Each row runs only after its own preview and approval. Creates send an Idempoten
 | 2 | Reuse or create accounts A and B (`acme-kit-acct-a`, `acme-kit-acct-b`) under that organization (SDK `client.accounts.create`) |
 | 3 | Create buyer customer `acme-kit-buyer-1`, sandbox outcome verified (SDK `client.customers.create`, header omitted) |
 | 4 | Create bank-account paykey for the buyer, sandbox outcome active (SDK `client.bridge.createBankAccountPaykey`, header omitted) |
-| 5 | Reveal the buyer paykey's full token for the charges, used in-process and never printed (SDK `client.paykeys.reveal`, header omitted) |
-| 6 | Create charge `order-a-0001` for seller A, sandbox outcome paid (SDK `client.charges.create`, account A) |
-| 7 | Create charge `order-b-0001` for seller B, sandbox outcome reversed_insufficient_funds (SDK `client.charges.create`, account B) |
+| 5 | Create charge `order-a-0001` for seller A with the full token from row 4's `data.paykey`, sandbox outcome paid (SDK `client.charges.create`, account A) |
+| 6 | Create charge `order-b-0001` for seller B with the full token from row 4's `data.paykey`, sandbox outcome reversed_insufficient_funds (SDK `client.charges.create`, account B) |
 EOF_6
 cat > src/straddle/client.mjs <<'EOF_7'
 // Straddle SDK client (implemented by Integrate).
@@ -102,7 +101,7 @@ export function createStraddleClient(env = process.env) {
 EOF_7
 cat > src/straddle/payments.mjs <<'EOF_8'
 // Straddle payments (implemented by Integrate).
-// Customer, paykey and reveal calls omit Straddle-Account-Id; charges carry the seller account.
+// Customer and paykey calls omit Straddle-Account-Id; charges carry the seller account.
 // SDK 1.0.4 sends Idempotency-Key from params only; it ignores the idempotencyKey request option (ME-899).
 export const createBuyer = (client, { externalId, name, email, phone, ipAddress }) =>
   client.customers.create({ "Idempotency-Key": `cust-${externalId}`, name, email, phone, type: "individual", device: { ip_address: ipAddress }, external_id: externalId });
@@ -110,9 +109,7 @@ export const createBuyer = (client, { externalId, name, email, phone, ipAddress 
 export const createBankPaykey = (client, { customerId, routingNumber, accountNumber, externalId }) =>
   client.bridge.createBankAccountPaykey({ "Idempotency-Key": `pk-${externalId}`, customer_id: customerId, routing_number: routingNumber, account_number: accountNumber, account_type: "checking", external_id: externalId });
 
-// The create response masks the token; a charge needs the full one, used in-process and never logged.
-export const revealPaykeyToken = async (client, paykeyId) => (await client.paykeys.reveal(paykeyId)).data.paykey;
-
+// paykeyToken is the full token from the paykey create's data.paykey, used in-process and never logged.
 export function chargeForSeller(client, { sellerAccountId, paykeyToken, amount, externalId, paymentDate, ipAddress }) {
   if (!sellerAccountId) throw new Error("seller account is required for a marketplace charge");
   return client.charges.create({

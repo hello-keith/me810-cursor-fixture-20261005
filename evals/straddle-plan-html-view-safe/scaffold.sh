@@ -87,11 +87,10 @@ Buyers pay marketplace sellers by bank (Pay by Bank) at checkout, alongside the 
 ## Application flow
 
 1. Create or reuse the buyer customer by external ID: `client.customers.create` (`node_modules/@straddlecom/straddle/dist/esm/resources/customers/customers.d.ts:97`).
-2. Connect the buyer's bank account through Bridge: `client.bridge.createBankAccountPaykey` (`resources/bridge.d.ts:23`). The create returns the paykey `id` and a masked `paykey`.
-3. Get the full paykey token for the charge with `client.paykeys.reveal` (`resources/paykeys/paykeys.d.ts:68`), in process. Never record the token in this plan.
-4. Create the charge on the seller account with the full token in `paykey`, plus consent, payment date, external ID, and idempotency key: `client.charges.create` (`resources/charges.d.ts:67`).
-5. Receive status changes through the FIFO endpoint.
-6. Reconcile from delivered funding events.
+2. Connect the buyer's bank account through Bridge: `client.bridge.createBankAccountPaykey` (`resources/bridge.d.ts:23`). The create returns the paykey `id` and the full token in `paykey`. Store the token encrypted, and never record it in this plan.
+3. Create the charge on the seller account with that token in `paykey`, plus consent, payment date, external ID, and idempotency key: `client.charges.create` (`resources/charges.d.ts:67`).
+4. Receive status changes through the FIFO endpoint.
+5. Reconcile from delivered funding events.
 
 ## Account scope
 
@@ -99,7 +98,7 @@ Buyers pay marketplace sellers by bank (Pay by Bank) at checkout, alongside the 
 | --- | --- | --- |
 | Organization and account management | omitted | best-practices account-scope reference |
 | Customer create | omitted | best-practices account-scope reference |
-| Bridge paykey create, paykey reveal | omitted | best-practices account-scope reference |
+| Bridge paykey create | omitted | best-practices account-scope reference |
 | Charge create, charge release | required: the seller account | best-practices account-scope reference |
 | Funding event simulation | sent: the selected seller account | best-practices account-scope reference |
 
@@ -166,7 +165,7 @@ Only these files may change.
 
 ## Future Sandbox writes
 
-Each row runs later, in Integrate or Test, only after its own preview and approval. Creates send an Idempotency-Key and an external ID.
+Each row runs later, in Integrate or Test, only after its own preview and approval. A charge row takes the full token from the paykey create row's `data.paykey`. Creates send an Idempotency-Key and an external ID.
 
 | Order | Operation | Executing tool | Account | External ID | Idempotency key source |
 | --- | --- | --- | --- | --- | --- |
@@ -174,12 +173,11 @@ Each row runs later, in Integrate or Test, only after its own preview and approv
 | 2 | Reuse or create accounts A and B under that organization | SDK `client.accounts.create` | omitted (account management) | `acme-kit-acct-a`, `acme-kit-acct-b` | `acct-` + external ID |
 | 3 | Create buyer customer, sandbox outcome `verified` | SDK `client.customers.create` | omitted | `acme-kit-buyer-1` | `cust-` + external ID |
 | 4 | Create bank-account paykey for the buyer, sandbox outcome `active` | SDK `client.bridge.createBankAccountPaykey` | omitted | `acme-kit-buyer-1-bank` | `pk-` + external ID |
-| 5 | Reveal the buyer paykey's full token for the charges, in process and never printed | SDK `client.paykeys.reveal` | omitted | none (a read) | none (a read) |
-| 6 | Create charge for seller A, sandbox outcome `paid` | SDK `client.charges.create` | account A | `order-a-0001` | `chg-` + external ID |
-| 7 | Create charge for seller B, sandbox outcome `reversed_insufficient_funds` | SDK `client.charges.create` | account B | `order-b-0001` | `chg-` + external ID |
-| 8 | Create charge for seller A, sandbox outcome `failed_insufficient_funds` | SDK `client.charges.create` | account A | `order-a-0002` | `chg-` + external ID |
-| 9 | Create charge for seller B, sandbox outcome `on_hold_daily_limit`, then release it | SDK `client.charges.create`, then `client.charges.release` (`resources/charges.d.ts:95`) | account B | `order-b-0002` | `chg-` + external ID; the release is an update |
-| 10 | Simulate the charges funding sweep for account B, after `order-b-0001` is `pending` | SDK `client.fundingEvents.simulate` | account B | none (a simulation) | `sim-acme-kit-acct-b` |
+| 5 | Create charge for seller A, sandbox outcome `paid` | SDK `client.charges.create` | account A | `order-a-0001` | `chg-` + external ID |
+| 6 | Create charge for seller B, sandbox outcome `reversed_insufficient_funds` | SDK `client.charges.create` | account B | `order-b-0001` | `chg-` + external ID |
+| 7 | Create charge for seller A, sandbox outcome `failed_insufficient_funds` | SDK `client.charges.create` | account A | `order-a-0002` | `chg-` + external ID |
+| 8 | Create charge for seller B, sandbox outcome `on_hold_daily_limit`, then release it | SDK `client.charges.create`, then `client.charges.release` (`resources/charges.d.ts:95`) | account B | `order-b-0002` | `chg-` + external ID; the release is an update |
+| 9 | Simulate the charges funding sweep for account B, after `order-b-0001` is `pending` | SDK `client.fundingEvents.simulate` | account B | none (a simulation) | `sim-acme-kit-acct-b` |
 
 ## Verification
 
