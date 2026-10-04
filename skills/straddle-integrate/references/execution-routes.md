@@ -31,7 +31,9 @@ Run only operations in the public API contract, as [writes-and-approval.md](../.
 
 ## Paykey tokens for charges and payouts
 
-Follow the contract's field meanings, and never guess a value's kind from its shape. In API contract 1.0.4, a charge's or payout's `paykey` request field is "the paykey token that identifies the customer's bank account". It is not the paykey's resource `id`. A Bridge paykey create returns the full token in `data.paykey`. `GET /v1/paykeys/{id}` and list responses return it masked.
+Follow the contract's field meanings, and never guess a value's kind from its shape. In API contract 1.0.4, a charge's or payout's `paykey` request field is "the paykey token that identifies the customer's bank account". It is not the paykey's resource `id`.
+
+A Bridge paykey create returns the full token in `data.paykey`. `GET /v1/paykeys/{id}` and list responses return it masked.
 
 - **ID fields take IDs.** Fields such as `customer_id` and `organization_id`, and the ID in a path like `/v1/paykeys/{id}/reveal`, take `data.id` from the earlier create response.
 - **The payment `paykey` field takes the full token.** For a paykey created earlier in the same run, pass the create response's `data.paykey`, never its `data.id`. No reveal is needed. For an existing paykey whose token the app didn't keep, get the token with `revealPaykey` or `getUnmaskedPaykey`. Both are excluded operations, so they run through the SDK or CLI only, as their own preview rows with approval. Never pass the paykey's `id` or a masked value.
