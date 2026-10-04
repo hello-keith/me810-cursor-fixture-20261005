@@ -1,6 +1,7 @@
 // Fixture-owned behavior check for the dues service, compiled into the workspace's test project by the env-fixture
 // Stop hook. The check-payment behavior existed before Integrate and must still work; the Straddle client factory and
-// ChargeDues are the plan's change. Every HTTP request the SDK makes goes through CaptureHandler and is answered locally.
+// ChargeDues are the plan's change. The charge checks use the client the app's factory builds, with only its HttpClient
+// swapped for CaptureHandler, so every HTTP request the SDK makes is answered locally.
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -53,22 +54,22 @@ public class FixtureVerifyExistingCheckPayments
 [Collection("FixtureVerify")]
 public class FixtureVerifyStraddleCharges
 {
+    // BEARER and STRADDLE_BASE_URL are the SDK's own defaults; clearing them means only the factory can supply the key
+    // and the base URL.
     static void SetConfiguration(string? key, string? environment)
     {
+        Environment.SetEnvironmentVariable("BEARER", null);
+        Environment.SetEnvironmentVariable("STRADDLE_BASE_URL", null);
         Environment.SetEnvironmentVariable("STRADDLE_API_KEY", key);
         Environment.SetEnvironmentVariable("STRADDLE_ENVIRONMENT", environment);
     }
 
     static async Task<(HttpRequestMessage Request, JsonElement Body)> Charge(string member)
     {
+        SetConfiguration("synthetic-verify-key", "sandbox");
         var handler = new CaptureHandler();
-        var client = new StraddleClient
-        {
-            Bearer = "synthetic-verify-key",
-            BaseUrl = "https://sandbox.straddle.com",
-            MaxRetries = 0,
-            HttpClient = new HttpClient(handler),
-        };
+        var client = StraddleClientFactory.Build()
+            .WithOptions(options => options with { HttpClient = new HttpClient(handler), MaxRetries = 0 });
         var charge = typeof(Payments).GetMethod("ChargeDues", BindingFlags.Public | BindingFlags.Static)!;
         var result = charge.Invoke(null, new object[] { client, member, "paykey-token-full-7c1d", 4500, "192.0.2.10" });
         if (result is Task task)
@@ -86,15 +87,14 @@ public class FixtureVerifyStraddleCharges
             SetConfiguration(key, environment);
             Assert.Throws<StraddleConfigurationException>(() => StraddleClientFactory.Build());
         }
-        SetConfiguration("synthetic-verify-key", "sandbox");
-        Assert.IsType<StraddleClient>(StraddleClientFactory.Build());
     }
 
     [Fact]
-    public async Task ChargeIsCreatedWithTheTokenExternalIdAndKey()
+    public async Task ChargeIsSentToSandboxWithTheApiKeyTokenExternalIdAndIdempotencyKey()
     {
         var (request, body) = await Charge("member-0001");
-        Assert.Equal(("POST", "/v1/charges"), (request.Method.Method, request.RequestUri!.AbsolutePath));
+        Assert.Equal(("POST", "https://sandbox.straddle.com/v1/charges"), (request.Method.Method, request.RequestUri!.AbsoluteUri));
+        Assert.Equal("Bearer synthetic-verify-key", request.Headers.GetValues("Authorization").Single());
         Assert.Equal("paykey-token-full-7c1d", body.GetProperty("paykey").GetString());
         Assert.Equal(4500, body.GetProperty("amount").GetInt32());
         Assert.False(string.IsNullOrEmpty(body.GetProperty("external_id").GetString()));
