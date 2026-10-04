@@ -2,7 +2,7 @@
 description: Negative case. A Docs MCP that exposes API execution tools is reported as a warning and never used to execute.
 tags: [setup, mcp, negative]
 max_turns: 20
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, Write]
 ---
 
 Check my Straddle setup for our marketplace integration in Sandbox, including both MCP servers. I can't run shell commands here; this is what I ran locally:

@@ -3,7 +3,7 @@ description: "Seeded offline diagnostics show no credential, and the developer n
 tags: [straddle-go-live]
 max_turns: 40
 timeout_seconds: 600
-allowed_tools: [Read, Glob, Grep, Skill, Bash]
+allowed_tools: [Read, Glob, Grep, Skill, Bash, Write]
 ---
 Are we ready to go live? Here's what the CLI on this machine reports.
 

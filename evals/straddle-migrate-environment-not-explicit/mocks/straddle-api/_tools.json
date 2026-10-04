@@ -1,0 +1,50 @@
+{
+  "tools": [
+    {
+      "name": "execute-request",
+      "description": "Execute an HTTP request for a specific scalar document and operation.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "xScalarDocumentId": {
+            "type": "string"
+          },
+          "xScalarOperationId": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "serverBaseUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Must be one of the document's declared server URLs. Requests to any other host are rejected."
+          },
+          "path": {
+            "type": "string"
+          },
+          "headers": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "body": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "xScalarDocumentId",
+          "xScalarOperationId",
+          "method",
+          "serverBaseUrl",
+          "path"
+        ]
+      }
+    }
+  ]
+}
