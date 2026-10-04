@@ -101,7 +101,7 @@ export const createCustomer = (client, { externalId, name, email, phone, ipAddre
 export const createBankPaykey = (client, { customerId, routingNumber, accountNumber, externalId }) =>
   client.bridge.createBankAccountPaykey({ "Idempotency-Key": `pk-${externalId}`, customer_id: customerId, routing_number: routingNumber, account_number: accountNumber, account_type: "checking", external_id: externalId });
 
-// paykeyToken is the full token from the paykey create's data.paykey, used in-process and never logged.
+// Never log paykeyToken.
 export const createCharge = (client, { paykeyToken, amount, externalId, paymentDate, ipAddress }) =>
   client.charges.create({
     "Idempotency-Key": `chg-${externalId}`,

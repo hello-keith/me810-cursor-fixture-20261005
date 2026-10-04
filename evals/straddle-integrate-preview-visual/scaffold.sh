@@ -109,7 +109,7 @@ export const createBuyer = (client, { externalId, name, email, phone, ipAddress 
 export const createBankPaykey = (client, { customerId, routingNumber, accountNumber, externalId }) =>
   client.bridge.createBankAccountPaykey({ "Idempotency-Key": `pk-${externalId}`, customer_id: customerId, routing_number: routingNumber, account_number: accountNumber, account_type: "checking", external_id: externalId });
 
-// paykeyToken is the full token from the paykey create's data.paykey, used in-process and never logged.
+// Never log paykeyToken.
 export function chargeForSeller(client, { sellerAccountId, paykeyToken, amount, externalId, paymentDate, ipAddress }) {
   if (!sellerAccountId) throw new Error("seller account is required for a marketplace charge");
   return client.charges.create({
