@@ -50,9 +50,23 @@ Each run prints one JSON line: `case`, `run`, `verdict` (the original PASS, FAIL
 
 Traces live in each run's temporary directory, so a pass has to keep them (`--keep-temp`) or copy them before cleanup. Without them every run reports `trace-missing`.
 
+## Rejudging trace graders on the whole trace
+
+A `focus: trace` grader's native PASS rests on a window of at most 24 events, and runs reach 211. Five graders use that focus: `plan-approval-show-me/view-matches-plan`, `integrate-python-approved-plan/proceeds-with-python-sdk`, `plan-asks-decisions/asks-before-guessing`, `plan-guest-checkout-identity/identity-mapping` and `test-dispute-own-account/dispute-own-account`. Run this after every batch, on every exported run of those graders:
+
+```sh
+CLAUDE_BIN=<claude binary> scripts/eval-trace-rejudge <export dir> --out <new file>.jsonl
+```
+
+For each exported run it builds the native judge prompt (same system prompt, layout and criteria) around the complete trace instead of the window, and asks `claude -p --model claude-opus-5-5` three times with no tools, no plugins or skills, no settings, no MCP servers and no saved session. A vote is PASS when the reply says PASS and not FAIL, FAIL the other way round, and unparseable otherwise. The majority decides. Each line carries `case`, `run`, `grader`, `native_verdict` and `native_votes` (unchanged), `full_trace_votes`, `full_trace_verdict` and `events_judged`.
+
+Exit 0 only if every full-trace verdict is PASS. Exit 1 if any is FAIL or any vote is unparseable. Exit 2 if it can't rejudge: an empty export, a run without its trace, an exported trace that isn't the one the native judge saw, or a failed judge call. It checks the whole export before its first judge call and makes 3 calls per run.
+
+A trace grader passes acceptance only when its native verdict is PASS and its full-trace verdict is PASS. Neither alone counts. The rejudge never rewrites `aggregate-result.json` or any native verdict.
+
 ## Limits
 
 - It reads evidence after a pass. It doesn't pin the runtime of future runs or change how lanes launch. Pinning the version, account and loaded environment before a launch is still open.
-- It doesn't judge anything. Reading an exported trace against a grader's criteria is human review.
+- `eval-evidence-check` doesn't judge anything. `eval-trace-rejudge` judges only `focus: trace` graders, with the same model judge, so it removes the window gap and not judge noise.
 - It makes no claim about confinement. Bash commands can reach paths that no regex over their text reliably finds, and the native file-tool boundary for `evals/` has never been exercised.
 - Judge rationale isn't kept by the runner, so nothing here can recover it.
