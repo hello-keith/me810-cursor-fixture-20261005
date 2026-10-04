@@ -22,7 +22,7 @@ Event payloads carry `event_type` (for example `charge.event.v1`), a unique `eve
 
 ## Endpoint types
 
-Straddle offers three endpoint types, all created in the Straddle dashboard. Choose one in the plan; never poll an ordinary API read to discover state changes.
+Straddle offers three endpoint types, each created in the Straddle dashboard. Use the webhook endpoint unless [notifications.md](notifications.md) gives a reason for FIFO or polling, and record the choice in the plan. Never poll an ordinary API read to discover state changes.
 
 ### Webhook endpoint
 

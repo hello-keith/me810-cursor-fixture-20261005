@@ -1,14 +1,14 @@
 # Notifications
 
-Straddle reports status changes through three endpoint types. Pick one per integration and record the choice in the plan.
+Straddle reports status changes through three endpoint types. Use the webhook endpoint by default. Choose FIFO or polling only when its condition below applies, and record the choice in the plan.
 
 | Endpoint | Choose it when |
 | --- | --- |
-| Webhook endpoint | You can expose a public HTTPS handler. |
+| Webhook endpoint | The default. You can expose a public HTTPS handler. |
 | FIFO endpoint | You can expose a public HTTPS handler and need strict order more than throughput. |
 | Polling endpoint | You cannot expose a public URL, for local development, or for batch processing. |
 
-Create all three in the Straddle dashboard. A public webhook receiver is optional because the polling endpoint exists.
+Each type is created in the Straddle dashboard. Streaming is coming later and isn't available today.
 
 ## What is not a notification model
 
