@@ -50,11 +50,10 @@ Terms the interview settled, in Straddle's meaning where Straddle has one, with 
 Numbered, using the installed SDK's method names with their source file. Remove steps that do not apply.
 
 1. Create or reuse the customer by external ID.
-2. Connect a bank account through Bridge. The create returns the paykey `id` and, for `bank_account` and `plaid`, a masked `paykey`.
-3. Get the full paykey token for the payment with `revealPaykey` or `getUnmaskedPaykey` through the SDK or CLI, unless a `quiltt` create already returned it. Never record the token in this plan.
-4. Create the charge or payout with the full token in `paykey`, plus consent, payment date, external ID, and idempotency key.
-5. Receive status changes through the chosen notification path.
-6. Reconcile from delivered events.
+2. Connect a bank account through Bridge. The create returns the paykey `id` and the full token in `paykey`. Store the token encrypted, and never record it in this plan.
+3. Create the charge or payout with that token in `paykey`, plus consent, payment date, external ID, and idempotency key.
+4. Receive status changes through the chosen notification path.
+5. Reconcile from delivered events.
 
 ## Account scope
 
@@ -116,7 +115,7 @@ What the app does for each status its notification path delivers, from the Decis
 
 ## Future Sandbox writes
 
-Each row runs later, in Integrate or Test, only after its own preview and approval. Before each charge or payout that uses a `bank_account` or `plaid` paykey, add a `revealPaykey` or `getUnmaskedPaykey` row. It is one of the fourteen, so it names the SDK or CLI.
+Each row runs later, in Integrate or Test, only after its own preview and approval. A charge or payout row takes the full token from the paykey create row's `data.paykey`. Add a `revealPaykey` or `getUnmaskedPaykey` row only for an existing paykey whose token the app didn't keep. It is one of the fourteen, so it names the SDK or CLI.
 
 | Order | Operation | Executing tool | Account | External ID | Idempotency key source |
 | --- | --- | --- | --- | --- | --- |

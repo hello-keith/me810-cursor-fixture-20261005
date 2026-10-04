@@ -19,7 +19,7 @@ Ways to create a paykey, each with the customer's `customer_id`, an optional `ex
 
 The three paykey creates run only through the SDK or CLI after approval ([writes-and-approval.md](writes-and-approval.md)).
 
-**The token.** A payment's `paykey` field takes the full token, not the paykey `id`. The `bank_account` and `plaid` create responses mask it. `revealPaykey` and `getUnmaskedPaykey` return it: both run only through the SDK or CLI after approval, and `getUnmaskedPaykey`, which also unmasks the bank details, needs Straddle to enable unmasking for the account (`allow_data_unmask`). The `paykey.created.v1` and `paykey.event.v1` payloads carry the full token too. Treat it as a secret: store it encrypted, and never log it or send it to a browser. [Idempotency](writes-and-approval.md#idempotency) has the handling rules.
+**The token.** A payment's `paykey` field takes the full token, not the paykey `id`. A paykey create returns the full token in `data.paykey`: use that value for the charge or payout that follows, and store it encrypted. Get and list responses mask it. `revealPaykey` and `getUnmaskedPaykey` recover the token of an existing paykey whose token your app didn't keep: both run only through the SDK or CLI after approval, and `getUnmaskedPaykey`, which also unmasks the bank details, needs Straddle to enable unmasking for the account (`allow_data_unmask`). The `paykey.created.v1` and `paykey.event.v1` payloads carry the full token too. Treat it as a secret: store it encrypted, and never log it or send it to a browser. [Idempotency](writes-and-approval.md#idempotency) has the handling rules.
 
 ## States and transitions
 

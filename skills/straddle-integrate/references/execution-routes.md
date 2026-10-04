@@ -23,7 +23,7 @@ Names below were checked against the installed TypeScript SDK `@straddlecom/stra
 | `getUnmaskedLinkedBankAccount` | `client.linkedBankAccounts.listUnmasked` | `straddle linked-bank-accounts unmask get-linked-bank-account-unmasked` |
 | `revealPaykey` | `client.paykeys.reveal` | `straddle paykeys reveal get` |
 
-The six unmask operations and paykey reveal return unmasked personal or bank data. Run them only when the approved plan needs them. Keep their output out of logs, plans, and evidence, and record only that the call succeeded and which ID it read.
+The six unmask operations and paykey reveal return unmasked personal or bank data. Run them only when the approved plan needs them, for example to recover the token of an existing paykey the app didn't keep. Keep their output out of logs, plans, and evidence, and record only that the call succeeded and which ID it read.
 
 ## Operations outside the public contract
 
@@ -31,11 +31,11 @@ Run only operations in the public API contract, as [writes-and-approval.md](../.
 
 ## Paykey tokens for charges and payouts
 
-Follow the contract's field meanings, and never guess a value's kind from its shape. In API contract 1.0.4, a charge's or payout's `paykey` request field is "the paykey token that identifies the customer's bank account". It is not the paykey's resource `id`. The Bridge `bank_account` and `plaid` create responses return that token masked.
+Follow the contract's field meanings, and never guess a value's kind from its shape. In API contract 1.0.4, a charge's or payout's `paykey` request field is "the paykey token that identifies the customer's bank account". It is not the paykey's resource `id`. A Bridge paykey create returns the full token in `data.paykey`. `GET /v1/paykeys/{id}` and list responses return it masked.
 
 - **ID fields take IDs.** Fields such as `customer_id` and `organization_id`, and the ID in a path like `/v1/paykeys/{id}/reveal`, take `data.id` from the earlier create response.
-- **The payment `paykey` field takes the full token.** When the paykey came from a Bridge `bank_account` or `plaid` create, get the full token with `revealPaykey` or `getUnmaskedPaykey`. Both are excluded operations, so they run through the SDK or CLI only, as their own preview rows with approval. Never pass the paykey's `id` or a masked value.
-- **Keep the token out of the record.** Never print, log, or write a full token into a plan, preview, report, evidence file, test, or commit. Get it and use it in one step: in a single SDK process that does not print it, or in a single CLI command that passes it to the payment without printing it (check the CLI's output flags with `--help` first). The preview names the reveal or unmasked-read row and the payment row that uses it, never the token. Payment responses return the paykey masked, so record the payment ID only.
+- **The payment `paykey` field takes the full token.** For a paykey created earlier in the same run, pass the create response's `data.paykey`, never its `data.id`. No reveal is needed. For an existing paykey whose token the app didn't keep, get the token with `revealPaykey` or `getUnmaskedPaykey`. Both are excluded operations, so they run through the SDK or CLI only, as their own preview rows with approval. Never pass the paykey's `id` or a masked value.
+- **Keep the token out of the record.** Never print, log, or write a full token into a plan, preview, report, evidence file, test, or commit. Take it from the response that returned it and use it in one step: in a single SDK process that does not print it, or in a single CLI command that passes it to the payment without printing it (check the CLI's output flags with `--help` first). The preview names the row the token comes from and the payment row that uses it, never the token. Payment responses return the paykey masked, so record the payment ID only.
 
 ## Other writes the fixture uses: SDK or CLI
 

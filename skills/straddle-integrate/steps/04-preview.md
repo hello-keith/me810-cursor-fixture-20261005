@@ -16,7 +16,7 @@ When step 1 recorded a **configuration error**, including an offline synthetic l
 
 ## Build the preview
 
-List every intended write in execution order, including every organization and account to reuse or create, and every excluded read (unmask or reveal) the plan needs. Write exact values, not placeholders, except for IDs that only a previous create in this run can return. Name those by the row they come from.
+List every intended write in execution order, including every organization and account to reuse or create, and every excluded read (unmask or reveal) the approved plan lists. Write exact values, not placeholders, except for IDs that only a previous create in this run can return. Name those by the row they come from.
 
 ```markdown
 ## Straddle Sandbox preview
@@ -41,7 +41,7 @@ Rules for the table:
 - **Executing tool.** Use the SDK method or CLI command from [execution-routes.md](../references/execution-routes.md), verified in step 2. The fourteen excluded operations always show the SDK or CLI, never `execute-request`, including when the developer asks for the MCP. Say why in one line.
 - **Acting account.** Show the account ID and how it was resolved (Straddle ID or exact external ID), or `omitted` with the rule that omits it. Direct integrations never send it.
 - **Idempotency key.** Write the key you will pass on every create. It must be 10 to 40 characters and derived as in [Idempotency by route](../references/execution-routes.md#idempotency-by-route). A CLI row is allowed only when the installed CLI lists `--idempotency-key` for that create. Otherwise the row uses the SDK. Never infer the key from `--dry-run` output, because the dry run does not print it.
-- **Paykey tokens.** A charge or payout row that uses a paykey from a Bridge `bank_account` or `plaid` create depends on a `revealPaykey` or `getUnmaskedPaykey` row, which is itself an excluded operation (SDK or CLI) needing approval. Name that row, never the token. See [Paykey tokens for charges and payouts](../references/execution-routes.md#paykey-tokens-for-charges-and-payouts).
+- **Paykey tokens.** A charge or payout row that uses a paykey created by an earlier row takes the full token from that row's `data.paykey`, never its `data.id`. It needs no other row. Name that row, never the token. Only a payment on an existing paykey whose token the app didn't keep depends on a `revealPaykey` or `getUnmaskedPaykey` row, an excluded operation (SDK or CLI) needing approval. See [Paykey tokens for charges and payouts](../references/execution-routes.md#paykey-tokens-for-charges-and-payouts).
 - **Sandbox outcomes.** Include the `config.sandbox_outcome` values the plan tests, such as `verified`, `active`, `paid`, and `reversed_insufficient_funds`.
 - **Payload.** Use synthetic, non-sensitive data. No real names, bank numbers, or keys. Write each row's payload in full, even where it repeats another row's, never "same as #6 except …". Only an ID that an earlier row returns is named by that row.
 - **Offline synthetic target.** When step 1 recorded one, write the exact localhost base URL in place of the Sandbox URL, and list no API MCP verification reads, per [offline-synthetic-target.md](../references/offline-synthetic-target.md). An approval covers that target only. Switching between it and Straddle Sandbox changes the target and needs a new preview.

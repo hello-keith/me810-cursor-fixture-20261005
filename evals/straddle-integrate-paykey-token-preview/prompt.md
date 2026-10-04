@@ -1,5 +1,5 @@
 ---
-description: A charge needs the full paykey token, not the paykey ID or the masked Bridge value; the preview adds an approved SDK/CLI reveal or unmasked read and never shows the token.
+description: A charge takes the full paykey token from the bank-account create response's data.paykey, not its data.id; the preview adds no reveal or unmasked read and never shows the token.
 tags: [integrate, marketplace, paykey-token, paykey-token-bash, offline-target]
 plugins: ["../..", "env-fixture"]
 max_turns: 30
