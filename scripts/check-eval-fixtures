@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Check eval fixture fidelity that `claude plugin eval` only warns about.
+
+1. Every `mocks/<server>/` that answers tools has `_tools.json`, the server's saved MCP `tools/list` result, listing
+   exactly the tools that directory mocks, each with a description and an input schema. Without an entry the runner
+   serves the mocked tool with a permissive schema and no description, unlike the real server.
+2. A case for a skill that writes its report in every outcome (Integrate, Go Live, Audit, Setup) grants Write, so
+   the run doesn't fall back to a Bash heredoc, subagents or a reply that says the report wasn't written.
+
+`--write SERVER=FILE` rewrites every `mocks/SERVER/_tools.json` from a saved `tools/list` response (a JSON-RPC
+response or its `result`), keeping only the tools each directory mocks. It refuses a capture that lacks one.
+"""
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+TOOLS_FILE = "_tools.json"
+SERVER_AGENT = "_server.md"
+REPORT_SKILLS = ("straddle-integrate", "straddle-go-live", "straddle-audit", "straddle-setup")
+ALLOWED_TOOLS = re.compile(r"^allowed_tools:\s*\[(.*)\]\s*$", re.M)
+
+
+def mock_dirs(evals):
+    roots = [evals / "mocks"] + sorted(p.parent / "mocks" for p in evals.glob("*/prompt.md"))
+    return [d for root in roots if root.is_dir() for d in sorted(root.iterdir()) if d.is_dir()]
+
+
+def mocked_tools(server_dir):
+    # ponytail: ignores _server.md `tools:` lists; no case uses one. Parse its frontmatter when one does.
+    return sorted(p.stem for p in server_dir.glob("*.md") if p.name != SERVER_AGENT)
+
+
+def listing(data):
+    """The runner's shape: {"tools": [{"name", "description"?, "inputSchema"?}]}, optionally under "result"."""
+    if isinstance(data, dict) and "result" in data:
+        data = data["result"]
+    tools = data.get("tools") if isinstance(data, dict) else None
+    if not isinstance(tools, list) or not all(isinstance(t, dict) and isinstance(t.get("name"), str) and t["name"]
+                                              for t in tools):
+        raise ValueError('expected a saved tools/list response ({"tools": [{"name", "description", "inputSchema"}]})')
+    return tools
+
+
+def check_mocks(evals):
+    problems = []
+    for server_dir in mock_dirs(evals):
+        names = mocked_tools(server_dir)
+        if not names:
+            continue
+        rel = server_dir.relative_to(evals.parent).as_posix()
+        path = server_dir / TOOLS_FILE
+        if not path.is_file():
+            problems.append(f"{rel}: no {TOOLS_FILE}; mocked {', '.join(names)} get no description or schema")
+            continue
+        try:
+            tools = listing(json.loads(path.read_text()))
+        except ValueError as error:
+            problems.append(f"{rel}/{TOOLS_FILE}: {error}")
+            continue
+        listed = [t["name"] for t in tools]
+        for name in sorted(set(names) - set(listed)):
+            problems.append(f"{rel}/{TOOLS_FILE}: no entry for mocked tool {name}")
+        for name in sorted(set(listed) - set(names)):
+            problems.append(f"{rel}/{TOOLS_FILE}: lists {name}, which this directory doesn't mock")
+        if len(listed) != len(set(listed)):
+            problems.append(f"{rel}/{TOOLS_FILE}: duplicate tool names")
+        for tool in tools:
+            if not isinstance(tool.get("description"), str) or not tool["description"].strip():
+                problems.append(f"{rel}/{TOOLS_FILE}: {tool['name']} has no description")
+            if not isinstance(tool.get("inputSchema"), dict) or tool["inputSchema"].get("type") != "object":
+                problems.append(f"{rel}/{TOOLS_FILE}: {tool['name']} has no object inputSchema")
+    return problems
+
+
+def check_write_grants(evals):
+    problems = []
+    for prompt in sorted(evals.glob("*/prompt.md")):
+        case = prompt.parent.name
+        if not case.startswith(tuple(f"{skill}-" for skill in REPORT_SKILLS)):
+            continue
+        match = ALLOWED_TOOLS.search(prompt.read_text())
+        tools = [t.strip().strip("'\"") for t in match.group(1).split(",")] if match else []
+        if "Write" not in tools:
+            problems.append(f"evals/{case}/prompt.md: allowed_tools has no Write, but the skill writes its report")
+    return problems
+
+
+def write_listings(evals, server, capture):
+    by_name = {t["name"]: t for t in listing(json.loads(Path(capture).read_text()))}
+    written = []
+    for server_dir in mock_dirs(evals):
+        names = mocked_tools(server_dir)
+        if server_dir.name != server or not names:
+            continue
+        missing = [n for n in names if n not in by_name]
+        if missing:
+            raise SystemExit(f"{capture}: tools/list has no {', '.join(missing)} for {server_dir}")
+        tools = [by_name[n] for n in by_name if n in names]
+        (server_dir / TOOLS_FILE).write_text(json.dumps({"tools": tools}, indent=2) + "\n")
+        written.append(server_dir)
+    return written
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--root", type=Path, default=ROOT, help="plugin root (default: this repository)")
+    parser.add_argument("--write", action="append", default=[], metavar="SERVER=FILE",
+                        help="rewrite mocks/SERVER/_tools.json from a saved tools/list response")
+    args = parser.parse_args(argv)
+    evals = args.root / "evals"
+    for spec in args.write:
+        server, _, capture = spec.partition("=")
+        print(f"{server}: wrote {len(write_listings(evals, server, capture))} {TOOLS_FILE} files")
+    problems = check_mocks(evals) + check_write_grants(evals)
+    for problem in problems:
+        print(problem)
+    print(f"{len(problems)} problem(s)" if problems else "eval fixtures ok")
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
