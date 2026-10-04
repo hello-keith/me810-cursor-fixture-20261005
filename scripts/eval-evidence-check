@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""Check the evidence integrity of retained `claude plugin eval` runs. Offline: no model or judge calls.
+
+identity <aggregate-result.json> [--run N]  prints one run's runtime identity as JSON, to vet and pin with --expect
+check --expect IDENTITY.json <aggregate-result.json or results dir>...
+                                            prints one JSON line per run: its original verdict, unchanged, whether the
+                                            evidence-integrity checks found gaps, the reasons, and the run's permission
+                                            denials; exits 1 if any run's evidence is incomplete, 2 if it can't check
+
+Exit 0 means only that the evidence-integrity checks found no gap. It is not a candidate PASS, not semantic acceptance
+of any grader verdict, and not proof that the run was confined to its sandbox.
+"""
+
+import argparse
+import hashlib
+import json
+import re
+import shutil
+import sys
+from pathlib import Path
+
+IDENTITY_KEYS = ("claude_code_version", "model", "judge_model", "apiKeySource", "plugins", "skills")
+SAFE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+# The native runner shows a `focus: trace` judge the trace's "\n"-separated events: all of them up to 24, else the
+# first and last 12 around an elision marker; then it cuts judge text over 100,000 chars to its first 80,000 and last
+# 20,000. judge_view reproduces all 15 retained trace-judge inputs of combined-c2bae0e and -r4 byte for byte.
+WINDOW, HEAD, CAP, CAP_HEAD, CAP_TAIL = 24, 12, 100_000, 80_000, 20_000
+
+
+class EvidenceError(Exception):
+    pass
+
+
+def trace_lines(raw):
+    lines = raw.split("\n")
+    return lines[:-1] if lines[-1] == "" else lines
+
+
+def judge_view(raw):
+    """(text the native judge saw, events it didn't see, chars it didn't see)."""
+    lines = trace_lines(raw)
+    elided = max(len(lines) - WINDOW, 0)
+    text = "\n".join(lines) if not elided else (
+        "\n".join(lines[:HEAD]) + f"\n[…{elided} messages elided…]\n" + "\n".join(lines[-HEAD:]))
+    cut = max(len(text) - CAP, 0)
+    if cut:
+        text = text[:CAP_HEAD] + f"\n[…{cut} chars elided…]\n" + text[-CAP_TAIL:]
+    return text, elided, cut
+
+
+def aggregates(paths):
+    found = []
+    for path in map(Path, paths):
+        found += sorted(path.rglob("aggregate-result.json")) if path.is_dir() else [path]
+    if not found:
+        raise EvidenceError(f"no aggregate-result.json in {', '.join(map(str, paths))}")
+    for path in found:
+        try:
+            result = json.loads(path.read_text())
+            cases = [(case, case["arms"]["with"]) for case in result["cases"]]
+        except (OSError, json.JSONDecodeError, KeyError, TypeError) as error:
+            raise EvidenceError(f"{path}: can't read this aggregate result ({type(error).__name__}: {error})") from None
+        if result.get("partial") or not cases or not all(runs for _, runs in cases):
+            raise EvidenceError(f"{path}: partial or empty aggregate result, its runs can't all be checked")
+        yield path, result, cases
+
+
+def trace_file(run, trace_root):
+    """The run's trace; under --trace-root for traces copied off the eval host with their absolute paths."""
+    if not run.get("tracePath"):
+        return None
+    path = Path(run["tracePath"])
+    return trace_root / path.relative_to(path.anchor) if trace_root else path
+
+
+def read_trace(path):
+    """(raw text, events, reason); events is None when the trace is missing or unreadable."""
+    if path is None or not path.is_file():
+        return None, None, f"trace-missing: {path}"
+    raw = path.read_text()
+    events = []
+    for number, line in enumerate(trace_lines(raw), 1):
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            event = None
+        if not isinstance(event, dict):
+            return raw, None, f"trace-unreadable: line {number}"
+        events.append(event)
+    return raw, events, None
+
+
+def identity(result, init):
+    plugins, skills = init.get("plugins"), init.get("skills")
+    return {"claude_code_version": init.get("claude_code_version"), "model": init.get("model"),
+            "judge_model": result["suite"].get("judgeModel"), "apiKeySource": init.get("apiKeySource"),
+            "plugins": None if plugins is None else sorted(plugin.get("source") for plugin in plugins),
+            "skills": None if skills is None else sorted(skills)}
+
+
+def drift(expected, actual, case_plugins):
+    reasons = []
+    for key in IDENTITY_KEYS:
+        value = actual[key]
+        if value is None:
+            reasons.append(f"identity-unavailable:{key}")
+            continue
+        if key == "plugins":
+            value = [source for source in value if source not in case_plugins]
+        if value == (sorted(expected[key]) if isinstance(expected[key], list) else expected[key]):
+            continue
+        if isinstance(value, list):
+            extra, missing = sorted(set(value) - set(expected[key])), sorted(set(expected[key]) - set(value))
+            reasons.append(f"drift:{key} extra {json.dumps(extra)} missing {json.dumps(missing)}")
+        else:
+            reasons.append(f"drift:{key} expected {json.dumps(expected[key])} got {json.dumps(value)}")
+    return reasons
+
+
+def trace_graders(case):
+    return [grader for grader in case["graders"]
+            if grader["type"] == "llm" and grader["config"].get("focus") == "trace"]
+
+
+def check_run(expected, result, case, run, trace_root):
+    path = trace_file(run, trace_root)
+    raw, events, reason = read_trace(path)
+    reasons, denials = [reason] if reason else [], None
+    case_plugins = expected.get("case_plugins", {}).get(case["name"], [])
+    excluded = []
+    if events is not None:
+        inits = [event for event in events if event.get("type") == "system" and event.get("subtype") == "init"]
+        if not inits:
+            reasons.append("trace-no-init")
+        for init in inits:
+            actual = identity(result, init)
+            excluded += [source for source in actual["plugins"] or [] if source in case_plugins and source not in excluded]
+            reasons += [reason for reason in drift(expected, actual, case_plugins) if reason not in reasons]
+        models = {event.get("message", {}).get("model") for event in events if event.get("type") == "assistant"}
+        if models - {expected["model"]}:
+            reasons.append(f"drift:assistant model {json.dumps(sorted(models - {expected['model']}, key=str))}")
+        results = [event for event in events if event.get("type") == "result"]
+        if results:
+            denials = results[-1].get("permission_denials")
+        if denials is None:
+            reasons.append("denials-unavailable")
+    graded = {grader.get("name"): grader for grader in run.get("graders") or []}
+    view, elided, cut = judge_view(raw) if events is not None else (None, 0, 0)
+    for grader in trace_graders(case):
+        evidence = (graded.get(grader["name"]) or {}).get("evidence")
+        if not evidence:
+            reasons.append(f"evidence-missing:{grader['name']}")
+        elif events is not None and evidence != view:
+            reasons.append(f"evidence-mismatch:{grader['name']} retained judge input isn't this trace's native view")
+        elif events is not None:
+            if elided:
+                reasons.append(f"trace-elided:{grader['name']} judge saw {WINDOW} of {len(events)} events")
+            if cut:
+                reasons.append(f"trace-truncated:{grader['name']} judge didn't see {cut} chars")
+    verdict = "ERROR" if run.get("error") is not None else "PASS" if run.get("passed") is True else "FAIL"
+    return {"case": case["name"], "verdict": verdict, "evidence_integrity": "incomplete" if reasons else "complete",
+            "reasons": reasons, "denials": denials, "case_plugins_excluded": excluded,
+            "trace": str(path) if path else None}, raw, events
+
+
+def export(folder, case, run, path, events):
+    """The full trace and, per `focus: trace` grader, exactly what its judge was shown, for review without a model."""
+    names = [case["name"]] + [grader["name"] for grader in trace_graders(case)]
+    unsafe = [name for name in names if not isinstance(name, str) or not SAFE_NAME.fullmatch(name)]
+    if unsafe:
+        raise EvidenceError(f"{json.dumps(unsafe)}: not a safe file name, nothing exported for {folder.name}")
+    try:
+        folder.mkdir(parents=True)
+        if events is not None:
+            with open(folder / "trace.jsonl", "xb") as copy, open(path, "rb") as trace:
+                shutil.copyfileobj(trace, copy)
+        graded = {grader.get("name"): grader for grader in run.get("graders") or []}
+        for grader in trace_graders(case):
+            result = graded.get(grader["name"]) or {}
+            record = {"case": case["name"], "grader": grader["name"], "criteria": grader["config"].get("criteria"),
+                      "passed": result.get("passed"), "judge_votes": result.get("judgeVotes"),
+                      "explanation": result.get("explanation"), "judge_saw": result.get("evidence"),
+                      "trace_events": None if events is None else len(events),
+                      "trace_sha256": None if events is None else hashlib.sha256(path.read_bytes()).hexdigest(),
+                      "trace_source": run.get("tracePath")}
+            with open(folder / f"{grader['name']}.json", "x") as out:
+                out.write(json.dumps(record, indent=1, ensure_ascii=False) + "\n")
+    except FileExistsError as error:
+        raise EvidenceError(f"{error.filename}: already exported (a case/run appears twice), not overwriting") from None
+
+
+def check(paths, expected_path, trace_root, export_dir):
+    try:
+        expected = json.loads(Path(expected_path).read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        raise EvidenceError(f"{expected_path}: can't read the expected identity ({type(error).__name__}: {error})")
+    unset = [key for key in IDENTITY_KEYS if expected.get(key) is None]
+    if unset:
+        raise EvidenceError(f"{expected_path}: expected identity has no value for {', '.join(unset)}")
+    if export_dir and export_dir.exists():
+        raise EvidenceError(f"{export_dir}: already exists, not overwriting retained evidence")
+    totals, incomplete = dict.fromkeys(("PASS", "FAIL", "ERROR"), 0), 0
+    for aggregate, result, cases in aggregates(paths):
+        for case, runs in cases:
+            for number, run in enumerate(runs, 1):
+                try:
+                    line, raw, events = check_run(expected, result, case, run, trace_root)
+                except (KeyError, TypeError, AttributeError) as error:
+                    raise EvidenceError(f"{aggregate}: unexpected shape ({type(error).__name__}: {error})") from None
+                print(json.dumps({**line, "run": number, "aggregate": str(aggregate)}, ensure_ascii=False))
+                totals[line["verdict"]] += 1
+                incomplete += line["evidence_integrity"] == "incomplete"
+                if export_dir and trace_graders(case):
+                    folder = export_dir / str(case["name"]) / f"run-{number}"
+                    export(folder, case, run, trace_file(run, trace_root), events)
+    runs = sum(totals.values())
+    verdicts = ", ".join(f"{count} {verdict}" for verdict, count in totals.items())
+    print(f"{runs} runs, original verdicts unchanged ({verdicts}); evidence-integrity checks found no gap in "
+          f"{runs - incomplete}, gaps in {incomplete}. Not a candidate PASS, semantic acceptance or confinement proof.",
+          file=sys.stderr)
+    return 1 if incomplete else 0
+
+
+def show_identity(path, number, trace_root):
+    (_, result, cases), = aggregates([path])
+    if len(cases) != 1 or not 1 <= number <= len(cases[0][1]):
+        raise EvidenceError(f"{path}: has no run {number} of a single case")
+    _, events, reason = read_trace(trace_file(cases[0][1][number - 1], trace_root))
+    inits = [event for event in events or [] if event.get("type") == "system" and event.get("subtype") == "init"]
+    if not inits:
+        raise EvidenceError(f"{path} run {number}: {reason or 'trace-no-init'}")
+    print(json.dumps(identity(result, inits[0]), indent=1))
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0], epilog=__doc__.split("\n\n")[-1])
+    parser.add_argument("--trace-root", type=Path, help="local copy of the eval host's / holding each tracePath")
+    commands = parser.add_subparsers(dest="command", required=True)
+    sub = commands.add_parser("identity", help="print one run's runtime identity")
+    sub.add_argument("aggregate", type=Path)
+    sub.add_argument("--run", type=int, default=1)
+    sub = commands.add_parser("check", help="check retained runs' evidence integrity against an expected identity")
+    sub.add_argument("results", nargs="+", type=Path)
+    sub.add_argument("--expect", required=True, type=Path, help="identity JSON every run must match")
+    sub.add_argument("--export", type=Path, help="new directory for the full trace evidence of focus: trace graders")
+    args = parser.parse_args(argv)
+    try:
+        if args.command == "identity":
+            show_identity(args.aggregate, args.run, args.trace_root)
+            return 0
+        return check(args.results, args.expect, args.trace_root, args.export)
+    except EvidenceError as error:
+        print(f"eval-evidence-check: {error}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
