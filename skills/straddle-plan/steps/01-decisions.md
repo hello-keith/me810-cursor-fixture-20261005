@@ -14,7 +14,7 @@ Interview the developer in rounds, as [interview.md](../references/interview.md)
 
 ## Before the first round
 
-Read [straddle-best-practices](../../straddle-best-practices/SKILL.md), and `straddle-setup.md` if it exists. If `straddle-integration-plan.md` exists, read its Decisions and Glossary. Keep every answered row that still holds, and resume: the rows still `open` are the next round's first questions, with their numbers.
+Read [straddle-best-practices](../../straddle-best-practices/SKILL.md), and `straddle-setup.md` if it exists. If `straddle-integration-plan.md` exists, read its Decisions and Glossary. Keep every answered row that still holds, and resume: the rows still `open` are the next round's first questions, with their numbers. An `open` row whose answer depends on another unanswered question, including one you add this round, may wait for it, if your reply names it by number and says what it waits on.
 
 Then find the facts yourself, before you ask anything:
 
@@ -29,7 +29,7 @@ When `straddle-integration-plan.md` doesn't exist yet, create it with the title,
 
 ## The design tree
 
-Seed the tree with these decisions. A branch opens once the decisions it hangs off are settled. Skip the branches the answers rule out, such as payouts for a charges-only integration or onboarding for a direct one, and add a branch for anything the repository makes risky, such as existing provider code or orders fulfilled before payment. A seeded branch that isn't in the Decisions log yet and whose answer depends on a risk branch you added waits until that branch is settled; say in the reply that it comes in a later round.
+Seed the tree with these decisions. A branch opens once the decisions it hangs off are settled. Skip the branches the answers rule out, such as payouts for a charges-only integration or onboarding for a direct one, and add a branch for anything the repository makes risky, such as existing provider code or orders fulfilled before payment. A seeded branch that isn't in the Decisions log yet and whose answer depends on a risk branch you added waits until that branch is settled; say in the reply that it comes in a later round. An `open` row in the log may wait the same way, named by number with what it waits on.
 
 | Decision | Opens after | What to settle | Reference |
 | --- | --- | --- | --- |
@@ -46,7 +46,7 @@ Seed the tree with these decisions. A branch opens once the decisions it hangs o
 | Onboarding | account model | hosted iframe onboarding for the customer-facing path, and Sandbox accounts created through the API for testing | [platforms](../../straddle-best-practices/references/platforms.md) |
 | Acting-account switching | account model | how the app selects and switches the acting account | [account scope](../../straddle-best-practices/references/account-scope.md) |
 | SDK | nothing | TypeScript, Python, Ruby, C#, or Go | [best-practices versions](../../straddle-best-practices/SKILL.md#current-versions) |
-| Notification path | nothing | webhook endpoint, FIFO endpoint, or polling endpoint. Recommend the webhook endpoint. Recommend FIFO only when strict order matters more than throughput, and polling only when the app can't expose a public URL, for local development, or for batch processing. | [notifications](../../straddle-best-practices/references/notifications.md) |
+| Notification path | nothing | webhook endpoint (recommend it by default), FIFO endpoint, or polling endpoint, with the conditions in [notifications](../../straddle-best-practices/references/notifications.md) | [notifications](../../straddle-best-practices/references/notifications.md) |
 | Duplicate events | notification path | where event IDs are stored so a repeat or redelivery is ignored | [receiving-webhooks](../../straddle-best-practices/references/receiving-webhooks.md) |
 | App behavior per status | products, notification path | what the app does on `paid`, `failed`, holds, and `reversed` after `paid`, such as an R01 after the order shipped | [charges](../../straddle-best-practices/references/charges.md), [returns and disputes](../../straddle-best-practices/references/returns-and-disputes.md) |
 | Refunds and resubmits | app behavior per status | whether the app refunds a `paid` charge (`refundCharge`, a payout linked to the charge) and when it resubmits (`insufficient_funds` only: an R01 or R09 return, or a failed balance check, which is `failed` with `source` `watchtower` and no return code) | [refunds and resubmits](../../straddle-best-practices/references/refunds-and-resubmits.md), [charges](../../straddle-best-practices/references/charges.md) |

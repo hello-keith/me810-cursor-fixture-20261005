@@ -42,7 +42,7 @@ List what the developer already said, in their words, for each of these. Anythin
 - product: accept bank payments (Pay by Bank charges), send payouts, onboard businesses onto a platform (hosted onboarding), or a combination
 - integration model: direct account, SaaS platform, or marketplace
 - SDK language
-- notification path: webhook endpoint, FIFO endpoint, or polling endpoint
+- notification path: webhook endpoint (the default), FIFO endpoint, or polling endpoint
 - whether an existing payment provider is being replaced
 
 **Summary for step 2:** key and environment present, the stated decisions, and the unanswered list.
