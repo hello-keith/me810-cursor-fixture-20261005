@@ -17,6 +17,6 @@ Do not change client, sandbox, or network settings yourself to reach the target,
 
 ## What changes
 
-- **Preview.** State `Target: offline synthetic localhost (not Straddle Sandbox)`, followed by the exact base URL. The rest of the preview and the approval rule are unchanged: every row still shows its acting account, operation, SDK or CLI route, payload summary, external ID, and idempotency key, and it still needs an explicit yes to that exact preview.
+- **Preview.** State `Target: offline synthetic localhost (not Straddle Sandbox)`, followed by the exact base URL and the label `offline synthetic proof, not live Straddle Sandbox proof`. The rest of the preview and the approval rule are unchanged: every row still shows its acting account, operation, SDK or CLI route, payload summary, external ID, and idempotency key, and it still needs an explicit yes to that exact preview.
 - **Routing.** Unchanged. The fourteen excluded operations still run only through the SDK or CLI. No API MCP call is made against a synthetic target, because the hosted MCP always reaches real Straddle.
 - **Reports and evidence.** Label the run `offline synthetic proof, not live Straddle Sandbox proof`. List created items as synthetic upstream records, not Straddle server-side resources. Never mark a live Sandbox scenario, such as a `paid` charge or an `R01` return delivered through a notification path, as passed from a synthetic run.

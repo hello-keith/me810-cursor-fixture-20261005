@@ -22,7 +22,7 @@ List every intended write in execution order, including every organization and a
 ## Straddle Sandbox preview
 
 - Environment: sandbox, https://sandbox.straddle.com
-- Target: Straddle Sandbox | offline synthetic localhost (not Straddle Sandbox) <exact base URL>
+- Target: Straddle Sandbox | offline synthetic localhost (not Straddle Sandbox) <exact base URL>: offline synthetic proof, not live Straddle Sandbox proof
 - Integration type: <direct | saas | marketplace>
 - Configuration: environment <explicit sandbox | unset | other>; credential per route: SDK `STRADDLE_API_KEY` <present | missing>, CLI `auth status` <env | saved | none>, API MCP <developer-confirmed | unknown>
 
