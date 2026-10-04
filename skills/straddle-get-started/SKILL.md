@@ -18,7 +18,7 @@ Write developer-facing replies in the [Straddle voice](../straddle-best-practice
 - Read-only. Get Started writes no file, installs nothing, changes no client or MCP configuration, and sends no Straddle API request. Docs MCP search needs no credential and is allowed.
 - Repository facts come from files you read. Product, integration model, SDK, and notification path come from the developer. A framework or language narrows the SDK options; it never decides the product or integration model.
 - Configuration first, offline. [Step 1](steps/01-begin.md) checks the key (`straddle auth status --agent`) and the environment before anything else, without `straddle doctor`, which sends a request. When either is missing, name it, ask the developer for it or point to [straddle-setup](../straddle-setup/SKILL.md), and stop. A question that needs an authenticated request (for example "which accounts do I have") goes to [straddle-setup](../straddle-setup/SKILL.md); never answer it with an empty or guessed result.
-- SDK packages and versions come from the Current versions table in [straddle-best-practices](../straddle-best-practices/SKILL.md). Never recommend a retired SDK, such as Python `straddle` 0.x or `github.com/straddleio/straddle-go`.
+- SDK packages and versions come from the Current versions table in [straddle-best-practices](../straddle-best-practices/SKILL.md).
 
 ## Steps
 

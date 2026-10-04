@@ -19,8 +19,8 @@ Every Straddle skill also follows [voice.md](references/voice.md) for developer-
 | TypeScript SDK | `@straddlecom/straddle` 1.0.4 | npm. |
 | Ruby SDK | `straddle` 1.0.4 | RubyGems. |
 | C# SDK | `Straddle` 1.0.4 | NuGet. |
-| Go SDK | `github.com/straddle-build/straddle-go` v1.0.4 | Module path moved from `github.com/straddleio/straddle-go`. |
-| Python SDK | `straddle` 1.0.5 | PyPI. Earlier `straddle` 0.x releases there are retired. |
+| Go SDK | `github.com/straddle-build/straddle-go` v1.0.4 | |
+| Python SDK | `straddle` 1.0.5 | PyPI. |
 | Straddle CLI | v1.0.3 published | v1.0.3 adds `--idempotency-key` on creates and `runtime_context` in `agent-context` and `doctor`. Check `straddle --version` and the command's `--help` before relying on either. |
 
 Versions change. Check the installed package in the developer's dependency tree before you rely on a method name, and prefer the SDK release's own `api.md`, README, and generated skill over memory.
@@ -41,7 +41,6 @@ Read the reference for each flow before you plan, build, or test it: [charges](r
 
 ## Deprecated paths
 
-- SDK releases older than the versions above, such as PyPI `straddle` 0.x or the Go module `github.com/straddleio/straddle-go`, and any MCP server shipped with them.
 - The `docs.straddle.com/.well-known/skills` index. It recommends polling charge reads and is retiring.
 - Any MCP server other than the hosted Scalar API MCP and Docs MCP in [tools.md](references/tools.md). Use only the hosted Scalar servers.
 - The React embed wrapper. Hosted iframe onboarding is the supported path until Onboarding V2.

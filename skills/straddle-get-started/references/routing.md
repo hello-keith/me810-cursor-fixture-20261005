@@ -14,8 +14,6 @@ The released package and version for each language are in the Current versions t
 | Ruby | `bundle add straddle` |
 | C# / .NET | `dotnet add package Straddle` |
 
-A lockfile that resolves to a release older than the table's (for example Python `straddle` 0.x or `github.com/straddleio/straddle-go`) is a retired SDK: say so and route to the current release.
-
 A repository with several languages gets the SDK for the service that will call Straddle, which the developer names. Browser code never holds the API key; it talks to the developer's server.
 
 ## Account scope by integration model

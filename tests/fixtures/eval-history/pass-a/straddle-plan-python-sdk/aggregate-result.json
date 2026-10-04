@@ -8,13 +8,13 @@
     "ablation": "none",
     "modelOverride": "claude-opus-5-5",
     "judgeModel": "claude-opus-5-5",
-    "caseFilter": "straddle-plan-python-retired-sdk",
+    "caseFilter": "straddle-plan-python-sdk",
     "threshold": 1
   },
   "cases": [
     {
-      "name": "straddle-plan-python-retired-sdk",
-      "dir": "evals/straddle-plan-python-retired-sdk",
+      "name": "straddle-plan-python-sdk",
+      "dir": "evals/straddle-plan-python-sdk",
       "runsPerCase": 3,
       "arms": {
         "with": [
@@ -23,14 +23,6 @@
             "passed": true,
             "error": null,
             "graders": [
-              {
-                "name": "plan-flags-retired-pin",
-                "passed": true,
-                "weight": 1,
-                "explanation": "matched straddle\\s*==\\s*0\\.5\\.0|straddle[^\\n]{0,20}\\b0\\.5\\.0\\b",
-                "withOnly": false,
-                "scored": true
-              },
               {
                 "name": "plan-marks-unresolved",
                 "passed": true,
@@ -79,14 +71,6 @@
             "error": null,
             "graders": [
               {
-                "name": "plan-flags-retired-pin",
-                "passed": true,
-                "weight": 1,
-                "explanation": "matched straddle\\s*==\\s*0\\.5\\.0|straddle[^\\n]{0,20}\\b0\\.5\\.0\\b",
-                "withOnly": false,
-                "scored": true
-              },
-              {
                 "name": "plan-marks-unresolved",
                 "passed": true,
                 "weight": 1,
@@ -133,14 +117,6 @@
             "passed": true,
             "error": null,
             "graders": [
-              {
-                "name": "plan-flags-retired-pin",
-                "passed": true,
-                "weight": 1,
-                "explanation": "matched straddle\\s*==\\s*0\\.5\\.0|straddle[^\\n]{0,20}\\b0\\.5\\.0\\b",
-                "withOnly": false,
-                "scored": true
-              },
               {
                 "name": "plan-marks-unresolved",
                 "passed": true,

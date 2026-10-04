@@ -26,6 +26,6 @@ Read `straddle-integration-plan.md` from disk with the Read tool now, even if yo
 - [ ] No key, token, or `.env` content appears. The plan says keys come from `STRADDLE_API_KEY` in the environment.
 - [ ] Missing key or environment is planned as a configuration error before any request.
 - [ ] SDK method names cite the installed source or are marked `verify after install`.
-- [ ] The SDK is one of the five published ones at the version in the best-practices table, and no retired release (such as PyPI `straddle` 0.x) is planned.
+- [ ] The SDK is one of the five published ones at the version in the best-practices table.
 
 **Summary for step 5:** the checklist result and any items left unresolved.

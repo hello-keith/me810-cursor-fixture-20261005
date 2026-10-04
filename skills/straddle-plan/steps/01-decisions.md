@@ -23,7 +23,7 @@ Then find the facts yourself, before you ask anything:
 
 If a reference can't be read, because it's missing or the read is denied, name it in your reply and ask for it back. Don't state its product facts from memory, and don't reopen or change an answer the developer already gave or accepted because of it. The branches that need it wait, because their `Recommended:` reasons would have to come from memory: don't ask them this round. Add each to the Decisions log with no number, the answer `open (round N)` for the next round, and the unreadable reference in Why, and list them in your reply. Ask them in the first round after the reference can be read.
 
-A decision the repository or Setup settles goes into the Decisions log with its `file:line` or `Setup` as the source, and is not asked. The framework or language alone settles none of them. If the repository already pins a retired SDK release, such as PyPI `straddle` 0.x, the SDK decision is the move to the version in the best-practices table.
+A decision the repository or Setup settles goes into the Decisions log with its `file:line` or `Setup` as the source, and is not asked. The framework or language alone settles none of them.
 
 When `straddle-integration-plan.md` doesn't exist yet, create it with the title, the Status lines `- Plan state: Draft` and `- Approval: none`, and the Decisions, Glossary, and Unresolved decisions sections of [plan-template.md](../references/plan-template.md). Step 3 fills in the rest.
 
