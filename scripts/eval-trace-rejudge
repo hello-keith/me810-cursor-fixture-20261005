@@ -11,6 +11,7 @@ if it can't rejudge: usage, an empty or inconsistent export, or a failed judge c
 """
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -70,9 +71,10 @@ def exported_runs(export_dir):
         trace = path.with_name("trace.jsonl")
         if not trace.is_file():
             raise RejudgeError(f"{path}: the run kept no readable trace, nothing to rejudge")
-        raw = trace.read_text(encoding="utf-8")
-        if evidence.judge_view(raw)[0] != record["judge_saw"]:
-            raise RejudgeError(f"{path}: the exported trace isn't the one the native judge saw")
+        data = trace.read_bytes()
+        raw = data.decode("utf-8")
+        if hashlib.sha256(data).hexdigest() != record["trace_sha256"] or evidence.judge_view(raw)[0] != record["judge_saw"]:
+            raise RejudgeError(f"{path}: the exported trace isn't the one the native run kept and its judge saw")
         lines = evidence.trace_lines(raw)
         runs.append((record, int(path.parent.name[4:]), "\n".join(lines), len(lines)))
     return runs

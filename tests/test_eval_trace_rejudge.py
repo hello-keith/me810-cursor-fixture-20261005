@@ -83,6 +83,15 @@ class EvalTraceRejudgeTest(unittest.TestCase):
         self.assertEqual((result.returncode, rejudged, self.prompts()), (2, [], []))
         self.assertIn("no exported `focus: trace` grader records", result.stderr)
 
+    def test_edited_hidden_middle_event_makes_no_judge_call_and_exits_2(self):
+        lines = [json.dumps(event) for event in [init()] + [said(f"step {n}") for n in range(1, 29)] + [done()]]
+        export = self.export(lines)
+        lines[15] = json.dumps(said("Which bank should the payout use?"))
+        (export / CASE / "run-1" / "trace.jsonl").write_text("\n".join(lines) + "\n")
+        result, rejudged = self.rejudge(export, "PASS", "PASS", "PASS")
+        self.assertEqual((result.returncode, rejudged, self.prompts()), (2, [], []))
+        self.assertIn("the exported trace isn't the one the native run kept", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

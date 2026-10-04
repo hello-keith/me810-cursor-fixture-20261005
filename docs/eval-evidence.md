@@ -60,7 +60,7 @@ CLAUDE_BIN=<claude binary> scripts/eval-trace-rejudge <export dir> --out <new fi
 
 For each exported run it builds the native judge prompt (same system prompt, layout and criteria) around the complete trace instead of the window, and asks `claude -p --model claude-opus-5-5` three times with no tools, no plugins or skills, no settings, no MCP servers and no saved session. A vote is PASS when the reply says PASS and not FAIL, FAIL the other way round, and unparseable otherwise. The majority decides. Each line carries `case`, `run`, `grader`, `native_verdict` and `native_votes` (unchanged), `full_trace_votes`, `full_trace_verdict` and `events_judged`.
 
-Exit 0 only if every full-trace verdict is PASS. Exit 1 if any is FAIL or any vote is unparseable. Exit 2 if it can't rejudge: an empty export, a run without its trace, an exported trace that isn't the one the native judge saw, or a failed judge call. It checks the whole export before its first judge call and makes 3 calls per run.
+Exit 0 only if every full-trace verdict is PASS. Exit 1 if any is FAIL or any vote is unparseable. Exit 2 if it can't rejudge: an empty export, a run without its trace, an exported trace whose sha256 or native judge view doesn't match its export record, or a failed judge call. It checks the whole export before its first judge call and makes 3 calls per run.
 
 A trace grader passes acceptance only when its native verdict is PASS and its full-trace verdict is PASS. Neither alone counts. The rejudge never rewrites `aggregate-result.json` or any native verdict.
 
