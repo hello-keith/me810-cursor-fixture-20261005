@@ -1,17 +1,17 @@
 // Fixture-owned behavior check for the dues service, compiled into the workspace's dues package through a go test
 // -overlay by the env-fixture Stop hook. The check-payment behavior existed before Integrate and must still work; the
 // Straddle client factory and ChargeDues are the plan's change. Every HTTP request the SDK makes is captured below
-// and answered locally.
+// and answered locally with a created charge.
 package dues_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	"testing"
 
 	"example.com/dues/dues"
@@ -25,15 +25,34 @@ type sent struct {
 
 type capture struct{ requests []sent }
 
+const chargeID = "0e9a1c4b-7d2f-4e8a-9b61-3f5c2d8e1a70"
+
+// RoundTrip answers every request with the charge create's 200 response: the charge it describes, with the
+// request's fields copied in.
 func (c *capture) RoundTrip(request *http.Request) (*http.Response, error) {
 	raw, _ := io.ReadAll(request.Body)
 	var body map[string]any
 	_ = json.Unmarshal(raw, &body)
 	c.requests = append(c.requests, sent{request, body})
+	charge := map[string]any{
+		"id": chargeID, "status": "created",
+		"status_details": map[string]any{"message": "Charge created", "reason": "ok", "source": "system", "changed_at": "2026-10-04T12:00:00Z"},
+		"status_history": []any{}, "funding_ids": []any{}, "trace_ids": map[string]any{},
+		"has_refund": false, "is_resubmit": false, "has_resubmit": false,
+		"created_at": "2026-10-04T12:00:00Z", "updated_at": "2026-10-04T12:00:00Z",
+	}
+	for field, value := range body {
+		charge[field] = value
+	}
+	payload, _ := json.Marshal(map[string]any{
+		"data":          charge,
+		"meta":          map[string]any{"api_request_id": "5b7e2f0a-1c3d-4e5f-8a9b-0c1d2e3f4a5b", "api_request_timestamp": "2026-10-04T12:00:00Z"},
+		"response_type": "object",
+	})
 	return &http.Response{
 		StatusCode: 200,
 		Header:     http.Header{"Content-Type": {"application/json"}},
-		Body:       io.NopCloser(strings.NewReader(`{"data":{"id":"chg_synthetic"},"meta":{},"response_type":"object"}`)),
+		Body:       io.NopCloser(bytes.NewReader(payload)),
 		Request:    request,
 	}, nil
 }
@@ -55,9 +74,18 @@ func charge(t *testing.T, transport *capture) sent {
 		t.Fatalf("BuildClient with configuration: %v", err)
 	}
 	before := len(transport.requests)
-	_, _ = dues.ChargeDues(context.Background(), client, "member-0001", "paykey-token-full-7c1d", 4500, "192.0.2.10")
+	response, err := dues.ChargeDues(context.Background(), client, "member-0001", "paykey-token-full-7c1d", 4500, "192.0.2.10")
 	if len(transport.requests) != before+1 {
 		t.Fatalf("one create request per ChargeDues call, got %d", len(transport.requests)-before)
+	}
+	if err != nil {
+		t.Fatalf("ChargeDues on a successful create returned the error %v", err)
+	}
+	if response == nil {
+		t.Fatal("ChargeDues returned no charge for a successful create")
+	}
+	if response.Data.ID != chargeID || response.Data.Status != "created" {
+		t.Fatalf("ChargeDues returned charge %q with status %q, want %q with status created", response.Data.ID, response.Data.Status, chargeID)
 	}
 	return transport.requests[len(transport.requests)-1]
 }
