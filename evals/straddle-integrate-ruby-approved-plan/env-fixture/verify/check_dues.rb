@@ -10,15 +10,23 @@ require "straddle"
 $LOAD_PATH.unshift(File.join(Dir.pwd, "lib"))
 
 SENT = []
+CHARGE_ID = "0f6c2b9e-3d4a-4e1b-9c7d-5a8e2f1b6c30"
 
 Straddle::Internal::Transport::PooledNetRequester.prepend(Module.new do
   def execute(request)
     body = request[:body]
     body = body.read if body.respond_to?(:read)
-    SENT << { method: request[:method].to_s.upcase, path: URI(request[:url].to_s).path, headers: request[:headers].transform_keys(&:downcase), body: JSON.parse(body.to_s) }
+    sent = JSON.parse(body.to_s)
+    SENT << { method: request[:method].to_s.upcase, path: URI(request[:url].to_s).path, headers: request[:headers].transform_keys(&:downcase), body: sent }
+    charge = sent.merge(
+      "id" => CHARGE_ID, "status" => "created", "created_at" => "2026-10-04T12:00:00Z", "updated_at" => "2026-10-04T12:00:00Z",
+      "status_details" => { "message" => "Charge created", "reason" => "ok", "source" => "system", "changed_at" => "2026-10-04T12:00:00Z" },
+      "status_history" => [], "funding_ids" => [], "trace_ids" => {}, "has_refund" => false, "has_resubmit" => false, "is_resubmit" => false
+    )
     response = Net::HTTPOK.new("1.1", "200", "OK")
     response["content-type"] = "application/json"
-    [200, response, [JSON.generate({ data: { id: "chg_synthetic" }, meta: {}, response_type: "object" })].each]
+    payload = { data: charge, meta: { api_request_id: "6a1c9e2f-8b3d-4c5e-a7f0-1d2e3f4a5b6c", api_request_timestamp: "2026-10-04T12:00:00Z" }, response_type: "object" }
+    [200, response, [JSON.generate(payload)].each]
   end
 end)
 
@@ -58,8 +66,12 @@ class StraddleCharges < Minitest::Test
     SENT.clear
   end
 
+  # charge_dues may return the SDK response, its charge, or the charge id; nil or false means it swallowed a failure.
   def charge(member)
-    with_env(CONFIGURED) { Dues::Payments.charge_dues(Dues.build_client, member, "paykey-token-full-7c1d", 4500, "192.0.2.10") }
+    result = with_env(CONFIGURED) { Dues::Payments.charge_dues(Dues.build_client, member, "paykey-token-full-7c1d", 4500, "192.0.2.10") }
+    result = result.data if result.respond_to?(:data)
+    assert_equal CHARGE_ID, result.respond_to?(:id) ? result.id : result, "charge_dues returns the created charge"
+    assert_equal "created", result.status.to_s if result.respond_to?(:status)
     assert_equal 1, SENT.length, "one create request per charge_dues call"
     SENT.pop
   end
