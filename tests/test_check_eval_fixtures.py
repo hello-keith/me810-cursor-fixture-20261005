@@ -38,6 +38,14 @@ class CheckEvalFixturesTest(unittest.TestCase):
     def test_repository_fixtures_pass(self):
         self.assertEqual(checker.main(["--root", str(REPO)]), 0)
 
+    def test_missing_or_empty_eval_root_fails_and_minimal_corpus_passes(self):
+        root = ["--root", str(self.root)]
+        self.assertEqual(checker.main(["--root", str(self.root / "missing")]), 1)
+        self.evals.mkdir()
+        self.assertEqual(checker.main(root), 1)
+        self.case("straddle-get-started-a", mocks=["search-documentation"], listing={"tools": [DOCS_SEARCH]})
+        self.assertEqual(checker.main(root), 0)
+
     def test_mocked_tool_without_listing_is_reported(self):
         self.case("straddle-get-started-a", mocks=["search-documentation"])
         self.assertEqual(len(self.problems()), 1)

@@ -112,6 +112,9 @@ def main(argv=None):
                         help="rewrite mocks/SERVER/_tools.json from a saved tools/list response")
     args = parser.parse_args(argv)
     evals = args.root / "evals"
+    if not any(evals.glob("*/prompt.md")):
+        print(f"{evals}: no eval cases (*/prompt.md); nothing to check")
+        return 1
     for spec in args.write:
         server, _, capture = spec.partition("=")
         print(f"{server}: wrote {len(write_listings(evals, server, capture))} {TOOLS_FILE} files")
