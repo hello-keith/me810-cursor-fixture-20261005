@@ -31,7 +31,7 @@ The status is `ready_with_warnings` when nothing blocks but something is incompl
 
 ## Report
 
-Write the report to `straddle-setup.md` at the repository root, replacing an earlier one, and give the same report in your reply. Open the reply with two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md): whether the project is ready, the one thing that matters most, and what happens next. A blocking configuration failure keeps its exact wording in the report, and the sentences around it name what the developer sets and where. When the client doesn't allow the write, give the report in the reply and say `straddle-setup.md` wasn't written.
+Write the report to `straddle-setup.md` at the repository root, replacing an earlier one, and give the same report in your reply. Open the reply with two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md): whether the project is ready, every blocking check when it's `blocked` (otherwise the one thing that matters most), and what happens next. A blocking configuration failure keeps its exact wording in the report, and the sentences around it name what the developer sets and where. When the client doesn't allow the write, give the report in the reply and say `straddle-setup.md` wasn't written.
 
 The header block comes first, because the Straddle Wizard reads it. `Status` is `complete` when the classification above is `ready` or `ready_with_warnings`, and `blocked (<each blocking check>)` when it is `blocked`. The `API key present` line says `yes` or `no` and never holds a value.
 
