@@ -26,7 +26,7 @@ Recommended: <your recommended answer>, because <one-line reason>.
 Recommended: <your recommended answer>, because <one-line reason>.
 ```
 
-Each round the developer answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
+Each round the developer answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question you haven't asked yet whose answer depends on another question still open in this round belongs to a _later_ round, not this one.
 
 Finding _facts_ is your job, never the developer's. When a frontier question needs a fact from the environment (the repository, the installed SDK, the references, the docs), read it yourself before you ask; don't ask the developer for anything you could look up. The _decisions_ are the developer's: put each to them and wait.
 

@@ -29,7 +29,7 @@ When `straddle-integration-plan.md` doesn't exist yet, create it with the title,
 
 ## The design tree
 
-Seed the tree with these decisions. A branch opens once the decisions it hangs off are settled. Skip the branches the answers rule out, such as payouts for a charges-only integration or onboarding for a direct one, and add a branch for anything the repository makes risky, such as existing provider code or orders fulfilled before payment. A seeded branch whose answer depends on a risk branch you added waits until that branch is settled; say in the reply that it comes in a later round.
+Seed the tree with these decisions. A branch opens once the decisions it hangs off are settled. Skip the branches the answers rule out, such as payouts for a charges-only integration or onboarding for a direct one, and add a branch for anything the repository makes risky, such as existing provider code or orders fulfilled before payment. A seeded branch that isn't in the Decisions log yet and whose answer depends on a risk branch you added waits until that branch is settled; say in the reply that it comes in a later round.
 
 | Decision | Opens after | What to settle | Reference |
 | --- | --- | --- | --- |
@@ -74,7 +74,7 @@ Write each answer into the Decisions log as it's given, with its source and the 
 | answers | their answer, source `developer`, and their reason or the one it rests on |
 | accepts your recommendations, for some questions or all of them | each recommended answer in full, as you gave it, source `developer, accepted recommendation`. Don't move part of it to a later question: when an accepted answer already says when to resubmit, the Refunds and resubmits branch keeps that and asks only what's still open. |
 | doesn't know | explain the choice in a sentence or two, then record your recommendation with source `assumption`, and say so. It's listed again when you summarize, for the developer to confirm or change. |
-| gives an answer that contradicts the product model or the code | nothing yet. Say what the reference or the code says, with its link or `file:line`, and ask that question again in this reply's round, with a corrected recommendation. |
+| gives an answer that contradicts the product model or the code | nothing yet. In your reply, say what the reference or the code says, with its link or `file:line`, and ask that question again in this round, with a corrected recommendation. |
 | hasn't decided, and can't answer now | `Unresolved`, and add it to Unresolved decisions with your recommendation |
 
 When the developer uses a word that means something else in Straddle, ask what they mean, use Straddle's term from then on, and add the settled term to the Glossary. "Refund" is a real Straddle operation: `refundCharge` returns money from a `paid` charge as a payout linked to it. It isn't cancelling a charge, which works only before `pending`, and it isn't a return (`reversed`), which the customer's bank starts. "Account" can mean the app's user, a Straddle customer, or an embedded account.
