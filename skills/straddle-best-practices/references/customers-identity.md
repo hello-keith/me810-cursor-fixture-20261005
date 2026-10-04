@@ -46,8 +46,8 @@ Identity reason codes (I-codes, and R-codes from the reputation check such as R1
 - On `rejected`, don't create paykeys or payments, and show the customer a neutral message, never the scores or codes.
 - For businesses, collect the KYB fields and representatives up front, and expect more modules in the breakdown.
 - Keep PII server-side: send `dob`, `ssn`, and `ein` from your backend, never log them, and don't store them unless you must. Use unmasked reads only when a person needs them, and keep their output out of logs.
-- Keep one customer per user of your app, keyed by your app's own user ID. Set the customer's `external_id` to that ID when you create it, store the customer `id` against the user, and reuse that customer when the user pays again. To find a customer whose `id` you didn't store, use `listCustomers` filtered by `external_id`.
-- Never create a customer per checkout or order, because a customer's email is unique on the account (above). Don't key a customer on an email typed at checkout when there's no app user behind it. How your app identifies its users, by a login, an account, or its own guest record, is your app's decision, and if its own user ID is an email, that's its call.
+- Keep one customer per real buyer, keyed by your app's own ID for that buyer: a login, an account, or a guest record your app finds again when the same buyer comes back. Set the customer's `external_id` to that ID when you create it, store the customer `id` against the buyer, and reuse that customer when the buyer pays again. To find a customer whose `id` you didn't store, use `listCustomers` filtered by `external_id`.
+- Never create a customer per checkout or order, and never a new app record per checkout or order that then gets its own customer, because a customer's email is unique on the account (above). This rules out every option you list too, even one whose drawback you name. Don't key a customer on an email typed at checkout when there's no app user behind it. How your app recognizes a returning buyer is your app's decision, and if its own user ID is an email, that's its call.
 
 ## Events and Sandbox outcomes
 
