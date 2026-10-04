@@ -1,0 +1,6 @@
+{
+  "name": "straddle-eval-env-fixture",
+  "version": "0.0.0",
+  "description": "Eval-only fixture: a Stop hook checks the dues service's existing and planned behavior without network.",
+  "author": { "name": "Straddle Developer Kit (eval fixture)" }
+}
