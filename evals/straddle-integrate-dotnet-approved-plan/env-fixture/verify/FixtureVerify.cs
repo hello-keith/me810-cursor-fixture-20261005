@@ -64,13 +64,33 @@ public class FixtureVerifyStraddleCharges
         Environment.SetEnvironmentVariable("STRADDLE_ENVIRONMENT", environment);
     }
 
+    // The overload a C# caller passing the plan's five arguments binds to: its first five parameter types are the plan's
+    // and every later parameter is optional. With several, the one with the fewest parameters wins.
+    static MethodInfo ChargeDuesForThePlansCall()
+    {
+        Type[] planned = { typeof(StraddleClient), typeof(string), typeof(string), typeof(int), typeof(string) };
+        var callable = typeof(Payments).GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(method => method.Name == "ChargeDues")
+            .Where(method => method.GetParameters() is var parameters
+                && parameters.Length >= planned.Length
+                && parameters.Take(planned.Length).Select(p => p.ParameterType).SequenceEqual(planned)
+                && parameters.Skip(planned.Length).All(p => p.IsOptional))
+            .OrderBy(method => method.GetParameters().Length)
+            .ToList();
+        if (callable.Count == 0)
+            Assert.Fail("no public static Payments.ChargeDues(StraddleClient, string, string, int, string) whose later parameters are all optional");
+        if (callable.Count > 1 && callable[1].GetParameters().Length == callable[0].GetParameters().Length)
+            Assert.Fail($"ambiguous ChargeDues overloads for the plan's call: {callable[0]} and {callable[1]}");
+        return callable[0];
+    }
+
     static async Task<(HttpRequestMessage Request, JsonElement Body)> Charge(string member)
     {
         SetConfiguration("synthetic-verify-key", "sandbox");
         var handler = new CaptureHandler();
         var client = StraddleClientFactory.Build()
             .WithOptions(options => options with { HttpClient = new HttpClient(handler), MaxRetries = 0 });
-        var charge = typeof(Payments).GetMethod("ChargeDues", BindingFlags.Public | BindingFlags.Static)!;
+        var charge = ChargeDuesForThePlansCall();
         // Bind like a C# caller: parameters after the plan's five take their declared defaults through Type.Missing, and
         // Invoke still throws if one of them has no default.
         var args = new object[charge.GetParameters().Length];
