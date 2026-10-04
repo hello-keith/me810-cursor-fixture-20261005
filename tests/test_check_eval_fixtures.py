@@ -33,7 +33,8 @@ class CheckEvalFixturesTest(unittest.TestCase):
         return server
 
     def problems(self):
-        return checker.check_mocks(self.evals) + checker.check_write_grants(self.evals)
+        return checker.check_mocks(self.evals) + checker.check_write_grants(self.evals) + \
+            checker.check_frontmatter_fences(self.evals)
 
     def test_repository_fixtures_pass(self):
         self.assertEqual(checker.main(["--root", str(REPO)]), 0)
@@ -75,6 +76,16 @@ class CheckEvalFixturesTest(unittest.TestCase):
         self.case("straddle-best-practices-answer", tools="[Read, Skill]")
         self.assertEqual(self.problems(), [
             "evals/straddle-integrate-no-write/prompt.md: allowed_tools has no Write, but the skill writes its report"])
+
+    def test_frontmatter_with_a_fence_inside_a_value_is_reported(self):
+        graders = self.evals / "straddle-integrate-go" / "graders"
+        self.case("straddle-integrate-go", tools="[Read, Skill, Write]")
+        (graders / "broken.md").write_text("---\ntype: regex\npattern: '^--- PASS: TestX'\nflags: m\n---\n")
+        (graders / "fixed.md").write_text("---\ntype: regex\npattern: '^-{3} PASS: TestX'\nflags: m\n---\n")
+        (graders / "body.md").write_text("---\ntype: llm\n---\n\nPASS if the report has a --- divider.\n")
+        self.assertEqual(self.problems(), [
+            "evals/straddle-integrate-go/graders/broken.md:3: frontmatter contains '---', which the runner reads "
+            "as the closing fence; write it another way, e.g. -{3}"])
 
     def test_write_keeps_only_mocked_tools_and_refuses_incomplete_capture(self):
         server = self.case("straddle-get-started-a", mocks=["search-documentation"])

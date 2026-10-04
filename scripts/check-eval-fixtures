@@ -6,6 +6,8 @@
    serves the mocked tool with a permissive schema and no description, unlike the real server.
 2. A case for a skill that writes its report in every outcome (Integrate, Go Live, Audit, Setup) grants Write, so
    the run doesn't fall back to a Bash heredoc, subagents or a reply that says the report wasn't written.
+3. No prompt or grader frontmatter contains `---` before its closing fence. The runner ends the frontmatter at the
+   first `---` it finds, even inside a value, so the case fails to load with "invalid YAML frontmatter".
 
 `--write SERVER=FILE` rewrites every `mocks/SERVER/_tools.json` from a saved `tools/list` response (a JSON-RPC
 response or its `result`), keeping only the tools each directory mocks. It refuses a capture that lacks one.
@@ -89,6 +91,19 @@ def check_write_grants(evals):
     return problems
 
 
+def check_frontmatter_fences(evals):
+    problems = []
+    for path in sorted([*evals.glob("*/prompt.md"), *evals.glob("*/graders/*.md")]):
+        lines = path.read_text().splitlines()
+        if not lines or lines[0] != "---" or "---" not in lines[1:]:
+            continue
+        for number, line in enumerate(lines[1:lines.index("---", 1)], start=2):
+            if "---" in line:
+                problems.append(f"evals/{path.relative_to(evals).as_posix()}:{number}: frontmatter contains '---', "
+                                "which the runner reads as the closing fence; write it another way, e.g. -{3}")
+    return problems
+
+
 def write_listings(evals, server, capture):
     by_name = {t["name"]: t for t in listing(json.loads(Path(capture).read_text()))}
     written = []
@@ -118,7 +133,7 @@ def main(argv=None):
     for spec in args.write:
         server, _, capture = spec.partition("=")
         print(f"{server}: wrote {len(write_listings(evals, server, capture))} {TOOLS_FILE} files")
-    problems = check_mocks(evals) + check_write_grants(evals)
+    problems = check_mocks(evals) + check_write_grants(evals) + check_frontmatter_fences(evals)
     for problem in problems:
         print(problem)
     print(f"{len(problems)} problem(s)" if problems else "eval fixtures ok")
