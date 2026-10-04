@@ -71,7 +71,12 @@ public class FixtureVerifyStraddleCharges
         var client = StraddleClientFactory.Build()
             .WithOptions(options => options with { HttpClient = new HttpClient(handler), MaxRetries = 0 });
         var charge = typeof(Payments).GetMethod("ChargeDues", BindingFlags.Public | BindingFlags.Static)!;
-        var result = charge.Invoke(null, new object[] { client, member, "paykey-token-full-7c1d", 4500, "192.0.2.10" });
+        // Bind like a C# caller: parameters after the plan's five take their declared defaults through Type.Missing, and
+        // Invoke still throws if one of them has no default.
+        var args = new object[charge.GetParameters().Length];
+        Array.Fill(args, Type.Missing);
+        new object[] { client, member, "paykey-token-full-7c1d", 4500, "192.0.2.10" }.CopyTo(args, 0);
+        var result = charge.Invoke(null, args);
         if (result is Task task)
             await task;
         Assert.Single(handler.Sent);
