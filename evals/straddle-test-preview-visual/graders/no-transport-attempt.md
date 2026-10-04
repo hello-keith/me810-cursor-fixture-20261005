@@ -1,7 +1,7 @@
 ---
 type: regex
 target: trace
-pattern: 'Connection error\.|dial tcp [^\s"\\]+: connect|ECONNREFUSED|fetch failed'
+pattern: '(?<!\x27)(?<!\\")(?:Connection error\.|TypeError: fetch failed|connect ECONNREFUSED [^\s"\\]+|dial tcp [^\s"\\]+: connect)'
 match: not_contains
 arm: both
 ---
