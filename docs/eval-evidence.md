@@ -17,7 +17,7 @@ Exit 0 means only that these integrity checks found no gap. It is not a candidat
 | `trace-elided:<grader>` | The judge saw only 24 of the trace's events. |
 | `trace-truncated:<grader>` | The judge text was cut at 100,000 chars. |
 
-A `focus: trace` judge sees every `\n`-separated trace event up to 24, otherwise the first and last 12 around a `[…N messages elided…]` marker. Judge text over 100,000 chars is then cut to its first 80,000 and last 20,000. The checker rebuilds that view from the trace and compares it with the kept `evidence`; it matched all 15 kept trace-judge inputs of `combined-c2bae0e` and `combined-c2bae0e-r4` byte for byte. A PASS from a judge that didn't see the whole trace is reported as `trace-elided`, so it can't stand in for a full-trajectory check.
+A `focus: trace` judge sees every `\n`-separated trace event up to 24, otherwise the first and last 12 around a `[…N messages elided…]` marker. Judge text over 100,000 chars is then cut to its first 80,000 and last 20,000. The runner counts and slices JavaScript UTF-16 code units, so an emoji counts as 2 and a cut can split one; the checker does the same. The checker rebuilds that view from the trace and compares it with the kept `evidence`; it matched all 15 kept trace-judge inputs of `combined-c2bae0e` and `combined-c2bae0e-r4` byte for byte. A PASS from a judge that didn't see the whole trace is reported as `trace-elided`, so it can't stand in for a full-trajectory check.
 
 Each line also carries the run's `permission_denials`, verbatim from the trace's `result` event. Denials are diagnostics shown beside the verdict, not gaps.
 
@@ -44,7 +44,7 @@ scripts/eval-evidence-check --trace-root <copy of the eval host's /> check --exp
   --export <new dir> <results dir or aggregate-result.json>...
 ```
 
-Each run prints one JSON line: `case`, `run`, `verdict` (the original PASS, FAIL or ERROR), `evidence_integrity` (`complete` or `incomplete`), `reasons`, `denials`, `case_plugins_excluded`, `trace` and `aggregate`. Exit 1 means at least one run has a gap. Exit 2 means it couldn't check: an empty or partial results directory, an unreadable aggregate, an expected identity with an empty field, or an export that would overwrite earlier files.
+Each run prints one JSON line: `case`, `run`, `verdict` (the original PASS, FAIL or ERROR), `evidence_integrity` (`complete` or `incomplete`), `reasons`, `denials`, `case_plugins_excluded`, `trace` and `aggregate`. Exit 1 means at least one run has a gap. Exit 2 means it couldn't check. It validates every aggregate before printing any run line, and exits 2 for an empty or partial results directory, an unreadable aggregate, a case that keeps fewer or more runs than its `runsPerCase` (`missing-run-evidence`), a run with neither a boolean `passed` nor an `error` (its verdict is unknown, so the checker won't invent one), or an expected identity with an empty field. It also exits 2 rather than write an export that would overwrite earlier files.
 
 `--trace-root` resolves each run's absolute `tracePath` under a local copy, for traces copied off the eval host. `--export` writes, for every run with a `focus: trace` grader, `<case>/run-N/trace.jsonl` (a byte copy) and `<case>/run-N/<grader>.json` (criteria, original verdict and votes, the exact judge input, and the trace's event count and sha256). It refuses an existing directory, a case or run seen twice, and a case or grader name that isn't a safe file name.
 

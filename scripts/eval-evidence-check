@@ -23,7 +23,8 @@ IDENTITY_KEYS = ("claude_code_version", "model", "judge_model", "apiKeySource", 
 SAFE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 # The native runner shows a `focus: trace` judge the trace's "\n"-separated events: all of them up to 24, else the
 # first and last 12 around an elision marker; then it cuts judge text over 100,000 chars to its first 80,000 and last
-# 20,000. judge_view reproduces all 15 retained trace-judge inputs of combined-c2bae0e and -r4 byte for byte.
+# 20,000. Its chars are JavaScript UTF-16 code units, so an emoji counts 2 and a cut can split one. judge_view
+# reproduces all 15 retained trace-judge inputs of combined-c2bae0e and -r4 byte for byte.
 WINDOW, HEAD, CAP, CAP_HEAD, CAP_TAIL = 24, 12, 100_000, 80_000, 20_000
 
 
@@ -42,9 +43,11 @@ def judge_view(raw):
     elided = max(len(lines) - WINDOW, 0)
     text = "\n".join(lines) if not elided else (
         "\n".join(lines[:HEAD]) + f"\n[…{elided} messages elided…]\n" + "\n".join(lines[-HEAD:]))
-    cut = max(len(text) - CAP, 0)
+    units = text.encode("utf-16-le", "surrogatepass")
+    cut = max(len(units) // 2 - CAP, 0)
     if cut:
-        text = text[:CAP_HEAD] + f"\n[…{cut} chars elided…]\n" + text[-CAP_TAIL:]
+        text = (units[:CAP_HEAD * 2].decode("utf-16-le", "surrogatepass") + f"\n[…{cut} chars elided…]\n"
+                + units[-CAP_TAIL * 2:].decode("utf-16-le", "surrogatepass"))
     return text, elided, cut
 
 
@@ -56,12 +59,21 @@ def aggregates(paths):
         raise EvidenceError(f"no aggregate-result.json in {', '.join(map(str, paths))}")
     for path in found:
         try:
-            result = json.loads(path.read_text())
+            result = json.loads(path.read_bytes())
             cases = [(case, case["arms"]["with"]) for case in result["cases"]]
-        except (OSError, json.JSONDecodeError, KeyError, TypeError) as error:
+        except (OSError, ValueError, KeyError, TypeError) as error:
             raise EvidenceError(f"{path}: can't read this aggregate result ({type(error).__name__}: {error})") from None
-        if result.get("partial") or not cases or not all(runs for _, runs in cases):
+        if result.get("partial") or not cases:
             raise EvidenceError(f"{path}: partial or empty aggregate result, its runs can't all be checked")
+        for case, runs in cases:
+            if not isinstance(runs, list) or len(runs) != case.get("runsPerCase"):
+                raise EvidenceError(f"{path}: missing-run-evidence: {case.get('name')} keeps "
+                                    f"{len(runs) if isinstance(runs, list) else 0} of {case.get('runsPerCase')} "
+                                    "declared runs")
+            for number, run in enumerate(runs, 1):
+                if not isinstance(run, dict) or run.get("error") is None and not isinstance(run.get("passed"), bool):
+                    raise EvidenceError(f"{path}: {case.get('name')} run {number} keeps no boolean passed and no "
+                                        "error, so its original verdict is unknown")
         yield path, result, cases
 
 
@@ -77,7 +89,10 @@ def read_trace(path):
     """(raw text, events, reason); events is None when the trace is missing or unreadable."""
     if path is None or not path.is_file():
         return None, None, f"trace-missing: {path}"
-    raw = path.read_text()
+    try:
+        raw = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return None, None, "trace-unreadable: not UTF-8"
     events = []
     for number, line in enumerate(trace_lines(raw), 1):
         try:
@@ -157,7 +172,7 @@ def check_run(expected, result, case, run, trace_root):
                 reasons.append(f"trace-elided:{grader['name']} judge saw {WINDOW} of {len(events)} events")
             if cut:
                 reasons.append(f"trace-truncated:{grader['name']} judge didn't see {cut} chars")
-    verdict = "ERROR" if run.get("error") is not None else "PASS" if run.get("passed") is True else "FAIL"
+    verdict = "ERROR" if run.get("error") is not None else "PASS" if run["passed"] else "FAIL"
     return {"case": case["name"], "verdict": verdict, "evidence_integrity": "incomplete" if reasons else "complete",
             "reasons": reasons, "denials": denials, "case_plugins_excluded": excluded,
             "trace": str(path) if path else None}, raw, events
@@ -184,7 +199,7 @@ def export(folder, case, run, path, events):
                       "trace_sha256": None if events is None else hashlib.sha256(path.read_bytes()).hexdigest(),
                       "trace_source": run.get("tracePath")}
             with open(folder / f"{grader['name']}.json", "x") as out:
-                out.write(json.dumps(record, indent=1, ensure_ascii=False) + "\n")
+                out.write(json.dumps(record, indent=1) + "\n")
     except FileExistsError as error:
         raise EvidenceError(f"{error.filename}: already exported (a case/run appears twice), not overwriting") from None
 
@@ -200,14 +215,14 @@ def check(paths, expected_path, trace_root, export_dir):
     if export_dir and export_dir.exists():
         raise EvidenceError(f"{export_dir}: already exists, not overwriting retained evidence")
     totals, incomplete = dict.fromkeys(("PASS", "FAIL", "ERROR"), 0), 0
-    for aggregate, result, cases in aggregates(paths):
+    for aggregate, result, cases in list(aggregates(paths)):
         for case, runs in cases:
             for number, run in enumerate(runs, 1):
                 try:
                     line, raw, events = check_run(expected, result, case, run, trace_root)
                 except (KeyError, TypeError, AttributeError) as error:
                     raise EvidenceError(f"{aggregate}: unexpected shape ({type(error).__name__}: {error})") from None
-                print(json.dumps({**line, "run": number, "aggregate": str(aggregate)}, ensure_ascii=False))
+                print(json.dumps({**line, "run": number, "aggregate": str(aggregate)}))
                 totals[line["verdict"]] += 1
                 incomplete += line["evidence_integrity"] == "incomplete"
                 if export_dir and trace_graders(case):

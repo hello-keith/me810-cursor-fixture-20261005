@@ -31,10 +31,21 @@ def done(denials=()):
 
 
 def native_view(lines):
-    """The runner's `focus: trace` judge input for a trace under 100,000 chars."""
-    if len(lines) <= 24:
-        return "\n".join(lines)
-    return "\n".join(lines[:12]) + f"\n[…{len(lines) - 24} messages elided…]\n" + "\n".join(lines[-12:])
+    """The runner's `focus: trace` judge input. Its JavaScript cap counts and slices UTF-16 code units."""
+    text = "\n".join(lines) if len(lines) <= 24 else (
+        "\n".join(lines[:12]) + f"\n[…{len(lines) - 24} messages elided…]\n" + "\n".join(lines[-12:]))
+    units = text.encode("utf-16-le", "surrogatepass")
+    if len(units) > 200_000:
+        text = (units[:160_000].decode("utf-16-le", "surrogatepass")
+                + f"\n[…{len(units) // 2 - 100_000} chars elided…]\n"
+                + units[-40_000:].decode("utf-16-le", "surrogatepass"))
+    return text
+
+
+def edit(path, change):
+    aggregate = json.loads(path.read_text())
+    change(aggregate)
+    path.write_text(json.dumps(aggregate))
 
 
 class EvalEvidenceCheckTest(unittest.TestCase):
@@ -48,12 +59,12 @@ class EvalEvidenceCheckTest(unittest.TestCase):
     def write(self, events, case="straddle-plan-asks-decisions", passed=True, evidence=None, name="a"):
         """A one-run aggregate whose `judge` grader has focus: trace; evidence defaults to the native judge view."""
         lines = events if isinstance(events, list) and all(isinstance(e, str) for e in events) else None
-        lines = lines or [json.dumps(event) for event in events]
+        lines = lines or [json.dumps(event, ensure_ascii=False) for event in events]
         trace = self.dir / name / "trace.jsonl"
         trace.parent.mkdir(parents=True)
-        trace.write_text("\n".join(lines) + "\n")
+        trace.write_text("\n".join(lines) + "\n", encoding="utf-8")
         aggregate = {"claudeVersion": "2.1.289", "suite": {"root": ROOT, "judgeModel": "claude-opus-5-5"},
-                     "cases": [{"name": case, "dir": f"evals/{case}",
+                     "cases": [{"name": case, "dir": f"evals/{case}", "runsPerCase": 1,
                                 "graders": [{"name": "judge", "type": "llm",
                                              "config": {"criteria": "asks first", "focus": "trace"}}],
                                 "arms": {"with": [{"passed": passed, "error": None, "tracePath": str(trace),
@@ -160,6 +171,29 @@ class EvalEvidenceCheckTest(unittest.TestCase):
         result, _ = self.check(unsafe, "--export", self.dir / "fresh")
         self.assertEqual((result.returncode, (self.dir / "escape").exists()), (2, False))
         self.assertIn('["../escape"]: not a safe file name', result.stderr)
+
+    def test_refuses_a_run_without_its_verdict_or_a_missing_run_but_keeps_an_error(self):
+        path, _ = self.write([init(), said("ok"), done()])
+        edit(path, lambda aggregate: aggregate["cases"][0]["arms"]["with"][0].pop("passed"))
+        result = run("check", "--expect", self.expect, path)
+        self.assertEqual((result.returncode, result.stdout, result.stderr), (2, "", (
+            f"eval-evidence-check: {path}: straddle-plan-asks-decisions run 1 keeps no boolean passed and no error, "
+            "so its original verdict is unknown\n")))
+        edit(path, lambda aggregate: aggregate["cases"][0]["arms"]["with"][0].update(error="timed out after 300s"))
+        result, (line,) = self.check(path)
+        self.assertEqual((result.returncode, line["verdict"]), (0, "ERROR"))
+        edit(path, lambda aggregate: aggregate["cases"][0].update(runsPerCase=3))
+        result = run("check", "--expect", self.expect, path)
+        self.assertEqual((result.returncode, result.stdout, result.stderr), (2, "", (
+            f"eval-evidence-check: {path}: missing-run-evidence: straddle-plan-asks-decisions keeps 1 of 3 declared "
+            "runs\n")))
+
+    def test_judge_text_cap_counts_utf16_code_units_like_the_native_judge(self):
+        # 60,429 code points but 120,429 UTF-16 units; the 80,000-unit head ends inside an emoji.
+        path, _ = self.write([init(), said("😀" * 60_000), done()])
+        result, (line,) = self.check(path)
+        self.assertEqual((result.returncode, line["reasons"]),
+                         (1, ["trace-truncated:judge judge didn't see 20429 chars"]))
 
 
 if __name__ == "__main__":
