@@ -28,7 +28,7 @@ Native installation in each client has not been accepted yet. The commands below
 | `.github/workflows/release.yml` | GitHub Actions, on a `v*` tag push | The plugin release cut. See [Plugin releases](#plugin-releases). |
 | `third_party/LICENSES.md` | Maintainers | Every vendored third-party file and its license. A skill that vendors a file also carries the notice in its own `references/third-party-licenses.md`, so skills-only installs keep it. |
 
-The version is `0.1.0` in `plugin.json`, all three native manifests, and both version fields in `.claude-plugin/marketplace.json`. Clients stay on a release until the version changes, so bump every copy together. The validator fails when they differ.
+The version is `0.1.1` in `plugin.json`, all three native manifests, and both version fields in `.claude-plugin/marketplace.json`. Clients stay on a release until the version changes, so bump every copy together. The validator fails when they differ.
 
 ## MCP servers and credentials
 
@@ -242,6 +242,8 @@ Test accepts either approved plan: `straddle-integration-plan.md` from Plan and 
 Since ME-914, Test records an approval the developer gives in the conversation in the chosen plan's two approval lines, as Integrate's Recorded approval does, with `recorded by straddle-test`. The Wizard counts a Test run only at the plan's recorded hash, so before this a run on a spoken approval stayed unfinished. `straddle-test-approved-in-conversation` approves the edited plan in the request and checks the recorded hash and the evidence's `Plan hash:`, both at the current file's hash.
 
 Each run section of `straddle-test-evidence.md` records `Straddle API requests sent`, the number of Sandbox writes and authenticated reads the run sent to its target, or 0. Best practices require a run that missing configuration stops to say it sent zero requests, but the evidence template had no place to record that. Some runs wrote it into the Target line or the scenario cells, and others left it out. One `straddle-test-migration-plan` run at `c2bae0e` left it out, and its `evidence-uses-migration-plan` grader, which requires the statement, failed.
+
+The `evidence-uses-migration-plan` grader accepts offline-only Configuration and Account scope rows that are labeled `offline-tested` and cite an offline test, wherever they appear in the evidence. It fails any scenario that needs a Straddle request when it is reported as passed, and any result labeled `live-observed` or presented as Sandbox proof. One eb91a70 run (#1) failed only because of where those rows sat in the table.
 
 ### Early blocked Integrate replies (ME-670)
 

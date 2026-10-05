@@ -1,11 +1,11 @@
 {
   "kit": {
-    "status": "release"
+    "status": "candidate"
   },
   "plugin_repository": "straddle-build/skills",
   "plugin_release": {
-    "tag": "v0.1.0",
-    "checksum_url": "https://github.com/straddle-build/skills/releases/download/v0.1.0/SHA256SUMS"
+    "tag": "v0.1.1",
+    "checksum_url": "https://github.com/straddle-build/skills/releases/download/v0.1.1/SHA256SUMS"
   },
   "wizard": {
     "package": "@straddlecom/wizard",
@@ -249,8 +249,8 @@
     {
       "id": "walkthrough-approval",
       "requirement": "Keith's explicit yes on the source and client walkthrough before publication (ME-666, ME-668, ME-669, ME-670, ME-815)",
-      "status": "passed",
-      "evidence": "Keith approved the skills v0.1.0 release in chat on 2026-10-05 (relayed by Main); release commit and archive sha256: plugin source 260614fa91a361902159f8726643211f0517916e, straddle-plugin-0.1.0.zip sha256 e4e66555eb23ce9b845ffcab99b31e628189cf99566810f6b3be66caa15dc6c0"
+      "status": "open",
+      "evidence": "Not given for v0.1.1. Keith's 2026-10-05 approval covered v0.1.0 only: plugin source 260614fa91a361902159f8726643211f0517916e, straddle-plugin-0.1.0.zip sha256 e4e66555eb23ce9b845ffcab99b31e628189cf99566810f6b3be66caa15dc6c0"
     },
     {
       "id": "wizard-npm-publication",
@@ -261,14 +261,14 @@
     {
       "id": "plugin-release-tag",
       "requirement": "Separately approved tag under the version-tag immutability ruleset, with the plugin checksum published (ME-810)",
-      "status": "passed",
-      "evidence": "Keith approved tag v0.1.0 in chat on 2026-10-05 (relayed by Main). Ruleset version-tag-immutability (id 22067157) active on refs/tags/v* with deletion and update rules and no bypass actors; immutable releases enabled on straddle-build/skills (GET /repos/straddle-build/skills/immutable-releases returns enabled true). The plugin checksum is published by the tag's release.yml run, which attaches SHA256SUMS in the same gh release create as straddle-plugin-0.1.0.zip (sha256 e4e66555eb23ce9b845ffcab99b31e628189cf99566810f6b3be66caa15dc6c0)"
+      "status": "open",
+      "evidence": "Tag v0.1.1 is not approved for publication. On 2026-10-05 Keith permitted only an isolated, unpushed local v0.1.1 tag after merge, to run the exact-merge-commit release check. Ruleset version-tag-immutability (id 22067157) and immutable releases on straddle-build/skills were recorded for v0.1.0"
     },
     {
       "id": "clean-client-acceptance",
       "requirement": "Manifest-generated install, update and remove instructions pass in clean Claude Code, Codex and Cursor environments (ME-810, ME-659)",
-      "status": "deferred",
-      "evidence": "Deferred by Keith 2026-10-05: release-channel install/update/remove in clean Claude Code, Codex and Cursor runs right after tag v0.1.0; failures fix forward in the next release; owner Main (agent conductor)"
+      "status": "open",
+      "evidence": "Not run. On 2026-10-05 Keith deferred it to run right after tag v0.1.0 (owner Main, fix forward in the next release); no result of that run is recorded, and no decision covers v0.1.1"
     }
   ]
 }
