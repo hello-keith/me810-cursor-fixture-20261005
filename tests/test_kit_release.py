@@ -74,7 +74,11 @@ class KitReleaseTest(unittest.TestCase):
             source = REPO / rel
             (shutil.copytree if source.is_dir() else shutil.copy)(source, self.root / rel)
         inputs = json.loads((REPO / "kit" / "release-inputs.json").read_text())
+        # A candidate baseline, whatever release state the repository's own inputs record.
+        inputs["kit"], inputs["plugin_release"] = {"status": "candidate"}, None
         inputs["wizard"] = wizard_input(wizard_pack())
+        for gate in inputs["gates"]:
+            gate.update(status="open", evidence=None)
         self.write_inputs(inputs)
         git(self.root, "init", "-q")
         self.commit_all("source")
