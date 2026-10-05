@@ -1,8 +1,8 @@
 ---
-type: tool_used
-tool: Bash
-input_match: '\bstraddle\s[^"]*\bdoctor\b'
-min: 0
-max: 0
+type: regex
+target: { source: file, path: .straddle-fixture-calls.log }
+pattern: '(^|\s)(doctor|accounts)(\s|$)'
+flags: m
+match: not_contains
 arm: both
 ---

@@ -34,3 +34,5 @@ We're a SaaS platform on Straddle. I created a FIFO endpoint in the Straddle San
 ```
 
 Our Straddle integration plan for this receiver is approved. Write the Express route in src/fifo.ts and register it in src/server.ts. Store events with saveEvents from src/store.ts. Don't create anything in Straddle.
+
+The Straddle CLI for this workspace is at `./bin/straddle`; use that path if you inspect the CLI.

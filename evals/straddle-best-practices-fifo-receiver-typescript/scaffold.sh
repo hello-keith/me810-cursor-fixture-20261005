@@ -1,5 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
+mkdir -p bin
+: > .straddle-fixture-calls.log
+printf '%s\n' '.straddle-fixture-calls.log' > .gitignore
+cat > bin/straddle <<'CLI'
+#!/usr/bin/env bash
+set -euo pipefail
+root="$(cd "$(dirname "$0")/.." && pwd)"
+for arg in "$@"; do
+  if [[ "$arg" == --help || "$arg" == -h ]]; then
+    echo 'Offline CLI: --version, auth status --agent, agent-context'
+    exit 0
+  fi
+done
+while [[ "${1:-}" == --agent || "${1:-}" == --json || "${1:-}" == --no-input || "${1:-}" == --yes ]]; do shift; done
+case "$*" in
+  --version|version) echo 'straddle v1.0.3' ;;
+  'auth status --agent'|'auth status --json') echo '{"authenticated":false,"source":null,"verified":false}' ;;
+  agent-context|'agent-context --pretty') echo '{"runtime_context":{"environment":"https://sandbox.straddle.com","integration_type":"saas","acting_account":null}}' ;;
+  doctor|doctor\ *|accounts|accounts\ *)
+    printf '%s\n' "$*" >> "$root/.straddle-fixture-calls.log"
+    echo 'Offline CLI: network commands are refused' >&2
+    exit 97 ;;
+  *) echo "Offline CLI: unsupported command: $*" >&2; exit 2 ;;
+esac
+CLI
+chmod +x bin/straddle
 mkdir -p src
 cat > package.json <<'JSON'
 {
