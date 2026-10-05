@@ -1,9 +1,12 @@
 {
   "kit": {
-    "status": "candidate"
+    "status": "release"
   },
   "plugin_repository": "straddle-build/skills",
-  "plugin_release": null,
+  "plugin_release": {
+    "tag": "v0.1.0",
+    "checksum_url": "https://github.com/straddle-build/skills/releases/download/v0.1.0/SHA256SUMS"
+  },
   "wizard": {
     "package": "@straddlecom/wizard",
     "version": "0.1.0",
