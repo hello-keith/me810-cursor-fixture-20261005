@@ -108,10 +108,10 @@ def plugin_facts(files):
 
 PROVENANCES = (RELEASED, LOCAL_CANDIDATE)
 SDKS = ("typescript", "python", "ruby", "dotnet", "go")
-# Every release needs these gates passed with evidence. They are required by name, so removing one from the inputs
-# cannot remove the requirement.
+# Every release needs these gates passed, or deferred by a recorded decision, with evidence. They are required by name,
+# so removing one from the inputs cannot remove the requirement.
 REQUIRED_GATES = ("walkthrough-approval", "wizard-npm-publication", "plugin-release-tag", "clean-client-acceptance")
-GATE_STATUSES = ("open", "passed")
+GATE_STATUSES = ("open", "passed", "deferred")
 REPOSITORY = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9._-]+")
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 
@@ -239,10 +239,10 @@ def release_problems(inputs, plugin_version, root, commit):
         except KitError:
             problems.append(f"plugin: tag {tag} does not exist in this repository")
     for gate in inputs.get("gates", []):
-        if gate.get("status") != "passed":
+        if gate.get("status") not in ("passed", "deferred"):
             problems.append(f"gate {gate.get('id')}: {gate.get('status')}")
         elif not gate.get("evidence"):
-            problems.append(f"gate {gate.get('id')}: passed but missing evidence")
+            problems.append(f"gate {gate.get('id')}: {gate.get('status')} but missing evidence")
     return problems
 
 

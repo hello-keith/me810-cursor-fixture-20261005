@@ -74,7 +74,11 @@ class KitReleaseTest(unittest.TestCase):
             source = REPO / rel
             (shutil.copytree if source.is_dir() else shutil.copy)(source, self.root / rel)
         inputs = json.loads((REPO / "kit" / "release-inputs.json").read_text())
+        # A candidate baseline, whatever release state the repository's own inputs record.
+        inputs["kit"], inputs["plugin_release"] = {"status": "candidate"}, None
         inputs["wizard"] = wizard_input(wizard_pack())
+        for gate in inputs["gates"]:
+            gate.update(status="open", evidence=None)
         self.write_inputs(inputs)
         git(self.root, "init", "-q")
         self.commit_all("source")
@@ -296,6 +300,23 @@ class KitReleaseTest(unittest.TestCase):
         code, output = self.run_kit("check", "--release")
         self.assertEqual(code, 1)
         self.assertIn("gate walkthrough-approval: passed but missing evidence", output)
+
+    def test_deferred_gate_releases_only_with_evidence(self):
+        inputs = self.released_inputs()
+        inputs["gates"][3].update(status="deferred", evidence="Deferred by the release owner until after the tag")
+        self.write_inputs(inputs)
+        self.assertEqual(self.run_kit("generate")[0], 0)
+        self.commit_all("deferred gate")
+        git(self.root, "tag", "v0.1.0")
+        self.assertEqual(self.run_kit("check", "--release")[0], 0)
+        inputs["gates"][3]["evidence"] = ""
+        self.write_inputs(inputs)
+        self.assertEqual(self.run_kit("generate")[0], 0)
+        self.commit_all("deferred gate without evidence")
+        git(self.root, "tag", "-f", "v0.1.0")
+        code, output = self.run_kit("check", "--release")
+        self.assertEqual(code, 1)
+        self.assertIn("gate clean-client-acceptance: deferred but missing evidence", output)
 
     def test_wizard_tarball_must_match_and_accept_the_plugin_release(self):
         self.assertEqual(self.run_kit("generate")[0], 0)
