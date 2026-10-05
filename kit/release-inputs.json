@@ -9,19 +9,27 @@
   },
   "wizard": {
     "package": "@straddlecom/wizard",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "bin": "wizard",
-    "provenance": "local-candidate",
+    "provenance": "released",
+    "evidence": {
+      "url": "https://registry.npmjs.org/@straddlecom/wizard/0.1.1",
+      "digest": {
+        "algorithm": "sha512",
+        "value": "sha512-wnWYdryNl4z1K71AM2HeHbbqRK0JMoekWTK49d8ezyLH+FPdQRhHkVqnIvVhcXlTJ6U9rcqms1K/Jmxud+Y6NA==",
+        "of": "wizard-0.1.1.tgz (npm dist.integrity)"
+      }
+    },
     "artifact": {
-      "file": "straddlecom-wizard-0.1.0.tgz",
-      "bytes": 44240,
-      "sha256": "0ec4ffa1b142c8684cc24f555d35cbdc0d93002b4bfd69cff60c357f2171437b",
-      "integrity": "sha512-ed87wX0niYYdAq0gTyM/mYyIUgFr/NMM0HR+DJhQaxvxZYHxmfpn18JZcWQTN/SClWUBOq2AzwSB492++2VPLw=="
+      "file": "straddlecom-wizard-0.1.1.tgz",
+      "url": "https://registry.npmjs.org/@straddlecom/wizard/-/wizard-0.1.1.tgz",
+      "bytes": 86132,
+      "sha256": "b7464ddecb3fee543a4cbc7c45dd826b34cb3398f412f28497e3a24ce75ab0c2",
+      "integrity": "sha512-wnWYdryNl4z1K71AM2HeHbbqRK0JMoekWTK49d8ezyLH+FPdQRhHkVqnIvVhcXlTJ6U9rcqms1K/Jmxud+Y6NA=="
     },
     "source": {
       "repository": "straddle-build/wizard",
-      "commit": "6e6b7bcc58f73fcb69dc61818d4542c7df679dc4",
-      "note": "npm pack of wizard PR #5 head (feat/me-891-plugin-releases), before merge to main; not published to npm. This Wizard runs the newest 0.1.x plugin release instead of a pinned skills commit"
+      "commit": "2ccc47c2c64c1b4bb4d90e379f184cb1f019fe19"
     },
     "plugin_range": "0.1.x"
   },
@@ -247,14 +255,14 @@
     {
       "id": "wizard-npm-publication",
       "requirement": "@straddlecom/wizard installs from npm with provenance, built from straddle-build/wizard (ME-667)",
-      "status": "open",
-      "evidence": null
+      "status": "passed",
+      "evidence": "@straddlecom/wizard 0.1.1 on npm (latest), dist.integrity sha512-wnWYdryNl4z1K71AM2HeHbbqRK0JMoekWTK49d8ezyLH+FPdQRhHkVqnIvVhcXlTJ6U9rcqms1K/Jmxud+Y6NA==, published by trusted publishing from straddle-build/wizard .github/workflows/release.yml at tag v0.1.1, commit 2ccc47c2c64c1b4bb4d90e379f184cb1f019fe19, run https://github.com/straddle-build/wizard/actions/runs/37254492729; SLSA provenance https://registry.npmjs.org/-/npm/v1/attestations/@straddlecom%2fwizard@0.1.1 (Rekor logIndex 3080474669), subject digest equal to dist.integrity; GitHub release https://github.com/straddle-build/wizard/releases/tag/v0.1.1"
     },
     {
       "id": "plugin-release-tag",
       "requirement": "Separately approved tag under the version-tag immutability ruleset, with the plugin checksum published (ME-810)",
-      "status": "open",
-      "evidence": null
+      "status": "passed",
+      "evidence": "Keith approved tag v0.1.0 in chat on 2026-10-05 (relayed by Main). Ruleset version-tag-immutability (id 22067157) active on refs/tags/v* with deletion and update rules and no bypass actors; immutable releases enabled on straddle-build/skills (GET /repos/straddle-build/skills/immutable-releases returns enabled true). The plugin checksum is published by the tag's release.yml run, which attaches SHA256SUMS in the same gh release create as straddle-plugin-0.1.0.zip (sha256 e4e66555eb23ce9b845ffcab99b31e628189cf99566810f6b3be66caa15dc6c0)"
     },
     {
       "id": "clean-client-acceptance",
