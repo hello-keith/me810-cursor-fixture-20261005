@@ -97,7 +97,7 @@ The handler:
 3. **Stores every event in order**, dropping duplicates by `event_id`.
 4. **Commits the last offset** after the batch is stored: `POST` `{"offset": N}`, where `N` is the last item's `offset`. It keeps polling while `done` is `false`.
 
-A `423` means a missing commit, not a transient error to retry.
+A `423` means a missing commit, not a transient error. Return it from the consumer's loop as a fatal error. Never send it to the backoff-and-retry path used for network errors and `5xx`, even when the poll function already labels it, because re-polling on `423` loops forever while new events wait.
 
 ### Ordering status changes
 
