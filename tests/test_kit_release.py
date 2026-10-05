@@ -73,6 +73,14 @@ class KitReleaseTest(unittest.TestCase):
         for rel in PLUGIN_PATHS:
             source = REPO / rel
             (shutil.copytree if source.is_dir() else shutil.copy)(source, self.root / rel)
+        # A fixed fixture version, whatever version the repository's manifests record.
+        for rel in ("plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json",
+                    ".cursor-plugin/plugin.json", ".claude-plugin/marketplace.json"):
+            manifest = json.loads((self.root / rel).read_text())
+            for record in (manifest, manifest.get("metadata", {}), *manifest.get("plugins", [])):
+                if "version" in record:
+                    record["version"] = "0.1.0"
+            (self.root / rel).write_text(json.dumps(manifest, indent=2) + "\n")
         inputs = json.loads((REPO / "kit" / "release-inputs.json").read_text())
         # A candidate baseline, whatever release state the repository's own inputs record.
         inputs["kit"], inputs["plugin_release"] = {"status": "candidate"}, None
