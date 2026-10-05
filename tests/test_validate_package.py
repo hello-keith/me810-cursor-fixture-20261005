@@ -168,13 +168,17 @@ class PackageTest(unittest.TestCase):
         ])
 
     def test_invalid_plugin_name_and_version_drift(self):
-        self.edit_json("plugin.json", lambda v: v.update(name="Straddle_Kit"))
+        self.edit_json("plugin.json", lambda v: v.update(name="Straddle_Kit", version="0.1.0"))
+        for rel in (".claude-plugin/plugin.json", ".codex-plugin/plugin.json"):
+            self.edit_json(rel, lambda v: v.update(version="0.1.0"))
+        self.edit_json(".claude-plugin/marketplace.json", lambda v: v["metadata"].update(version="0.1.0"))
+        self.edit_json(".claude-plugin/marketplace.json", lambda v: v["plugins"][0].update(version="0.1.0"))
         self.edit_json(".cursor-plugin/plugin.json", lambda v: v.update(name="Straddle_Kit", version="0.2.0"))
         self.assertEqual(self.new_gates(), [
             (".claude-plugin/marketplace.json", "package", "must list plugin 'Straddle_Kit' exactly once"),
             (".claude-plugin/plugin.json", "package", "name must match plugin.json name 'Straddle_Kit'"),
             (".codex-plugin/plugin.json", "package", "name must match plugin.json name 'Straddle_Kit'"),
-            (".cursor-plugin/plugin.json", "version", "version must match plugin.json version '0.1.1'"),
+            (".cursor-plugin/plugin.json", "version", "version must match plugin.json version '0.1.0'"),
             ("plugin.json", "agent-plugins",
              "$.name does not match ^(?!.*(?:--|\\.\\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$"),
         ])
