@@ -12,7 +12,7 @@ package consumer
 import "context"
 
 // Store saves events. SaveBatch inserts them in order in one transaction,
-// skipping event IDs already stored, and returns an error when nothing was saved.
+// skipping event IDs already stored. A duplicate-only batch succeeds; any write failure rolls back the batch and returns an error.
 type Store interface {
 	SaveBatch(ctx context.Context, events []Event) error
 }
@@ -30,7 +30,7 @@ cat > straddle-integration-plan.md <<'PLAN'
 ## Status
 
 - Plan state: Approved
-- Approval: 2026-10-02, "The plan is approved.", recorded by straddle-plan, sha256 55f4315ec321a7906725d929b56e275638d7b7878daca02d33cd40ce0863256e
+- Approval: 2026-10-02, "The plan is approved.", recorded by straddle-plan, sha256 54dd43673b53bfd2db47ff6623ab1117b14554c94a910330d0db1145a56a8136
 - Last reviewed: 2026-10-02
 - Repository and branch: ledger, main
 - Straddle skills version: 0.1.0
@@ -54,7 +54,7 @@ Pull events from the polling endpoint already created in the Sandbox dashboard, 
 
 - Language and module: Go 1.22, module example.com/ledger
 - Test command: none configured
-- Entry points: consumer/store.go defines `Store` with `SaveBatch`, which inserts events in order in one transaction, skips stored event IDs, and returns an error when nothing was saved
+- Entry points: consumer/store.go defines `Store` with `SaveBatch`, which inserts events in order in one transaction and skips stored event IDs. A duplicate-only batch succeeds; any write failure rolls back the batch and returns an error.
 
 ## Notifications
 

@@ -94,10 +94,10 @@ The handler:
 
 1. **Chooses its own consumer ID.** Each consumer keeps its own position. Give each independent reader its own ID, and never reuse another tool's.
 2. **Expects a replay on a new consumer.** Observed in Sandbox, not a documented API contract: from `earliest`, a new consumer replayed the endpoint's whole retained history, for every account on the platform, not only this run's resources. The first batch of 50 in the observed run had 32 events from 3 other accounts. Route by `account_id` as [Routing events on a platform](#routing-events-on-a-platform) says, and project only events for resources your application created; store or skip the rest. Starting from `latest` or from a timestamp would avoid the replay, but neither has been tried on a Straddle endpoint.
-3. **Stores every event in order**, dropping duplicates by `event_id`.
+3. **Stores every event in order**, dropping duplicates by `event_id`. A batch containing only stored events is a successful no-op, so its last offset can still be committed after a replay.
 4. **Commits the last offset** after the batch is stored: `POST` `{"offset": N}`, where `N` is the last item's `offset`. It keeps polling while `done` is `false`.
 
-A `423` means a missing commit, not a transient error. Return it from the consumer's loop as a fatal error. Never send it to the backoff-and-retry path used for network errors and `5xx`, even when the poll function already labels it, because re-polling on `423` loops forever while new events wait.
+A `423` means a missing commit, not a transient error. Return it from the consumer's loop as a fatal error. Never send it to the backoff-and-retry path used for network errors and `5xx`, even when the poll function already labels it, because new events queue behind the uncommitted batch.
 
 ### Ordering status changes
 

@@ -17,4 +17,4 @@ STRADDLE_PROGRESS {"skill":"straddle-integrate","step":"02-sources"}
 
 Stop and report when the installed SDK lacks a method or option the plan relies on. Do not substitute raw HTTP or a guessed method.
 
-**Summary for step 3:** SDK package and version, the verified method for each planned operation with its source file, the webhook helper, files to change and files to keep untouched, CLI version and idempotency flag support.
+**Summary for step 3:** SDK package and version, the verified method for each planned operation with its source file, the verification library for the selected endpoint type (the `svix` library, or an existing SDK webhook helper), files to change and files to keep untouched, CLI version and idempotency flag support.
