@@ -22,7 +22,7 @@ Event payloads carry `event_type` (for example `charge.event.v1`), a unique `eve
 
 ## Endpoint types
 
-Straddle offers three endpoint types, all created in the Straddle dashboard. Choose one in the plan; never poll an ordinary API read to discover state changes.
+Straddle offers three endpoint types, each created in the Straddle dashboard. Use the webhook endpoint unless [notifications.md](notifications.md) gives a reason for FIFO or polling, and record the choice in the plan. Never poll an ordinary API read to discover state changes.
 
 ### Webhook endpoint
 
@@ -75,7 +75,7 @@ A `423` means a missing commit, not a transient error to retry.
 
 ### Ordering status changes
 
-Deliveries can arrive out of order ([Sandbox Pay by Bank troubleshooting](https://docs.straddle.com/guides/resources/sandbox-paybybank)). Order a resource's transitions by `data.status_details.changed_at`, the contract's time the status changed, not by arrival time or the `webhook-timestamp` or `svix-timestamp` header, which is the send time.
+Deliveries can arrive out of order ([Sandbox Pay by Bank troubleshooting](https://docs.straddle.com/guides/resources/sandbox-paybybank)). Order a resource's transitions by `data.status_details.changed_at`, the contract's time the status changed, not by arrival time or the `webhook-timestamp` or `svix-timestamp` header, which is the send time. Some events carry no `changed_at`: the R29 paykey block events observed in Sandbox had none ([bridge-and-paykeys.md](bridge-and-paykeys.md#events-and-sandbox-outcomes)). For such an event, use `data.updated_at` in its place in every rule below, and never drop the event for lacking it.
 
 Two transitions can share a `changed_at`. Sandbox emitted `paid` and `reversed` for one charge with the identical value `04:13:41.3663282Z`. That was observed in Sandbox and is not a documented API contract, so handle a tie whether or not production produces one. On a tie, the event later in delivery order is the later transition: the higher polling offset, or the later position in a FIFO batch, with later batches after earlier ones. A webhook endpoint has no delivery order, so there a tie can't be settled from the deliveries. Keep both transitions in the history and don't infer an order from arrival.
 

@@ -20,7 +20,7 @@ Review only the files the step 3 summary lists, and the writes the step 5 summar
 - [ ] No code calls the API MCP's `execute-request`, and none of the fourteen excluded operations is routed anywhere but the SDK.
 - [ ] Notification handling matches [Endpoint types](../../straddle-best-practices/references/receiving-webhooks.md#endpoint-types) for the plan's type: a webhook handler verifies the raw body with headers passed, fails on a missing secret, persists before `2xx`, and ignores duplicates; a FIFO handler does the same with the `svix-*` headers, parses the shape recorded from its endpoint's transformation, and stores each batch whole and in order before `2xx`; a polling consumer commits the last offset after storing each batch.
 - [ ] No loop re-reads a resource for status. Dashboard email appears, if at all, only as a human confirmation.
-- [ ] Onboarding uses the hosted iframe with `env=sandbox` and an external ID, with no React wrapper and no completion callback.
+- [ ] Onboarding uses the hosted iframe with `env=sandbox`, literal or guarded in the rendering file, and an external ID, with no React wrapper and no completion callback.
 - [ ] Repository tests pass, or the failures are reported with their files.
 - [ ] Every Sandbox write executed was in an approved preview row, with the previewed values.
 

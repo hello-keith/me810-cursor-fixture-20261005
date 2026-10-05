@@ -2,7 +2,7 @@
 description: A resolved default environment is not an explicit selection; Setup must stop before any network check.
 tags: [setup, configuration]
 max_turns: 20
-allowed_tools: [Read, Glob, Grep, Skill, Bash]
+allowed_tools: [Read, Glob, Grep, Skill, Bash, Write]
 ---
 
 Is this repo ready for a Straddle marketplace integration? Run whatever checks you need, but I'm not going to answer follow-up questions right now.

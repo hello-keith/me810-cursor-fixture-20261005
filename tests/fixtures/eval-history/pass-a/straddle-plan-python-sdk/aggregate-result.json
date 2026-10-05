@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.286",
+  "startedAt": "2026-10-01T00:18:20.468Z",
+  "durationSeconds": 262,
+  "partial": false,
+  "suite": {
+    "ablation": "none",
+    "modelOverride": "claude-opus-5-5",
+    "judgeModel": "claude-opus-5-5",
+    "caseFilter": "straddle-plan-python-sdk",
+    "threshold": 1
+  },
+  "cases": [
+    {
+      "name": "straddle-plan-python-sdk",
+      "dir": "evals/straddle-plan-python-sdk",
+      "runsPerCase": 3,
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "plan-marks-unresolved",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched (?:bank connection|bank account connection|Bridge)[^\\n]{0,80}\\bunresolved\\b|\\bunresolved\\b[^\\n]{0,80}(?:bank connection|bank account connection|Bridge)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-names-current-version",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\bstraddle\\b[^\\n]{0,40}1\\.0\\.5",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": "straddle-integration-plan.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "python-current-sdk",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS \u2014 note: long file (21700 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "plan-marks-unresolved",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched (?:bank connection|bank account connection|Bridge)[^\\n]{0,80}\\bunresolved\\b|\\bunresolved\\b[^\\n]{0,80}(?:bank connection|bank account connection|Bridge)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-names-current-version",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\bstraddle\\b[^\\n]{0,40}1\\.0\\.5",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": "straddle-integration-plan.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "python-current-sdk",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS \u2014 note: long file (19832 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "error": null,
+            "graders": [
+              {
+                "name": "plan-marks-unresolved",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched (?:bank connection|bank account connection|Bridge)[^\\n]{0,80}\\bunresolved\\b|\\bunresolved\\b[^\\n]{0,80}(?:bank connection|bank account connection|Bridge)",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-names-current-version",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\bstraddle\\b[^\\n]{0,40}1\\.0\\.5",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "plan-written",
+                "passed": true,
+                "weight": 1,
+                "explanation": "straddle-integration-plan.md exists as expected",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "python-current-sdk",
+                "passed": true,
+                "weight": 1,
+                "explanation": "judge votes: PASS PASS PASS \u2014 note: long file (23248 chars); llm judges are noisy on long inputs, prefer a regex grader for large artifacts",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..\u221e)",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 1,
+    "casesPassed": 1,
+    "overallScore": 1,
+    "overallPassRate": 1
+  }
+}

@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Rejudge `focus: trace` graders on the complete trace. Makes 3 judge calls per exported run.
+
+eval-trace-rejudge EXPORT_DIR --out FILE.jsonl
+    EXPORT_DIR is an `eval-evidence-check check --export` directory. Writes one JSON line per run and grader: its
+    native verdict and votes, unchanged, and the votes and majority verdict of the same judge prompt built from the
+    whole trace instead of the native 24-event window.
+
+Exit 0 only if every full-trace verdict is PASS. Exit 1 if any is FAIL or any vote is neither PASS nor FAIL. Exit 2
+if it can't rejudge: usage, an empty or inconsistent export, or a failed judge call. Native results are never changed.
+"""
+
+import argparse
+import hashlib
+import importlib.util
+import json
+import os
+import re
+import subprocess
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from importlib.machinery import SourceFileLoader
+from pathlib import Path
+
+loader = SourceFileLoader("eval_evidence_check", str(Path(__file__).with_name("eval-evidence-check")))
+evidence = importlib.util.module_from_spec(importlib.util.spec_from_loader(loader.name, loader))
+loader.exec_module(evidence)
+
+# The native judge's system prompt, prompt layout, vote count and model, from claude 2.1.289's `plugin eval` runner.
+SYSTEM = "You are a strict, terse evaluation judge for coding-agent traces."
+VOTES, MODEL, TIMEOUT_SECONDS = 3, "claude-opus-5-5", 900
+JUDGE_FLAGS = ["-p", "--model", MODEL, "--system-prompt", SYSTEM, "--tools", "", "--safe-mode", "--setting-sources", "",
+               "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence", "--output-format", "text"]
+
+
+class RejudgeError(Exception):
+    pass
+
+
+def judge_prompt(criteria, trace):
+    return (f"You are grading the output of a coding agent against a criterion.\n\nCriterion:\n{criteria}"
+            f"\n\n\nAgent output (trace):\n{trace}\n\n\nRespond with exactly one word: PASS or FAIL.")
+
+
+def vote(reply):
+    """True for PASS, False for FAIL, None when the reply says both or neither."""
+    passed, failed = re.search(r"\bPASS\b", reply, re.I), re.search(r"\bFAIL\b", reply, re.I)
+    return None if bool(passed) == bool(failed) else bool(passed)
+
+
+def judge(prompt):
+    command = [os.environ.get("CLAUDE_BIN") or "claude", *JUDGE_FLAGS]
+    try:
+        done = subprocess.run(command, input=prompt, capture_output=True, text=True, timeout=TIMEOUT_SECONDS)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RejudgeError(f"judge call failed: {error}") from None
+    if done.returncode != 0:
+        raise RejudgeError(f"judge call exited {done.returncode}: {done.stderr.strip()[-500:]}")
+    return vote(done.stdout)
+
+
+def exported_runs(export_dir):
+    """Every exported (record, run number, full trace text, event count), checked before any judge call."""
+    found = sorted(export_dir.glob("*/run-*/*.json"), key=lambda path: (path.parts[-3], int(path.parent.name[4:]),
+                                                                         path.stem))
+    if not found:
+        raise RejudgeError(f"{export_dir}: no exported `focus: trace` grader records")
+    runs = []
+    for path in found:
+        record = json.loads(path.read_text())
+        trace = path.with_name("trace.jsonl")
+        if not trace.is_file():
+            raise RejudgeError(f"{path}: the run kept no readable trace, nothing to rejudge")
+        data = trace.read_bytes()
+        raw = data.decode("utf-8")
+        if hashlib.sha256(data).hexdigest() != record["trace_sha256"] or evidence.judge_view(raw)[0] != record["judge_saw"]:
+            raise RejudgeError(f"{path}: the exported trace isn't the one the native run kept and its judge saw")
+        lines = evidence.trace_lines(raw)
+        runs.append((record, int(path.parent.name[4:]), "\n".join(lines), len(lines)))
+    return runs
+
+
+def rejudge(export_dir, out):
+    runs = exported_runs(export_dir)
+    failed = False
+    with open(out, "x") as sink, ThreadPoolExecutor(VOTES) as pool:
+        for record, number, trace, events in runs:
+            votes = list(pool.map(judge, [judge_prompt(record["criteria"], trace)] * VOTES))
+            verdict = "PASS" if votes.count(True) > VOTES / 2 else "FAIL"
+            failed |= verdict == "FAIL" or None in votes
+            line = {"case": record["case"], "run": number, "grader": record["grader"],
+                    "native_verdict": {True: "PASS", False: "FAIL"}.get(record["passed"]),
+                    "native_votes": record["judge_votes"], "full_trace_votes": votes,
+                    "full_trace_verdict": verdict, "events_judged": events}
+            sink.write(json.dumps(line) + "\n")
+            sink.flush()
+            print(json.dumps(line))
+    return 1 if failed else 0
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0], epilog=__doc__.split("\n\n")[-1])
+    parser.add_argument("export", type=Path, help="an eval-evidence-check --export directory")
+    parser.add_argument("--out", required=True, type=Path, help="new JSONL file for the rejudged lines")
+    args = parser.parse_args(argv)
+    try:
+        return rejudge(args.export, args.out)
+    except (RejudgeError, OSError, ValueError, KeyError) as error:
+        print(f"eval-trace-rejudge: {type(error).__name__}: {error}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

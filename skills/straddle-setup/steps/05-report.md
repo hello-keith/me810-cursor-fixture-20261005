@@ -27,11 +27,11 @@ The status is `blocked` when any of these holds:
 - the agent client is not Claude Code, Codex, or Cursor
 - the integration type or SDK is unknown and the developer has not answered
 
-The status is `ready_with_warnings` when nothing blocks but something is incomplete: a reachability or authenticated check `not run`, a CLI older than v1.0.3 (no `runtime_context` and no `--idempotency-key` on creates), no acting account on a platform, fewer than two Sandbox accounts for a platform, the chosen SDK not installed yet, a retired SDK installed, a plugin or skill version that could not be read, or a Docs MCP that exposes execution tools. Otherwise it is `ready`.
+The status is `ready_with_warnings` when nothing blocks but something is incomplete: a reachability or authenticated check `not run`, a CLI older than v1.0.3 (no `runtime_context` and no `--idempotency-key` on creates), no acting account on a platform, fewer than two Sandbox accounts for a platform, the chosen SDK not installed yet, a plugin or skill version that could not be read, or a Docs MCP that exposes execution tools. Otherwise it is `ready`.
 
 ## Report
 
-Write the report to `straddle-setup.md` at the repository root, replacing an earlier one, and give the same report in your reply. Open the reply with two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md): whether the project is ready, the one thing that matters most, and what happens next. A blocking configuration failure keeps its exact wording in the report, and the sentences around it name what the developer sets and where. When the client doesn't allow the write, give the report in the reply and say `straddle-setup.md` wasn't written.
+Write the report to `straddle-setup.md` at the repository root, replacing an earlier one, and give the same report in your reply. Open the reply with two or three plain sentences in the [Straddle voice](../../straddle-best-practices/references/voice.md): whether the project is ready, every blocking check when it's `blocked` (otherwise the one thing that matters most), and what happens next. A blocking configuration failure keeps its exact wording in the report, and the sentences around it name what the developer sets and where. When the client doesn't allow the write, give the report in the reply and say `straddle-setup.md` wasn't written.
 
 The header block comes first, because the Straddle Wizard reads it. `Status` is `complete` when the classification above is `ready` or `ready_with_warnings`, and `blocked (<each blocking check>)` when it is `blocked`. The `API key present` line says `yes` or `no` and never holds a value.
 

@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+"""A stand-in `claude -p` judge: records each call's argv and stdin in $FAKE_JUDGE_LOG/call-N, replies $FAKE_VOTES[N]."""
+
+import json
+import os
+import sys
+
+prompt = sys.stdin.read()
+for number, reply in enumerate(os.environ["FAKE_VOTES"].split(",")):
+    try:
+        claimed = os.open(os.path.join(os.environ["FAKE_JUDGE_LOG"], f"call-{number}"), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        continue
+    with os.fdopen(claimed, "w") as call:
+        call.write(json.dumps({"argv": sys.argv[1:], "prompt": prompt}))
+    print(reply)
+    sys.exit(0)
+sys.exit("fake-claude: more calls than FAKE_VOTES")

@@ -72,7 +72,7 @@ class EvalHistoryTest(unittest.TestCase):
             self.line(a, "2026-09-30", "2.1.286", "straddle-plan-interview-dont-know", 3, 0, 1,
                       ["assumption-recorded"]),
             self.line(a, "2026-09-30", "2.1.286", "straddle-plan-interview-resume", 3, 3, 0, []),
-            self.line(a, "2026-09-30", "2.1.286", "straddle-plan-python-retired-sdk", 3, 3, 0, []),
+            self.line(a, "2026-09-30", "2.1.286", "straddle-plan-python-sdk", 3, 3, 0, []),
         ])
         # Pass B is one with-without aggregate; its failing no-plugin arm must not count.
         self.assertEqual(self.lines(b), [
@@ -90,7 +90,7 @@ class EvalHistoryTest(unittest.TestCase):
             "fixed  straddle-plan-asks-decisions  0/3 [open-questions-logged round-format] -> 3/3\n"
             "fail   straddle-plan-interview-dont-know  0/3 [assumption-recorded] errors=1 -> 1/3 [explains-assumption]\n"
             "broke  straddle-plan-interview-resume  3/3 -> 2/3 [read-plan]\n"
-            "gone   straddle-plan-python-retired-sdk  3/3 -> -\n"
+            "gone   straddle-plan-python-sdk  3/3 -> -\n"
             f"{a}: 2/4 cases pass\n"
             f"{b}: 2/4 cases pass\n"
             "0 pass, 1 fail, 1 fixed, 1 broke, 1 new, 1 gone\n"))

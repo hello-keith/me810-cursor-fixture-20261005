@@ -42,7 +42,6 @@ Anti-patterns to flag in notification code. Each row is something the audit dete
 
 | ID | Look for | Hypothesis | Triage against | Recovery |
 | --- | --- | --- | --- | --- |
-| K1 | `github.com/straddleio/straddle-go`, Python `straddle` 0.x, or other Stainless-era packages | Retired SDK | Lockfile | Move to the published Scalar SDK; Go module path changed to `github.com/straddle-build/straddle-go` |
 | K2 | Method, parameter, or type names that do not exist in the installed SDK | Code written against another version or from memory | Installed SDK `api.md` and resource source | Use the installed signature |
 | K3 | Creates without an idempotency key or external ID | Duplicate resources on retry | SDK create params (TypeScript takes `'Idempotency-Key'` in params) | Derive a stable key from the intent |
 | K4 | Unbounded retry of a create after a timeout | Duplicate charges or payouts | Retry code | Retry with the same key, or look up the exact external ID |

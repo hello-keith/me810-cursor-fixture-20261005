@@ -1,5 +1,5 @@
 ---
-description: A payment takes the full paykey token from an active paykey, not the paykey id or the masked value.
+description: A payment takes the full paykey token the create returns in data.paykey, from an active paykey, not the paykey id.
 tags: [best-practices, product-model, bridge, paykeys]
 max_turns: 12
 allowed_tools: [Read, Glob, Grep, Skill]

@@ -38,7 +38,7 @@ Capabilities say what an `active` account can do. Each `capability_status` is `a
 
 ## What your app must handle
 
-- Store each business's account `id` and `external_id`, and act for exactly one account per request, as [account-scope.md](account-scope.md) requires.
+- Store each business's account `id` and `external_id`, and act for exactly one account per request, as [account-scope.md](account-scope.md) requires. Every charge or payout you create for a business sends its account `id` in `Straddle-Account-Id`, on SaaS and marketplace alike. On SaaS, so do its customer, paykey, and Bridge creates.
 - Collect the business profile, representatives, and bank account step by step, then onboard once all three exist. Keep the terms acceptance record (time, IP address, user agent) so you can reproduce it.
 - Show onboarding progress from events, including `stuck` and `rejected` with what the business must fix.
 - Allow payments only for an `active` account whose needed capability is `active`, and check the consent type your charges use is enabled.

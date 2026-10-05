@@ -12,7 +12,7 @@ This section is Straddle's addition to the adapted text under "Views" below. It 
 | --- | --- | --- |
 | Plan, [step 5](../../straddle-plan/steps/05-handoff.md) | The integration shape, and the files the plan changes | A Mermaid sequence of customer, Bridge and paykey, charge or payout, and the chosen notification path, and a `diff` file tree of the file-change table |
 | Integrate, [step 4](../../straddle-integrate/steps/04-preview.md) | The Sandbox writes in the preview | A call tree or Mermaid chain of the preview rows by number: which returned ID feeds which row, and which account each row runs as |
-| Test, [step 3](../../straddle-test/steps/03-preview.md) | Account A/B switching and the notification flow | A Mermaid sequence of the A and B requests, where the account header is sent or omitted, and how each status arrives through the webhook, FIFO, or polling endpoint |
+| Test, [step 3](../../straddle-test/steps/03-preview.md) | Account A/B switching and the notification flow | A Mermaid sequence of the A and B requests, where the account header is sent or omitted, and how each outcome arrives through the webhook, FIFO, or polling endpoint |
 
 - Show only what the plan, the preview, or the run already says. A visual never adds an operation, file, account, or decision.
 - A visual never replaces safety text. The preview table and the approval question stay exactly as the step gives them, and the visual sits beside them. The developer approves the table, not the picture.

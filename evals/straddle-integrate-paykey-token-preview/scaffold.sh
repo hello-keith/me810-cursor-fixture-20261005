@@ -84,11 +84,36 @@ Each row runs only after its own preview and approval. Creates send an Idempoten
 EOF_6
 cat > src/straddle/client.mjs <<'EOF_7'
 // Straddle SDK client (implemented by Integrate).
-export {};
+import StraddleAPI from "@straddlecom/straddle";
+
+const LOCALHOST = /^http:\/\/(127\.0\.0\.1|localhost):\d+\/?$/;
+
+// Sandbox only. An explicit localhost STRADDLE_BASE_URL is the offline synthetic upstream.
+export function createStraddleClient(env = process.env) {
+  if (!env.STRADDLE_API_KEY) throw new Error("Straddle is not configured: missing STRADDLE_API_KEY");
+  if (env.STRADDLE_ENVIRONMENT !== "sandbox") throw new Error("STRADDLE_ENVIRONMENT must be sandbox");
+  const baseURL = LOCALHOST.test(env.STRADDLE_BASE_URL ?? "") ? env.STRADDLE_BASE_URL : "https://sandbox.straddle.com";
+  return new StraddleAPI({ bearer: env.STRADDLE_API_KEY, baseURL, maxRetries: 0 });
+}
 EOF_7
 cat > src/straddle/payments.mjs <<'EOF_8'
 // Straddle payments (implemented by Integrate).
-export {};
+// Customer and paykey calls omit Straddle-Account-Id; charges carry the seller account.
+// SDK 1.0.4 sends Idempotency-Key from params only; it ignores the idempotencyKey request option (ME-899).
+export const createBuyer = (client, { externalId, name, email, phone, ipAddress }) =>
+  client.customers.create({ "Idempotency-Key": `cust-${externalId}`, name, email, phone, type: "individual", device: { ip_address: ipAddress }, external_id: externalId });
+
+export const createBankPaykey = (client, { customerId, routingNumber, accountNumber, externalId }) =>
+  client.bridge.createBankAccountPaykey({ "Idempotency-Key": `pk-${externalId}`, customer_id: customerId, routing_number: routingNumber, account_number: accountNumber, account_type: "checking", external_id: externalId });
+
+export function chargeForSeller(client, { sellerAccountId, paykeyToken, amount, externalId, paymentDate, ipAddress }) {
+  if (!sellerAccountId) throw new Error("seller account is required for a marketplace charge");
+  return client.charges.create({
+    "Straddle-Account-Id": sellerAccountId, "Idempotency-Key": `chg-${externalId}`,
+    paykey: paykeyToken, amount, currency: "USD", consent_type: "internet", description: `order ${externalId}`,
+    payment_date: paymentDate, external_id: externalId, device: { ip_address: ipAddress }, config: { balance_check: "enabled" },
+  });
+}
 EOF_8
 npm install --ignore-scripts --no-audit --no-fund --silent @straddlecom/straddle@1.0.4
 git init -q && git add -A && git -c user.name=eval -c user.email=eval@example.invalid commit -q -m scaffold

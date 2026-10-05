@@ -1,5 +1,5 @@
 ---
 type: tool_used
 tool: Skill
-input_match: '"skill"\s*:\s*"(?:[\w-]+:)?straddle-best-practices"'
+input_match: '"skill"\s*:\s*"(?:[\w-]+:)?straddle-[\w-]+"'
 ---
