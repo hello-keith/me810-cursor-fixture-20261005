@@ -3,7 +3,6 @@
 // ChargeDues are the plan's change. The charge checks use the client the app's factory builds, with only its HttpClient
 // swapped for CaptureHandler, so every HTTP request the SDK makes is answered locally.
 using System.Net;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using Straddle;
@@ -64,39 +63,16 @@ public class FixtureVerifyStraddleCharges
         Environment.SetEnvironmentVariable("STRADDLE_ENVIRONMENT", environment);
     }
 
-    // The overload a C# caller passing the plan's five arguments binds to: its first five parameter types are the plan's
-    // and every later parameter is optional. With several, the one with the fewest parameters wins.
-    static MethodInfo ChargeDuesForThePlansCall()
-    {
-        Type[] planned = { typeof(StraddleClient), typeof(string), typeof(string), typeof(int), typeof(string) };
-        var callable = typeof(Payments).GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .Where(method => method.Name == "ChargeDues")
-            .Where(method => method.GetParameters() is var parameters
-                && parameters.Length >= planned.Length
-                && parameters.Take(planned.Length).Select(p => p.ParameterType).SequenceEqual(planned)
-                && parameters.Skip(planned.Length).All(p => p.IsOptional))
-            .OrderBy(method => method.GetParameters().Length)
-            .ToList();
-        if (callable.Count == 0)
-            Assert.Fail("no public static Payments.ChargeDues(StraddleClient, string, string, int, string) whose later parameters are all optional");
-        if (callable.Count > 1 && callable[1].GetParameters().Length == callable[0].GetParameters().Length)
-            Assert.Fail($"ambiguous ChargeDues overloads for the plan's call: {callable[0]} and {callable[1]}");
-        return callable[0];
-    }
-
     static async Task<(HttpRequestMessage Request, JsonElement Body)> Charge(string member)
     {
         SetConfiguration("synthetic-verify-key", "sandbox");
         var handler = new CaptureHandler();
-        var client = StraddleClientFactory.Build()
+        // WithOptions is typed IStraddleClient but returns a StraddleClient, the type the plan's ChargeDues takes.
+        var client = (StraddleClient)StraddleClientFactory.Build()
             .WithOptions(options => options with { HttpClient = new HttpClient(handler), MaxRetries = 0 });
-        var charge = ChargeDuesForThePlansCall();
-        // Bind like a C# caller: parameters after the plan's five take their declared defaults through Type.Missing, and
-        // Invoke still throws if one of them has no default.
-        var args = new object[charge.GetParameters().Length];
-        Array.Fill(args, Type.Missing);
-        new object[] { client, member, "paykey-token-full-7c1d", 4500, "192.0.2.10" }.CopyTo(args, 0);
-        var result = charge.Invoke(null, args);
+        // A direct call, so the compiler binds the plan's five arguments the way the app's callers would: real overload
+        // resolution and optional-parameter defaults, and a missing or ambiguous overload fails the build.
+        object result = Payments.ChargeDues(client, member, "paykey-token-full-7c1d", 4500, "192.0.2.10");
         if (result is Task task)
             await task;
         Assert.Single(handler.Sent);
