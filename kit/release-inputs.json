@@ -233,16 +233,16 @@
   },
   "clients": {
     "claude-code": {
-      "observed_version": "2.1.283",
-      "observed": "marketplace install from GitHub main f713fc6 in a scratch profile, 2026-09-28; not a tagged release"
+      "observed_version": "2.1.289",
+      "observed": "2026-10-05: isolated candidate 0.1.1 install, validation and removal, and published 0.1.0-to-candidate 0.1.1 upgrade, passed on source 23a5d4ef5cb8b940579509b39d05ceaeabadbb37; archive sha256 1437093ccc629a183e99c44d77feeff83c63d16d5c71a7b4382156209f732e5b. No model session or Straddle request; not published 0.1.1 release-channel acceptance"
     },
     "codex": {
       "observed_version": "0.157.1",
-      "observed": "marketplace install from GitHub main f713fc6 in a scratch profile, 2026-09-28; not a tagged release"
+      "observed": "2026-10-05: isolated candidate 0.1.1 install, validation and removal, and published 0.1.0-to-candidate 0.1.1 upgrade, passed on source 23a5d4ef5cb8b940579509b39d05ceaeabadbb37; archive sha256 1437093ccc629a183e99c44d77feeff83c63d16d5c71a7b4382156209f732e5b. Both MCP URLs and STRADDLE_API_KEY bearer variable validated; no model session or Straddle request; not published 0.1.1 release-channel acceptance"
     },
     "cursor": {
-      "observed_version": null,
-      "observed": "not tested; the restored Cursor desktop still requires login, and the team marketplace import and STRADDLE_API_KEY prompt are unobserved"
+      "observed_version": "3.22.12",
+      "observed": "2026-10-05: isolated desktop profile visibly lists an existing Local Straddle 0.1.0 plugin with 9 skills and straddle-api/straddle-docs. Team-marketplace install/update/remove and the STRADDLE_API_KEY prompt remain unobserved; no shared team configuration changed"
     }
   },
   "gates": [
@@ -268,7 +268,7 @@
       "id": "clean-client-acceptance",
       "requirement": "Manifest-generated install, update and remove instructions pass in clean Claude Code, Codex and Cursor environments (ME-810, ME-659)",
       "status": "open",
-      "evidence": "Not run. On 2026-10-05 Keith deferred it to run right after tag v0.1.0 (owner Main, fix forward in the next release); no result of that run is recorded, and no decision covers v0.1.1"
+      "evidence": "Partial coverage recorded on 2026-10-05: Claude Code and Codex passed published 0.1.0 lifecycle and candidate 0.1.1 install/upgrade/validate/remove in isolated profiles; Cursor's existing Local 0.1.0 surface was observed, not its team-marketplace lifecycle. Published 0.1.1 release-channel acceptance is not complete. Keith's earlier deferral covered 0.1.0 only; no renewed deferral covers 0.1.1"
     }
   ]
 }
