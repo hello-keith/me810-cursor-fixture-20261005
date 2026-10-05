@@ -512,8 +512,8 @@ instructions:
 gates:
   - id: "walkthrough-approval"
     requirement: "Keith's explicit yes on the source and client walkthrough before publication (ME-666, ME-668, ME-669, ME-670, ME-815)"
-    status: "open"
-    evidence: null
+    status: "passed"
+    evidence: "Keith approved the skills v0.1.0 release in chat on 2026-10-05 (relayed by Main); release commit and archive sha256: plugin source 260614fa91a361902159f8726643211f0517916e, straddle-plugin-0.1.0.zip sha256 e4e66555eb23ce9b845ffcab99b31e628189cf99566810f6b3be66caa15dc6c0"
   - id: "wizard-npm-publication"
     requirement: "@straddlecom/wizard installs from npm with provenance, built from straddle-build/wizard (ME-667)"
     status: "open"
@@ -524,5 +524,5 @@ gates:
     evidence: null
   - id: "clean-client-acceptance"
     requirement: "Manifest-generated install, update and remove instructions pass in clean Claude Code, Codex and Cursor environments (ME-810, ME-659)"
-    status: "open"
-    evidence: null
+    status: "deferred"
+    evidence: "Deferred by Keith 2026-10-05: release-channel install/update/remove in clean Claude Code, Codex and Cursor runs right after tag v0.1.0; failures fix forward in the next release; owner Main (agent conductor)"
