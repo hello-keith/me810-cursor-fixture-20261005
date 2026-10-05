@@ -174,7 +174,7 @@ class PackageTest(unittest.TestCase):
             (".claude-plugin/marketplace.json", "package", "must list plugin 'Straddle_Kit' exactly once"),
             (".claude-plugin/plugin.json", "package", "name must match plugin.json name 'Straddle_Kit'"),
             (".codex-plugin/plugin.json", "package", "name must match plugin.json name 'Straddle_Kit'"),
-            (".cursor-plugin/plugin.json", "version", "version must match plugin.json version '0.1.0'"),
+            (".cursor-plugin/plugin.json", "version", "version must match plugin.json version '0.1.1'"),
             ("plugin.json", "agent-plugins",
              "$.name does not match ^(?!.*(?:--|\\.\\.))[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$"),
         ])
